@@ -186,14 +186,19 @@ final class BoardController {
 
     // MARK: Initiative
 
-    /// For the optional Roll button: d20 plus the creature's initiative modifier. The GM normally rolls.
+    /// For the optional Roll button: d20 plus the creature's initiative modifier, with the template and
+    /// conditions applied. The GM normally rolls.
     func rollInitiative(for combatant: Combatant?) -> Double {
         guard let combatant else { return 10 }
         let modifier = stripCreature(for: combatant).map {
-            StatBlockPresenter(creature: $0, template: combatant.template).initiative.value
+            StatBlockPresenter(creature: $0, template: combatant.template,
+                               conditions: combatant.conditions).initiative.value
         } ?? 0
         return CombatSetup.rollInitiative(modifier: modifier, using: &generator)
     }
+
+    /// The strips that share a creature type with `id`, for the initiative pad's Roll All and Set All.
+    func initiativeGroup(of id: UUID) -> [Combatant] { state.initiativeGroup(of: id) }
 
     /// Brings a benched combatant onto the ladder without an initiative, for the GM to enter one.
     func bringInFromBench(_ id: UUID) {
