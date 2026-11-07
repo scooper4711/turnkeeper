@@ -9,6 +9,13 @@ ladder, and the right half is the notes side, which shows the battle card of the
 - R1.2 Planning data moves between devices in both directions as `.turnkeeper` files, through AirDrop,
   Files or Finder.
 - R1.3 "Sync with nearby device" merges the libraries of two devices over the local network.
+- R1.3a The campaign sidebar's toolbar holds Add Campaign and a More menu with Import…, Sync with Nearby Device…,
+  Creature Art… and, on the iPad, About, so none of them is lost when the sidebar is too narrow for a row of
+  buttons. When art PDFs are missing, the menu's button and its Creature Art item say how many.
+- R1.3b The File menu has the same, whether or not the sidebar is showing: New Campaign… (⌘N, in place of New
+  Window on the Mac, as every window shows the same library), Import Library…, Export Campaign… (the selected
+  campaign), Sync with Nearby Device… and Creature Art…. On the iPad they are in the menu bar a keyboard
+  brings up.
 - R1.4 Merging never loses edits silently. When both sides changed the same record, the newer one wins
   and the other is kept as a conflict copy, once. A record changed on only one device, however many times and
   across however many syncs, never makes a conflict copy. Opening, viewing or running something doesn't count
@@ -32,7 +39,7 @@ ladder, and the right half is the notes side, which shows the battle card of the
 - R2.2 `make bestiary` re-imports the bestiary. Running it twice on the same input produces identical
   output.
 - R2.3 Creature art comes only from the user's own Paizo pawn, token and Battle Cards PDFs, read on the
-  device by Tabletop Kit's art library; none is bundled. Creature Art (in the sidebar's toolbar) offers
+  device by Tabletop Kit's art library; none is bundled. Creature Art (in the sidebar's More menu) offers
   Import from Scrollkeeper, which watches the folder Scrollkeeper downloads to and adds its PDFs by reference
   (no copies; new downloads are added on request and at launch), and Add PDFs…, which keeps copies of other
   PDFs. Art is matched to creatures by name and game, remastered creatures preferring remastered products'
