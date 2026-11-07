@@ -1,4 +1,3 @@
-import AppNotices
 import Bestiary
 import TurnkeeperKit
 import SwiftUI
@@ -7,12 +6,6 @@ import UniformTypeIdentifiers
 /// The list of campaigns, with adding, deleting, importing and exporting.
 struct CampaignSidebar: View {
     @Environment(AppModel.self) private var model
-    @State private var isAdding = false
-    @State private var isImporting = false
-    @State private var isSyncing = false
-    @State private var isShowingCreatureArt = false
-    @State private var isShowingAbout = false
-    @State private var exportDocument: LibraryDocument?
     @State private var renaming: Campaign?
 
     var body: some View {
@@ -26,56 +19,49 @@ struct CampaignSidebar: View {
         }
         .navigationTitle("Campaigns")
         .toolbar {
-            ToolbarItem { Button("Add Campaign", systemImage: "plus") { isAdding = true } }
-            ToolbarItem { Button("Import…", systemImage: "square.and.arrow.down") { isImporting = true } }
-            ToolbarItem {
-                Button("Sync with Nearby Device", systemImage: "arrow.triangle.2.circlepath") { isSyncing = true }
+            ToolbarItem { Button("Add Campaign", systemImage: "plus") { model.librarySheet = .newCampaign } }
+            // The rest share one menu: a narrow sidebar hides toolbar buttons that don't fit, with no sign of them.
+            ToolbarItem { moreMenu }
+        }
+        .sheet(item: $renaming) { campaign in CampaignSheet(campaign: campaign) }
+        .onChange(of: model.selectedCampaignID) { model.selection = nil }
+    }
+
+    /// Importing, syncing, creature art and (on the iPad) About, in one menu that always fits the sidebar; the File
+    /// menu has the same (`LibraryCommands`). Missing art PDFs are counted on the menu's button and its
+    /// Creature Art item.
+    private var moreMenu: some View {
+        let missing = model.artCatalog.missingSources.count
+        return Menu {
+            Button("Import…", systemImage: "square.and.arrow.down") { model.isImportingLibrary = true }
+            Button("Sync with Nearby Device…", systemImage: "arrow.triangle.2.circlepath") {
+                model.librarySheet = .nearbySync
             }
-            ToolbarItem {
-                Button("Creature Art", systemImage: "photo.on.rectangle.angled") { isShowingCreatureArt = true }
-                    .badge(model.artCatalog.missingSources.count)
-            }
+            Button(missing > 0 ? "Creature Art (\(missing) missing)…" : "Creature Art…",
+                   systemImage: "photo.on.rectangle.angled") { model.librarySheet = .creatureArt }
             // The Mac has About in the app menu.
             #if os(iOS)
-            ToolbarItem { Button("About", systemImage: "info.circle") { isShowingAbout = true } }
+            Button("About", systemImage: "info.circle") { model.librarySheet = .about }
             #endif
+        } label: {
+            Label("More", systemImage: missing > 0 ? "exclamationmark.circle" : "ellipsis.circle")
         }
-        .sheet(isPresented: $isAdding) { CampaignSheet(campaign: nil) }
-        .sheet(item: $renaming) { campaign in CampaignSheet(campaign: campaign) }
-        .sheet(isPresented: $isSyncing) { NearbySyncSheet() }
-        .sheet(isPresented: $isShowingCreatureArt) { CreatureArtView() }
-        .sheet(isPresented: $isShowingAbout) { AboutSheet(info: .turnkeeper) }
-        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.turnkeeperLibrary, .json]) { result in
-            if case let .success(url) = result { model.importLibraryFile(url) }
-        }
-        .fileExporter(isPresented: exportBinding, document: exportDocument, contentType: .turnkeeperLibrary,
-                      defaultFilename: exportDocument?.fileName) { _ in exportDocument = nil }
-        .onChange(of: model.selectedCampaignID) { model.selection = nil }
+        .badge(missing)
+        .help(missing > 0 ? "Import, sync and creature art: \(missing) art PDFs are missing"
+                          : "Import, sync and creature art")
     }
 
     @ViewBuilder
     private func menu(for campaign: Campaign) -> some View {
         Button("Rename…", systemImage: "pencil") { renaming = campaign }
-        Button("Export…", systemImage: "square.and.arrow.up") { export(campaign) }
+        Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: campaign.id) }
         Button("Delete", systemImage: "trash", role: .destructive) { model.deleteCampaign(campaign.id) }
     }
 
-    private func export(_ campaign: Campaign) {
-        do {
-            exportDocument = LibraryDocument(data: try model.exportCampaign(campaign.id),
-                                             fileName: model.exportFileName(for: campaign.id))
-        } catch {
-            model.errorMessage = "Exporting \(campaign.name) failed: \(error.localizedDescription)"
-        }
-    }
-
-    private var exportBinding: Binding<Bool> {
-        Binding(get: { exportDocument != nil }, set: { if !$0 { exportDocument = nil } })
-    }
 }
 
 /// Asks for a campaign's name and game, for a new campaign or to rename one.
-private struct CampaignSheet: View {
+struct CampaignSheet: View {
     /// The campaign being renamed, or nil to add one.
     let campaign: Campaign?
     @Environment(AppModel.self) private var model

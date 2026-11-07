@@ -8,6 +8,7 @@ struct RootView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
+        @Bindable var model = model
         Group {
             if let key = Self.demoCardBackKey {
                 // `--demo back <key>`: one creature's player view, for checking card backs.
@@ -33,6 +34,18 @@ struct RootView: View {
             Text(model.errorMessage ?? "")
         }
         .overlay(alignment: .bottom) { StatusToast() }
+        // Here rather than in the sidebar, which isn't there while it is hidden or a fight is on screen.
+        .sheet(item: $model.librarySheet) { $0.content }
+        .fileImporter(isPresented: $model.isImportingLibrary,
+                      allowedContentTypes: [.turnkeeperLibrary, .json]) { result in
+            if case let .success(url) = result { model.importLibraryFile(url) }
+        }
+        .fileExporter(isPresented: exportBinding, document: model.campaignExport, contentType: .turnkeeperLibrary,
+                      defaultFilename: model.campaignExport?.fileName) { _ in model.campaignExport = nil }
+    }
+
+    private var exportBinding: Binding<Bool> {
+        Binding(get: { model.campaignExport != nil }, set: { if !$0 { model.campaignExport = nil } })
     }
 
     private static var demoCardBackKey: String? {
