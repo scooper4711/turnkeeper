@@ -1,6 +1,7 @@
 import Bestiary
 import CreatureArt
 import SwiftUI
+import TurnkeeperKit
 import UniformTypeIdentifiers
 
 /// Where creature art comes from (R2.3): the user's own Paizo PDFs, used where Scrollkeeper keeps them or copied
@@ -55,12 +56,11 @@ struct CreatureArtView: View {
         .disabled(model.artProgress != nil)
     }
 
-    /// On the Mac, Scrollkeeper's folder is used straight away when it's there; on the iPad, the user picks it
-    /// in Files (On My iPad ▸ Scrollkeeper).
+    /// On the Mac, Scrollkeeper's downloads in the Tableside Toolkit's App Group are used straight away; otherwise,
+    /// and on the iPad (On My iPad ▸ Scrollkeeper in Files), the user picks the folder.
     private func importFromScrollkeeper() {
         #if os(macOS)
-        let folder = URL.applicationSupportDirectory.appendingPathComponent("Scrollkeeper/Files", isDirectory: true)
-        if FileManager.default.fileExists(atPath: folder.path) {
+        if let folder = ScrollkeeperDownloads.folder() {
             Task { await model.importCreatureArt(fromFolder: folder) }
             return
         }

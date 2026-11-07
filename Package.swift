@@ -11,10 +11,13 @@ let package = Package(
         .executable(name: "BestiaryImport", targets: ["BestiaryImport"])
     ],
     dependencies: [
-        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "0.15.2")
+        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "0.16.0")
     ],
     targets: [
-        .target(name: "TurnkeeperKit", dependencies: [.product(name: "Bestiary", package: "tabletop-kit")]),
+        .target(name: "TurnkeeperKit", dependencies: [
+            .product(name: "Bestiary", package: "tabletop-kit"),
+            .product(name: "TablesideShared", package: "tabletop-kit")
+        ]),
         .target(name: "TurnkeeperUI", dependencies: [
             "TurnkeeperKit", "CharacterImport", .product(name: "ArtExtraction", package: "tabletop-kit"),
             .product(name: "BattleCards", package: "tabletop-kit"),
@@ -29,7 +32,7 @@ let package = Package(
         .executableTarget(name: "CardSnapshots", dependencies: ["TurnkeeperUI"]),
         .testTarget(
             name: "TurnkeeperKitTests",
-            dependencies: ["TurnkeeperKit"]
+            dependencies: ["TurnkeeperKit", .product(name: "TablesideShared", package: "tabletop-kit")]
         ),
         .testTarget(
             name: "CharacterImportTests",

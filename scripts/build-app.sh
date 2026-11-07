@@ -3,6 +3,8 @@
 #
 # VERSION    version written to the bundle (default 0.0.0)
 # UNIVERSAL  set to 1 to build for both Apple silicon and Intel
+# TEAM_ID    the team that owns the App Group (default: read from the Developer ID certificate)
+# SIGNING_IDENTITY  passed to scripts/sign-app.sh; "-" signs ad hoc, without the App Group
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -128,8 +130,22 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 
-# The entitlements turn on the App Sandbox.
-scripts/sign-app.sh "$APP" Resources/Turnkeeper.entitlements
+# The entitlements turn on the App Sandbox. A build signed with the team's Developer ID also joins the Tableside
+# Toolkit's App Group, where Scrollkeeper keeps its downloads: the team's ID takes the place of TEAM_ID. The team ID
+# is read from the signing certificate, or from TEAM_ID in the environment, and never committed. An ad hoc
+# signature can't join the group, so its build leaves the group out and asks for Scrollkeeper's folder instead.
+ENTITLEMENTS="build/Turnkeeper.entitlements"
+if [ "${SIGNING_IDENTITY:-}" != "-" ]; then
+    TEAM_ID="${TEAM_ID:-$(security find-identity -v -p codesigning \
+        | sed -n 's/.*"Developer ID Application: .*(\([A-Z0-9]*\))"$/\1/p' | head -n 1)}"
+fi
+if [ -n "${TEAM_ID:-}" ]; then
+    sed "s/TEAM_ID/$TEAM_ID/" Resources/Turnkeeper.entitlements > "$ENTITLEMENTS"
+else
+    cp Resources/Turnkeeper.entitlements "$ENTITLEMENTS"
+    /usr/libexec/PlistBuddy -c "Delete :com.apple.security.application-groups" "$ENTITLEMENTS"
+fi
+scripts/sign-app.sh "$APP" "$ENTITLEMENTS"
 # The bundle is rebuilt at the same path, so Finder and LaunchServices keep showing the icon they cached
 # for it (none, from the first build). Touching it and re-registering makes them read the icon again.
 touch "$APP"

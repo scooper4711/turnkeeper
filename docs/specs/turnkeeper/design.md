@@ -37,8 +37,9 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
   the keychain.
 - **App Sandbox** (R8). `scripts/build-app.sh` signs with `Resources/Turnkeeper.entitlements`: the App Sandbox,
   network client (Demiplane, joining nearby sync) and server (hosting it), audio input (Hold to Say
-  Initiative), read-write access to files the user picks, and app-scoped bookmarks for the watched folders and
-  PDFs. It copies `Resources/container-migration.plist` into the bundle; on the first sandboxed launch macOS
+  Initiative), read-write access to files the user picks, app-scoped bookmarks for the watched folders and
+  PDFs, and the Tableside Toolkit's App Group (`TEAM_ID.io.github.scooper4711.tableside`, into which the script puts
+  the team of the Developer ID certificate, or `TEAM_ID`, leaving the group out of an ad hoc build). It copies `Resources/container-migration.plist` into the bundle; on the first sandboxed launch macOS
   moves `Application Support/Turnkeeper` and the preferences into the container.
 - **Fingerprint.** `make bestiary` writes `import.sha256`, a SHA-256 of `Generated/Bestiary`
   (`scripts/fingerprint.sh`); fonts and pictures are left out, since tool versions change their bytes. The
@@ -54,10 +55,12 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
 ## Creature art
 - Tabletop Kit's `CreatureArtStore` (an actor, in its `CreatureArt` product) owns the kit's `ArtLibrary`;
   Turnkeeper's `standard()` puts it in Application Support/Turnkeeper/Creature Art (apart from
-  pasted art's `Art` folder, whose unused files are swept at launch). In the sandbox
-  `URL.applicationSupportDirectory` is the container's, so on the Mac too Import from Scrollkeeper finds no
-  Scrollkeeper folder there and opens the folder picker; picking a folder again relinks its PDFs (Tabletop Kit
-  0.15.1). Import from Scrollkeeper watches the chosen folder and runs `addNewFiles`, by reference; Add PDFs… commits each file
+  pasted art's `Art` folder, whose unused files are swept at launch). On the Mac, Import from Scrollkeeper asks
+  `ScrollkeeperDownloads.folder()` (TurnkeeperKit) for the downloads in the App Group: tabletop-kit's
+  `TablesideShared` gives Scrollkeeper's folder there (`ToolkitGroup.scrollkeeperFolder()`) and its library list,
+  whose `downloadFolderURL(in:)` is the shared `Files`, or nil for a folder the user chose; without a list
+  Turnkeeper can read, `Files` is used when it holds anything. Otherwise, and on the iPad, it opens the folder
+  picker; picking a folder again relinks its PDFs (Tabletop Kit 0.15.1). Import from Scrollkeeper watches the chosen folder and runs `addNewFiles`, by reference; Add PDFs… commits each file
   kept. At launch the store refreshes the PDFs' statuses and adds new files from the watched folders. Pictures
   are drawn by `ArtLibrary.picture(of:maxPixels:)` and cached by entry and size.
 - After each change the store publishes a catalog: per entry its id, name, game, whether a remastered product
