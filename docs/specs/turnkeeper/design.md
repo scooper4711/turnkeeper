@@ -63,6 +63,8 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
   picker; picking a folder again relinks its PDFs (Tabletop Kit 0.15.1). Import from Scrollkeeper watches the chosen folder and runs `addNewFiles`, by reference; Add PDFs… commits each file
   kept. At launch the store refreshes the PDFs' statuses and adds new files from the watched folders. Pictures
   are drawn by `ArtLibrary.picture(of:maxPixels:)` and cached by entry and size.
+- Creature Art names folders with tabletop-kit's `FolderName` (`TablesideShared`, R2.3b): a watched folder as a
+  `Label` with its title and location, a PDF's folder with `place(ofFile:)`.
 - After each change the store publishes a catalog: per entry its id, name, game, whether a remastered product
   (Monster Core, NPC Core, Alien Core, Howl of the Wild, Rage of Elements) prints it, whether its first print is
   a token, whether it can be drawn, the titles of the PDFs printing it, and whether it is an item's art.

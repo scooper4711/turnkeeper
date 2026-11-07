@@ -48,6 +48,8 @@ ladder, and the right half is the notes side, which shows the battle card of the
   took away, and a creature whose art came only from missing PDFs says on its card which PDF it needs. Art
   returns when the PDF does (Check Again), or, when Turnkeeper can no longer reach their folder, when the folder
   is picked again with Import from Scrollkeeper.
+- R2.3b Creature Art shows watched folders and each PDF's folder by name and place, not by path: Scrollkeeper's
+  downloads read "Scrollkeeper ▸ <title folder> · On this Mac" (or On My iPad); the path is in the help tag.
 - R2.4 The import writes a report covering counts per pack and enrichers it couldn't parse.
 - R2.5 The browser searches by name and trait, and filters by level, game, source, rarity, size and
   kind, and by source book. With a party chosen, the level filter starts at party level −4 to +4. The
