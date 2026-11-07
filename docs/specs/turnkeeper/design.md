@@ -214,7 +214,16 @@ Ported from the pf2e system, with tests.
   `Resources/ConditionIcons` with `CREDITS.md` naming each icon's author. `make bestiary` renders them with
   `sips` to `Generated/Conditions/<slug>.png`, which the palette shows.
 - **About.** Tabletop Kit's `AppNotices`: `AboutCommands` on the Mac, an `AboutSheet` from the campaign
-  sidebar's toolbar on the iPad, both with `AboutInfo.turnkeeper` (`App/About.swift`).
+  sidebar's More menu on the iPad, both with `AboutInfo.turnkeeper` (`App/About.swift`).
+- **Campaign sidebar toolbar** (R1.3a). `CampaignSidebar` shows Add Campaign and one `Menu` (`moreMenu`) for
+  the rest. A row of toolbar buttons in a narrow sidebar is cut off without an overflow menu on the Mac, so
+  only two items share the toolbar. The menu's label turns to `exclamationmark.circle` and carries a badge
+  while art PDFs are missing.
+- **Library sheets and File menu** (R1.3b). The sheets for a new campaign, nearby sync, creature art and About
+  (`LibrarySheet`), the import picker and the campaign exporter are presented by `RootView`, from
+  `AppModel.librarySheet`, `isImportingLibrary` and `campaignExport` (`beginExport(of:)`), so they open with the
+  sidebar hidden or a fight on screen. The sidebar's buttons and context menu and `LibraryCommands` (the File
+  menu, on both platforms) set those. Renaming stays in the sidebar, from a campaign's context menu.
 
 ## Character import
 - **Sheet.** A PC's sheet is a `Creature` of kind `character`, with `PlayerDetails` (ancestry, heritage,
