@@ -11,7 +11,7 @@ let package = Package(
         .executable(name: "BestiaryImport", targets: ["BestiaryImport"])
     ],
     dependencies: [
-        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "0.16.0")
+        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "0.17.0")
     ],
     targets: [
         .target(name: "TurnkeeperKit", dependencies: [
@@ -22,7 +22,8 @@ let package = Package(
             "TurnkeeperKit", "CharacterImport", .product(name: "ArtExtraction", package: "tabletop-kit"),
             .product(name: "BattleCards", package: "tabletop-kit"),
             .product(name: "CreatureArt", package: "tabletop-kit"),
-            .product(name: "AppNotices", package: "tabletop-kit")
+            .product(name: "AppNotices", package: "tabletop-kit"),
+            .product(name: "TablesideShared", package: "tabletop-kit")
         ]),
         .target(name: "CharacterImport", dependencies: ["TurnkeeperKit"]),
         .executableTarget(name: "Turnkeeper", dependencies: ["TurnkeeperUI"]),
