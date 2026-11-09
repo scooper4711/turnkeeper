@@ -32,6 +32,7 @@ public struct TurnkeeperApp: App {
         .commands {
             #if os(macOS)
             AboutCommands(info: .turnkeeper)
+            PrivacyCommands()
             #endif
             LibraryCommands(model: model)
         }
@@ -56,3 +57,18 @@ public struct TurnkeeperApp: App {
 enum PlayerWindow {
     static let id = "players"
 }
+
+#if os(macOS)
+/// The privacy policy, in the Help menu.
+struct PrivacyCommands: Commands {
+    // A literal URL that is known to parse.
+    // swiftlint:disable:next force_unwrapping
+    private static let policy = URL(string: "https://github.com/scooper4711/turnkeeper/blob/main/PRIVACY.md")!
+
+    var body: some Commands {
+        CommandGroup(after: .help) {
+            Link("Turnkeeper Privacy Policy", destination: Self.policy)
+        }
+    }
+}
+#endif
