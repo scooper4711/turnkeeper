@@ -18,5 +18,4 @@ packaging steps are tabletop-kit's `scripts/package-appstore.sh` (its `appstore-
 ## R3 Review
 - R3.1 `APP-STORE-REVIEW.md` holds the review notes, with a use named for every entitlement: Demiplane import
   (network client), device sync (network server), voice initiative (microphone and speech), the camera on the iPad.
-  The file is kept out of the
-  repository (`.git/info/exclude`).
+  The file is kept out of the repository (`.git/info/exclude`).
