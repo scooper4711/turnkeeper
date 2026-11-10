@@ -2,8 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!-- Turnkeeper's privacy manifest, for the iPad app (ios/App is a synchronized folder) and the Mac app
      (scripts/build-app.sh copies it into Contents/Resources). No tracking and no data collected. User defaults hold
-     the app's own settings and the last campaign (CA92.1). Turnkeeper reads no file timestamps, boot times or disk
-     space. -->
+     the app's own settings and the last campaign (CA92.1). tabletop-kit's ArtExtraction reads the size of art files
+     through file attributes, the call that also returns timestamps, so those are declared as Pawn Shop declares
+     them (C617.1 for the app's container, 3B52.1 for files the user gave it). No boot times or disk space. -->
 <plist version="1.0">
 <dict>
     <key>NSPrivacyTracking</key>
@@ -20,6 +21,15 @@
             <key>NSPrivacyAccessedAPITypeReasons</key>
             <array>
                 <string>CA92.1</string>
+            </array>
+        </dict>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>C617.1</string>
+                <string>3B52.1</string>
             </array>
         </dict>
     </array>

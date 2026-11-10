@@ -11,9 +11,12 @@ packaging steps are tabletop-kit's `scripts/package-appstore.sh` (its `appstore-
   bundle declares `ITSAppUsesNonExemptEncryption` as false and a copyright line on both.
 
 ## R2 Privacy
-- R2.1 A privacy manifest ships in both bundles: no tracking, no data collected, user defaults (CA92.1).
+- R2.1 A privacy manifest ships in both bundles: no tracking, no data collected, user defaults (CA92.1) and file
+  attributes (C617.1, 3B52.1), as in Pawn Shop, which reads file sizes through the same tabletop-kit code.
 - R2.2 `PRIVACY.md` is the privacy policy, linked from the Help menu on the Mac.
 
 ## R3 Review
 - R3.1 `APP-STORE-REVIEW.md` holds the review notes, with a use named for every entitlement: Demiplane import
   (network client), device sync (network server), voice initiative (microphone and speech), the camera on the iPad.
+  The file is kept out of the
+  repository (`.git/info/exclude`).

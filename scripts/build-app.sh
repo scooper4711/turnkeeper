@@ -147,7 +147,7 @@ cp ios/App/PrivacyInfo.xcprivacy "$APP/Contents/Resources/"
 
 # The entitlements turn on the App Sandbox. A build signed with the team's Developer ID also joins the Tableside
 # Toolkit's App Group, where Scrollkeeper keeps its downloads: the team's ID takes the place of TEAM_ID. The team ID
-# is read from the signing certificate, or from TEAM_ID in the environment, and never committed. An ad hoc
+# is read from the signing certificate, or from TEAM_ID in the environment. An ad hoc
 # signature can't join the group, so its build leaves the group out and asks for Scrollkeeper's folder instead.
 ENTITLEMENTS="build/Turnkeeper.entitlements"
 if [ "${SIGNING_IDENTITY:-}" != "-" ]; then
