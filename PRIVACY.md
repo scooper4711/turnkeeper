@@ -13,7 +13,8 @@ third-party code that reports anything. Nothing you do in the app is sent to the
   what you say into a number with Apple's speech recognition, on your device when it can. Apple's privacy policy
   covers speech recognition that Apple performs; Turnkeeper keeps no recording.
 
-Deleting the app deletes all of this.
+Deleting the app from an iPad deletes all of this. On a Mac, macOS keeps an app's saved data in the
+Containers folder of your Library folder until you delete the folder named Turnkeeper there.
 
 ## Importing characters from Demiplane
 
