@@ -5,6 +5,10 @@
 # UNIVERSAL  set to 1 to build for both Apple silicon and Intel
 # TEAM_ID    the team that owns the App Group (default: read from the Developer ID certificate)
 # SIGNING_IDENTITY  passed to scripts/sign-app.sh; "-" signs ad hoc, without the App Group
+# BUILD_NUMBER  CFBundleVersion, which must increase with every App Store upload (default: VERSION)
+# CHANNEL    "appstore" also builds the Mac App Store package, build/appstore/Turnkeeper.pkg, from the same sources,
+#            compiled with -DAPP_STORE; needs TEAM_ID and the variables of tabletop-kit's
+#            scripts/package-appstore.sh (PACKAGER names another copy; TRIAL=1 checks it without them)
 set -eu
 
 cd "$(dirname "$0")/.."
@@ -13,13 +17,18 @@ VERSION="${VERSION:-0.0.0}"
 APP="build/Turnkeeper.app"
 EXECUTABLE="Turnkeeper"
 
+SWIFT_FLAGS=""
+[ "${CHANNEL:-}" = "appstore" ] && SWIFT_FLAGS="-Xswiftc -DAPP_STORE"
+
 if [ "${UNIVERSAL:-0}" = "1" ]; then
-    swift build -c release --arch arm64 --arch x86_64
+    # shellcheck disable=SC2086 # SWIFT_FLAGS is a list of words
+    swift build -c release $SWIFT_FLAGS --arch arm64 --arch x86_64
     # Asked rather than assumed: newer SwiftPM moved universal builds out of .build/apple, and a copy left
     # there by an older toolchain would otherwise be bundled instead.
     BINARY="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/$EXECUTABLE"
 else
-    swift build -c release
+    # shellcheck disable=SC2086
+    swift build -c release $SWIFT_FLAGS
     BINARY="$(swift build -c release --show-bin-path)/$EXECUTABLE"
 fi
 
@@ -59,9 +68,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleShortVersionString</key>
     <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>$VERSION</string>
+    <string>${BUILD_NUMBER:-$VERSION}</string>
+    <!-- Only HTTPS to Demiplane, which is exempt, so uploads don't ask about export compliance. -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>LSApplicationCategoryType</key>
-    <string>public.app-category.role-playing-games</string>
+    <string>public.app-category.productivity</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
     <key>NSHighResolutionCapable</key>
@@ -125,14 +137,17 @@ cat > "$APP/Contents/Info.plist" <<PLIST
         </dict>
     </array>
     <key>NSHumanReadableCopyright</key>
-    <string>Not published, endorsed, or specifically approved by Paizo.</string>
+    <string>Copyright © 2026 Stephen Cooper. MIT License.</string>
 </dict>
 </plist>
 PLIST
 
+# The privacy manifest the App Store requires, shared with the iPad app.
+cp ios/App/PrivacyInfo.xcprivacy "$APP/Contents/Resources/"
+
 # The entitlements turn on the App Sandbox. A build signed with the team's Developer ID also joins the Tableside
 # Toolkit's App Group, where Scrollkeeper keeps its downloads: the team's ID takes the place of TEAM_ID. The team ID
-# is read from the signing certificate, or from TEAM_ID in the environment, and never committed. An ad hoc
+# is read from the signing certificate, or from TEAM_ID in the environment. An ad hoc
 # signature can't join the group, so its build leaves the group out and asks for Scrollkeeper's folder instead.
 ENTITLEMENTS="build/Turnkeeper.entitlements"
 if [ "${SIGNING_IDENTITY:-}" != "-" ]; then
@@ -152,3 +167,9 @@ touch "$APP"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 [ -x "$LSREGISTER" ] && "$LSREGISTER" -f "$APP"
 echo "Built $APP ($VERSION)"
+
+if [ "${CHANNEL:-}" = "appstore" ]; then
+    # Found beside the package after "swift package resolve", so the script follows the dependency pin.
+    "${PACKAGER:-.build/checkouts/tabletop-kit/scripts/package-appstore.sh}" "$APP" "$ENTITLEMENTS" \
+        io.github.scooper4711.Turnkeeper
+fi

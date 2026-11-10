@@ -1,4 +1,4 @@
-.PHONY: build test lint coverage bestiary update-pf2e dmg cards icon app run install \
+.PHONY: build test lint coverage bestiary update-pf2e dmg appstore cards icon app run install \
 	ipad-simulator ipad-install ipad-uitest clean
 
 build:
@@ -66,3 +66,8 @@ cards:
 
 clean:
 	rm -rf .build build ios/build
+
+# Builds the Mac App Store package, build/appstore/Turnkeeper.pkg (see scripts/build-app.sh for the variables).
+appstore:
+	swift package resolve
+	CHANNEL=appstore scripts/build-app.sh
