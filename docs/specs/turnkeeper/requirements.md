@@ -261,8 +261,8 @@ ladder, and the right half is the notes side, which shows the battle card of the
 ## R8 App Sandbox
 - R8.1 The Mac app runs in the App Sandbox. On its first sandboxed launch the library, the art and the settings
   move into the app's container.
-- R8.2 On the Mac, Import from Scrollkeeper uses a sandboxed Scrollkeeper's downloads in the Tableside
-  Toolkit's shared App Group folder straight away (Scrollkeeper's app-handoff requirements 5 and 6). It opens
-  the folder picker when they aren't there: Scrollkeeper isn't sandboxed yet, or downloads to a folder the user
-  chose. Folders watched before the move have to be picked once more, or, for Scrollkeeper's own, imported again
-  from the shared folder.
+- R8.2 On the Mac and the iPad, Import from Scrollkeeper uses Scrollkeeper's downloads in the Tableside
+  Toolkit's shared App Group folder straight away (Scrollkeeper's app-handoff requirements 5 and 6; on the iPad
+  from Scrollkeeper 2.0, scrollkeeper#52). It opens the folder picker when they aren't there: Scrollkeeper isn't
+  sandboxed yet or is an older iPad version, or downloads to a folder the user chose. Folders watched before the
+  move have to be picked once more, or, for Scrollkeeper's own, imported again from the shared folder.
