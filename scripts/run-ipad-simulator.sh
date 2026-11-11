@@ -16,6 +16,7 @@ xcodebuild -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
 
 APP="ios/build/Build/Products/Debug-iphonesimulator/Turnkeeper.app"
 xcrun simctl boot "$DEVICE" 2>/dev/null || true
-open -a Simulator
+# Xcode 27 shows simulators in Device Hub; earlier versions in the Simulator app.
+open -b com.apple.dt.Devices 2>/dev/null || open -a Simulator
 xcrun simctl install "$DEVICE" "$APP"
 xcrun simctl launch "$DEVICE" io.github.scooper4711.Turnkeeper
