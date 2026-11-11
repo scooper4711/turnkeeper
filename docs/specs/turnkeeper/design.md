@@ -55,11 +55,12 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
 ## Creature art
 - Tabletop Kit's `CreatureArtStore` (an actor, in its `CreatureArt` product) owns the kit's `ArtLibrary`;
   Turnkeeper's `standard()` puts it in Application Support/Turnkeeper/Creature Art (apart from
-  pasted art's `Art` folder, whose unused files are swept at launch). On the Mac, Import from Scrollkeeper asks
+  pasted art's `Art` folder, whose unused files are swept at launch). Import from Scrollkeeper asks
   `ScrollkeeperDownloads.folder()` (TurnkeeperKit) for the downloads in the App Group: tabletop-kit's
   `TablesideShared` gives Scrollkeeper's folder there (`ToolkitGroup.scrollkeeperFolder()`) and its library list,
   whose `downloadFolderURL(in:)` is the shared `Files`, or nil for a folder the user chose; without a list
-  Turnkeeper can read, `Files` is used when it holds anything. Otherwise, and on the iPad, it opens the folder
+  Turnkeeper can read, `Files` is used when it holds anything. On iOS the group is
+  `group.io.github.scooper4711.tableside`, in `ios/Turnkeeper.entitlements`. Otherwise it opens the folder
   picker; picking a folder again relinks its PDFs (Tabletop Kit 0.15.1). Import from Scrollkeeper watches the chosen folder and runs `addNewFiles`, by reference; Add PDFs… commits each file
   kept. At launch the store refreshes the PDFs' statuses and adds new files from the watched folders. Pictures
   are drawn by `ArtLibrary.picture(of:maxPixels:)` and cached by entry and size.

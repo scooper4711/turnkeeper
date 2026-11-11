@@ -57,15 +57,13 @@ struct CreatureArtView: View {
         .disabled(model.artProgress != nil)
     }
 
-    /// On the Mac, Scrollkeeper's downloads in the Tableside Toolkit's App Group are used straight away; otherwise,
-    /// and on the iPad (On My iPad ▸ Scrollkeeper in Files), the user picks the folder.
+    /// Scrollkeeper's downloads in the Tableside Toolkit's App Group are used straight away, on the Mac and the iPad;
+    /// otherwise the user picks the folder.
     private func importFromScrollkeeper() {
-        #if os(macOS)
         if let folder = ScrollkeeperDownloads.folder() {
             Task { await model.importCreatureArt(fromFolder: folder) }
             return
         }
-        #endif
         choose(.folder)
     }
 
