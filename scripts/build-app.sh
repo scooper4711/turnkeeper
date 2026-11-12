@@ -73,7 +73,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>LSApplicationCategoryType</key>
-    <string>public.app-category.productivity</string>
+    <string>public.app-category.role-playing-games</string>
     <key>LSMinimumSystemVersion</key>
     <string>15.0</string>
     <key>NSHighResolutionCapable</key>
