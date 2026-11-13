@@ -40,12 +40,9 @@ struct LibraryCommands: Commands {
     let model: AppModel
 
     var body: some Commands {
-        // Every window shows the same library, so a new campaign takes the place of a new window on the Mac.
-        #if os(macOS)
+        // Every window shows the same library, so a new campaign takes the place of New Window, and its ⌘N.
+        // The iPad app must replace it too: run on a Mac, keeping New Window ⌘N beside it crashes at launch.
         CommandGroup(replacing: .newItem) { newCampaign }
-        #else
-        CommandGroup(after: .newItem) { newCampaign }
-        #endif
         CommandGroup(after: .importExport) {
             Button("Import Library…") { model.isImportingLibrary = true }
             Button("Export Campaign…") {
