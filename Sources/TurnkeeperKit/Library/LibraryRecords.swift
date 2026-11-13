@@ -185,8 +185,8 @@ public enum VariantScheme: String, CaseIterable, Sendable {
 
     public var labels: [String] {
         switch self {
-        case .challengePointsLowTier: return ["10–11 CP", "12–13 CP", "14–15 CP", "16–18 CP"]
-        case .challengePointsHighTier: return ["19–22 CP", "23–27 CP", "28–32 CP", "33+ CP"]
+        case .challengePointsLowTier: return ["8–9 CP", "10–11 CP", "12–13 CP", "14–15 CP", "16–18 CP"]
+        case .challengePointsHighTier: return ["16–18 CP", "19–22 CP", "23–27 CP", "28–32 CP", "33–42 CP"]
         case .easierBaseHarder: return ["Easier", "Base", "Harder"]
         case .single: return ["Standard"]
         }

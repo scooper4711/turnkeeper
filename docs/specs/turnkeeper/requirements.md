@@ -72,7 +72,7 @@ ladder, and the right half is the notes side, which shows the battle card of the
   higher-level Harder).
 - R3.2b Name fields capitalize each word and skip autocorrect, so fantasy names stay as typed.
 - R3.3 A scenario holds ordered encounters and editable difficulty labels, filled from presets:
-  Challenge Points low tier (10–11 … 16–18 CP), high tier (19–22 … 33+ CP), Easier/Base/Harder, or one
+  Challenge Points low tier (8–9 … 16–18 CP), high tier (16–18 … 33–42 CP), Easier/Base/Harder, or one
   version. Scenarios can be collapsed in the list; the choice is remembered on each device.
 - R3.4 Each encounter has one variant per scheme label. Each variant has its own creatures, bench and
   events. A variant can be copied from another one.

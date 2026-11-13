@@ -29,8 +29,11 @@ struct ChallengePointsTests {
     func matching() {
         let low = VariantScheme.challengePointsLowTier.labels
         #expect(ChallengePoints.label(for: 15, among: low) == "14–15 CP")
-        #expect(ChallengePoints.label(for: 9, among: low) == nil)
-        #expect(ChallengePoints.label(for: 35, among: VariantScheme.challengePointsHighTier.labels) == "33+ CP")
+        #expect(ChallengePoints.label(for: 8, among: low) == "8–9 CP")
+        #expect(ChallengePoints.label(for: 7, among: low) == nil)
+        let high = VariantScheme.challengePointsHighTier.labels
+        #expect(ChallengePoints.label(for: 17, among: high) == "16–18 CP")
+        #expect(ChallengePoints.label(for: 42, among: high) == "33–42 CP")
     }
 
     @Test("A party's points count present players, at their own level or the party's")
@@ -92,6 +95,6 @@ struct ChallengePointsTests {
         #expect(scenario.startingVariantLabel(for: encounter, lastRun: "") == "Base")
         let tiers = Scenario(campaignID: UUID(), name: "#6-01",
                              variantLabels: VariantScheme.challengePointsLowTier.labels)
-        #expect(tiers.startingVariantLabel(for: encounter, lastRun: "") == "10–11 CP")
+        #expect(tiers.startingVariantLabel(for: encounter, lastRun: "") == "8–9 CP")
     }
 }
