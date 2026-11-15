@@ -27,6 +27,7 @@ struct CreaturePreview: View {
                         CreatureBattleCard(entry: model.entry(key), front: BattleCard(
                             creature: creature, template: template, conditions: conditions))
                         MissingArtNote(key: key)
+                        ArtworkPasteButton(key: key)
                     }
                     .padding()
                 } else if isPlayerCharacter {

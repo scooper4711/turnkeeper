@@ -83,7 +83,8 @@ final class PlanningUITests: XCTestCase {
         let card = app.buttons["Card"].firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 5))
         card.tap()
-        let paste = app.navigationBars.buttons["Paste"]
+        // Paste is under the card: in the toolbar, iOS 27 refuses it the clipboard's contents.
+        let paste = app.buttons["Paste"]
         XCTAssertTrue(paste.waitForExistence(timeout: 5))
         paste.tap()
         let artwork = app.navigationBars.buttons["Artwork"]

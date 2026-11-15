@@ -133,8 +133,10 @@ Ported from the pf2e system, with tests.
   and travel in packages the same way. `PlayerDisplay` shows either a handout or, while the player screen is
   on, the fight.
 - **System paste buttons.** Pasting uses SwiftUI's `PasteButton`, which reads the pasteboard without iOS's
-  Allow Paste prompt. Where a toolbar may be crowded, it sits in the page instead: iOS ignores a paste
-  button it can't see in full.
+  Allow Paste prompt. It always sits in the page, never in a toolbar: iOS ignores a paste button it can't see
+  in full, and iOS 27 hands a toolbar's paste button the clipboard's types but refuses their contents
+  (`PBErrorDomain` 13, "Operation not authorized"), which broke pasting art from a battle card's toolbar
+  (`ArtworkPasteButton` is under the card now).
 - **Notes.** `CreatureNote` records (scenario, creature key, text) merge one note at a time, so editing
   one mid-fight never makes a conflict copy of a scenario. Encounter notes are `Encounter.notes`, edited in
   both places; the old per-session scratch notes are gone (old sessions still load).

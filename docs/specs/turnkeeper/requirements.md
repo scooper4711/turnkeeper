@@ -94,8 +94,8 @@ ladder, and the right half is the notes side, which shows the battle card of the
 - R3.5b Stat blocks copied or dragged from Pluck (or pasted as plain text) become custom creatures in the
   encounter. A block for a subtier goes into the variant with that subtier; a summary lists what was added
   and anything kept as text, with Review… to open the editor.
-- R3.5c Any creature can be given pasted artwork: Paste (an image copied from Pluck or anywhere), Choose
-  Image…, or a drop onto its card or encounter row, plus ⌘V on the Mac. It replaces the bundled art
+- R3.5c Any creature can be given pasted artwork: Paste (under its battle card; an image copied from Pluck or
+  anywhere), Choose Image…, or a drop onto its card or encounter row, plus ⌘V on the Mac. It replaces the bundled art
   everywhere, including the player view, travels with exports and nearby sync, and can be removed to go back
   to the bundled art.
 - R3.5d Each scenario can have handouts: a name and one image (pasted, chosen or dropped), listed under its
