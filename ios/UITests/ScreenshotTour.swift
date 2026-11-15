@@ -80,11 +80,11 @@ final class ScreenshotTour: XCTestCase {
     func testEncounter() {
         launch("planner")
         save("planner-encounter")
+        scroll(to: app.buttons["Card"].firstMatch)
+        save("planner-encounter-creatures")
         tap(app.buttons["Card"].firstMatch)
         save("planner-creature-card")
         tap(app.buttons["Done"])
-        app.swipeUp()
-        save("planner-encounter-creatures")
         scroll(to: app.buttons["Add Creature…"])
         tap(app.buttons["Add Creature…"])
         save("planner-bestiary")
