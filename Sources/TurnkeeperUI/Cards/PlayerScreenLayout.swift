@@ -50,7 +50,8 @@ private struct PlayerOrder: View {
             VStack(spacing: 8) {
                 ForEach(lines) { line in
                     strip(line)
-                        .opacity(line.isDelaying ? 0.7 : 1)
+                        .grayscale(line.isDead ? 1 : 0)
+                        .opacity(line.isDead ? 0.5 : line.isDelaying ? 0.7 : 1)
                         .padding(.leading, line.isDelaying ? 32 : 0)
                 }
             }

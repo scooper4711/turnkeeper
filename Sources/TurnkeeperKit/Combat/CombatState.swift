@@ -85,14 +85,14 @@ public struct CombatState: Codable, Sendable, Hashable {
         return combatantsWithoutInitiative.first?.id
     }
 
-    /// Whether every enemy that has joined the fight is at 0 HP. Benched enemies haven't joined, hazards are
-    /// disabled rather than killed, and allies and PCs don't count. False when there are no such enemies.
+    /// Whether every enemy that has joined the fight is dead or at 0 HP. Benched enemies haven't joined, hazards
+    /// are disabled rather than killed, and allies and PCs don't count. False when there are no such enemies.
     public func allEnemiesDown(maxHitPoints: (Combatant) -> Int) -> Bool {
         let enemies = combatants.filter { combatant in
             combatant.side == .enemy && combatant.place != .bench
                 && combatant.kind != .hazard && combatant.kind != .playerCharacter
         }
-        return !enemies.isEmpty && enemies.allSatisfy { maxHitPoints($0) - $0.damageTaken <= 0 }
+        return !enemies.isEmpty && enemies.allSatisfy { $0.isDead || maxHitPoints($0) - $0.damageTaken <= 0 }
     }
 
     // MARK: Setup

@@ -142,6 +142,15 @@ struct DeathTests {
         #expect(CombatState().firstOfRound == nil)
     }
 
+    @Test("Every enemy dead counts as all enemies down, whatever their HP")
+    func allEnemiesDown() {
+        var (state, ids) = fight()
+        state.markDead(ids[0])
+        #expect(!state.allEnemiesDown { _ in 30 })
+        state.markDead(ids[2])
+        #expect(state.allEnemiesDown { _ in 30 })
+    }
+
     @Test("A session saved before the Dead status decodes with nobody dead")
     func oldSessionDecodes() throws {
         let (state, _) = fight()

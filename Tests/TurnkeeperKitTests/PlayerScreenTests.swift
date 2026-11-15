@@ -64,6 +64,28 @@ struct PlayerScreenTests {
         #expect(lines(state).first { $0.id == ids[0] }?.health == .down)
     }
 
+    @Test("A dead strip is marked dead, and a dead enemy is down whatever its HP")
+    func deadIsDown() {
+        var (state, ids) = fight()
+        state.markDead(ids[0])
+        let result = lines(state)
+        #expect(result.map(\.isDead) == [true, false, false])
+        #expect(result.first?.health == .down)
+    }
+
+    @Test("A dead strip is sent to following devices, and an older host's strips aren't dead")
+    func deadIsShared() throws {
+        var (state, ids) = fight()
+        state.markDead(ids[0])
+        let sent = try JSONEncoder().encode(lines(state).map { TableLine($0, card: nil) })
+        let received = try JSONDecoder().decode([TableLine].self, from: sent)
+        #expect(received.map(\.playerLine.isDead) == [true, false, false])
+        var older = try #require(JSONSerialization.jsonObject(with: sent) as? [[String: Any]])
+        older[0]["isDead"] = nil
+        let decoded = try JSONDecoder().decode([TableLine].self, from: JSONSerialization.data(withJSONObject: older))
+        #expect(decoded.map(\.playerLine.isDead) == [false, false, false])
+    }
+
     @Test("An enemy without a known maximum shows no estimate")
     func unknownMaximum() {
         let (state, _) = fight()

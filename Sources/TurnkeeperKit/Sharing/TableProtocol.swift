@@ -28,6 +28,8 @@ public struct TableLine: Codable, Sendable, Hashable, Identifiable {
     public var magnet: Magnet
     public var isActive: Bool
     public var isDelaying: Bool
+    /// Nil from a host whose version has no Dead status.
+    public var isDead: Bool?
     /// A `HealthEstimate`, by its name; nil for PCs and allies.
     public var health: String?
     public var card: TableCard?
@@ -38,14 +40,17 @@ public struct TableLine: Codable, Sendable, Hashable, Identifiable {
         magnet = line.magnet
         isActive = line.isActive
         isDelaying = line.isDelaying
+        isDead = line.isDead
         health = line.health?.rawValue
         self.card = card
     }
 
     /// The strip as the player screen draws it.
     public var playerLine: PlayerScreenLine {
-        PlayerScreenLine(id: id, name: name, magnet: magnet, isActive: isActive, isDelaying: isDelaying,
-                         health: health.flatMap(HealthEstimate.init(rawValue:)))
+        var line = PlayerScreenLine(id: id, name: name, magnet: magnet, isActive: isActive, isDelaying: isDelaying,
+                                    health: health.flatMap(HealthEstimate.init(rawValue:)))
+        line.isDead = isDead ?? false
+        return line
     }
 }
 
