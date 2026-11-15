@@ -1,6 +1,6 @@
 # Turnkeeper Privacy Policy
 
-Effective November 10, 2026. This policy covers Turnkeeper for iPad and Mac.
+Effective November 10, 2026. This policy covers Turnkeeper for iPad, iPhone and Mac.
 
 **Turnkeeper collects no data.** It has no account of its own, no analytics, no advertising, no tracking and no
 third-party code that reports anything. Nothing you do in the app is sent to the developer.
@@ -13,7 +13,7 @@ third-party code that reports anything. Nothing you do in the app is sent to the
   what you say into a number with Apple's speech recognition, on your device when it can. Apple's privacy policy
   covers speech recognition that Apple performs; Turnkeeper keeps no recording.
 
-Deleting the app from an iPad deletes all of this. On a Mac, macOS keeps an app's saved data in the
+Deleting the app from an iPad or an iPhone deletes all of this. On a Mac, macOS keeps an app's saved data in the
 Containers folder of your Library folder until you delete the folder named Turnkeeper there.
 
 ## Importing characters from Demiplane
@@ -28,6 +28,14 @@ Demiplane's own privacy policy. The developer sees none of it.
 Turnkeeper can sync your campaigns with your other devices on the same network. The devices find each other with
 Bonjour, and you confirm a pairing code. The data goes directly between your devices; it does not pass through a
 server.
+
+## Sharing the player screen
+
+When you choose Share with Players, devices on the same network that enter your code are sent what a player
+screen shows: the names in the initiative order, how hurt each enemy looks, handouts you show, and the art of the
+creatures in the fight. Stat blocks, hit points and your notes are not sent. It goes directly from your device to
+theirs, not through a server. A device that follows a table keeps that art only while it is following, and sends
+the sharing device its name.
 
 ## Other apps
 

@@ -47,7 +47,7 @@ struct NearbySyncSheet: View {
             if let host {
                 Text(host.code).font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
                     .frame(maxWidth: .infinity)
-                Text("On the other device, choose Join, pick \(Self.deviceName), and enter this code.")
+                Text("On the other device, choose Join, pick \(DeviceName.current), and enter this code.")
                     .foregroundStyle(.secondary)
             } else {
                 ProgressView("Starting…")
@@ -106,7 +106,7 @@ struct NearbySyncSheet: View {
         var generator = SystemRandomNumberGenerator()
         let code = PairingCode.make(using: &generator)
         do {
-            let host = try NearbyHost(name: Self.deviceName, code: code) { incoming in
+            let host = try NearbyHost(name: DeviceName.current, code: code) { incoming in
                 await MainActor.run {
                     let reply = model.fullPackage()
                     model.importPackage(incoming)
@@ -142,13 +142,5 @@ struct NearbySyncSheet: View {
         browser = nil
         peers = []
         selectedPeer = nil
-    }
-
-    private static var deviceName: String {
-        #if os(macOS)
-        return Host.current().localizedName ?? "Mac"
-        #else
-        return UIDevice.current.name
-        #endif
     }
 }

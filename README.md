@@ -19,6 +19,9 @@ players' numbers aloud or tap them in, and Next passes the turn. The right half 
 turn it is, and your notes. Reminders hold the turn until persistent damage and the like are dealt with, and the
 players can watch the creature's art on a second screen.
 
+The players can follow along on their own phones, too: share the player screen and each of them sees the
+initiative order, how hurt the enemies look and the art of whoever they tap, never your stat blocks.
+
 On an iPhone the ladder fills the screen, Next sits under your thumb, and a tap on a strip opens its battle card
 and notes in a sheet, so the whole app fits in a pocket.
 
@@ -66,10 +69,14 @@ requirements and design.
   Reminders block Next until dismissed.
 - **Show players:** the eye button shows the creature's card back, with its art, on an external display or
   AirPlay screen (iPad), in the Players window (Mac), or full screen.
+- **Share with players:** in the Fight menu (or the campaign list's More menu) choose Share with Players and
+  turn it on. On each player's iPhone, iPad or Mac, More ▸ Follow a Table, pick your device and enter the
+  code it shows. They see the order, health descriptions, handouts and the art of anyone they tap; a phone
+  that was in another app catches up by itself when they come back. Everyone needs to be on the same network.
 - **Share:** export a campaign as a `.turnkeeper` file (AirDrop, Files, Finder) and open it on the other
   device, or use Sync with Nearby Device on both. Edits made on both sides are kept as conflict copies.
 - **Demo:** launch with `--demo planner`, `--demo setup`, `--demo board` or `--demo starfinder` for an
-  in-memory sample that leaves the saved library alone.
+  in-memory sample that leaves the saved library alone. `--demo-art` adds drawn stand-in art.
 
 ## Artwork
 
@@ -124,7 +131,8 @@ Contact: [Turnkeeper's issues on GitHub](https://github.com/scooper4711/turnkeep
 ## Test
 `make test` and `make lint` (Swift); `make ipad-uitest` and `make iphone-uitest` (UI tests, against the demo
 fight, on an iPad and an iPhone); `make screenshots` saves a picture of every screen to `tmp/screenshots` for
-checking a device's layout by eye (`SIMULATOR="iPhone 17e"` names the simulator);
+checking a device's layout by eye (`SIMULATOR="iPhone 17e"` names the simulator); `scripts/sharing-check.sh`
+shares the player screen from one simulator to another and saves pictures of both;
 `.venv/bin/python -m pytest` and `.venv/bin/ruff check .` (Python). `make cards KEYS="<creature key>[:elite]"`
 renders battle cards to `tmp/cards` for comparing with the printed decks.
 

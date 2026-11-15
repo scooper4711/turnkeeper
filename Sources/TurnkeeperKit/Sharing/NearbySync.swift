@@ -30,7 +30,7 @@ public final class NearbyHost: @unchecked Sendable {
     public func start() async throws -> NWEndpoint.Port {
         listener.newConnectionHandler = { [weak self] connection in
             guard let self else { return }
-            Task { await self.answer(MessageChannel(connection: connection, queue: self.queue)) }
+            Task { await self.answer(MessageChannel<NearbyMessage>(connection: connection, queue: self.queue)) }
         }
         return try await withCheckedThrowingContinuation { continuation in
             let once = Once()
@@ -50,7 +50,7 @@ public final class NearbyHost: @unchecked Sendable {
         listener.cancel()
     }
 
-    private func answer(_ channel: MessageChannel) async {
+    private func answer(_ channel: MessageChannel<NearbyMessage>) async {
         defer { channel.close() }
         do {
             try await channel.open()
@@ -104,8 +104,8 @@ public enum NearbyClient {
         -> LibraryPackage {
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true
-        let channel = MessageChannel(connection: NWConnection(to: endpoint, using: parameters),
-                                     queue: DispatchQueue(label: "turnkeeper.nearby.client"))
+        let channel = MessageChannel<NearbyMessage>(connection: NWConnection(to: endpoint, using: parameters),
+                                                    queue: DispatchQueue(label: "turnkeeper.nearby.client"))
         defer { channel.close() }
         try await channel.open()
         try await channel.send(.hello(code: code, package: package))

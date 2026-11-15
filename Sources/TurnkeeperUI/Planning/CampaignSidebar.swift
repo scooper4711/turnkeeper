@@ -39,6 +39,11 @@ struct CampaignSidebar: View {
             }
             Button(missing > 0 ? "Creature Art (\(missing) missing)…" : "Creature Art…",
                    systemImage: "photo.on.rectangle.angled") { model.librarySheet = .creatureArt }
+            Divider()
+            Button("Share with Players…", systemImage: "dot.radiowaves.left.and.right") {
+                model.librarySheet = .shareWithPlayers
+            }
+            Button("Follow a Table…", systemImage: "person.2.wave.2") { model.librarySheet = .followTable }
             // The Mac has About in the app menu.
             #if os(iOS)
             Button("About", systemImage: "info.circle") { model.librarySheet = .about }

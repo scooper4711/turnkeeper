@@ -17,20 +17,33 @@ public enum NearbyFraming {
     public static let maximumLength = 64 * 1024 * 1024
 
     public static func frame(_ message: NearbyMessage) throws -> Data {
+        try encode(message)
+    }
+
+    /// Takes one complete message off the front of `buffer`, or returns nil if it hasn't all arrived yet.
+    public static func nextMessage(from buffer: inout Data) throws -> NearbyMessage? {
+        try next(NearbyMessage.self, from: &buffer)
+    }
+
+    /// Frames a message of any of the app's protocols.
+    public static func encode<Message: Encodable>(_ message: Message) throws -> Data {
         let body = try JSONEncoder().encode(message)
         var length = UInt32(body.count).bigEndian
         return Data(bytes: &length, count: 4) + body
     }
 
-    /// Takes one complete message off the front of `buffer`, or returns nil if it hasn't all arrived yet.
-    public static func nextMessage(from buffer: inout Data) throws -> NearbyMessage? {
+    /// Takes one complete message of `type` off the front of `buffer`, or returns nil if it hasn't all arrived
+    /// yet. A frame longer than `limit` is refused.
+    public static func next<Message: Decodable>(
+        _ type: Message.Type, from buffer: inout Data, limit: Int = maximumLength
+    ) throws -> Message? {
         guard buffer.count >= 4 else { return nil }
         let length = buffer.prefix(4).reduce(0) { $0 << 8 | Int($1) }
-        guard length <= maximumLength else { throw NearbyError.messageTooLarge(length) }
+        guard length <= limit else { throw NearbyError.messageTooLarge(length) }
         guard buffer.count >= 4 + length else { return nil }
         let body = buffer.dropFirst(4).prefix(length)
         buffer = Data(buffer.dropFirst(4 + length))
-        return try JSONDecoder().decode(NearbyMessage.self, from: Data(body))
+        return try JSONDecoder().decode(type, from: Data(body))
     }
 }
 

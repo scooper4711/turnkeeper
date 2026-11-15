@@ -1,16 +1,19 @@
 import Foundation
 import Network
 
-/// Sends and receives framed `NearbyMessage`s over one connection.
-final class MessageChannel: @unchecked Sendable {
+/// Sends and receives framed messages of one protocol (`NearbyMessage`, `TableMessage`) over one connection.
+final class MessageChannel<Message: Codable & Sendable>: @unchecked Sendable {
     private let connection: NWConnection
     private let queue: DispatchQueue
+    /// The longest message this side accepts.
+    private let limit: Int
     /// Bytes received but not yet read as a message. Only touched on `queue`.
     private var buffer = Data()
 
-    init(connection: NWConnection, queue: DispatchQueue) {
+    init(connection: NWConnection, queue: DispatchQueue, limit: Int = NearbyFraming.maximumLength) {
         self.connection = connection
         self.queue = queue
+        self.limit = limit
     }
 
     func open() async throws {
@@ -29,8 +32,8 @@ final class MessageChannel: @unchecked Sendable {
         }
     }
 
-    func send(_ message: NearbyMessage) async throws {
-        let data = try NearbyFraming.frame(message)
+    func send(_ message: Message) async throws {
+        let data = try NearbyFraming.encode(message)
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: data, completion: .contentProcessed { error in
                 if let error {
@@ -42,9 +45,10 @@ final class MessageChannel: @unchecked Sendable {
         }
     }
 
-    func receive() async throws -> NearbyMessage {
+    func receive() async throws -> Message {
         while true {
-            if let message = try queue.sync(execute: { try NearbyFraming.nextMessage(from: &buffer) }) {
+            if let message = try queue.sync(execute: { try NearbyFraming.next(Message.self, from: &buffer,
+                                                                              limit: limit) }) {
                 return message
             }
             let chunk = try await receiveChunk()

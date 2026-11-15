@@ -6,6 +6,8 @@ enum LibrarySheet: String, Identifiable {
     case newCampaign
     case nearbySync
     case creatureArt
+    case shareWithPlayers
+    case followTable
     case about
 
     var id: String { rawValue }
@@ -16,6 +18,8 @@ enum LibrarySheet: String, Identifiable {
         case .newCampaign: CampaignSheet(campaign: nil)
         case .nearbySync: NearbySyncSheet()
         case .creatureArt: CreatureArtView()
+        case .shareWithPlayers: TableShareSheet()
+        case .followTable: FollowTableSheet()
         case .about: AboutSheet(info: .turnkeeper)
         }
     }
@@ -52,6 +56,9 @@ struct LibraryCommands: Commands {
             Divider()
             Button("Sync with Nearby Device…") { model.librarySheet = .nearbySync }
             Button("Creature Art…") { model.librarySheet = .creatureArt }
+            Divider()
+            Button("Share with Players…") { model.librarySheet = .shareWithPlayers }
+            Button("Follow a Table…") { model.librarySheet = .followTable }
         }
     }
 
