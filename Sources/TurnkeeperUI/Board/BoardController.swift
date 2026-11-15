@@ -200,6 +200,13 @@ final class BoardController {
         change { $0.bringIn(id) }
     }
 
+    /// Adds a creature the plan left out, on either side, at the end of the order for the GM to enter its
+    /// initiative.
+    func addCreature(_ key: String, side: Side) {
+        guard let entry = model.entry(key) else { return }
+        change { $0.addCreature(entry, side: side) }
+    }
+
     /// Initiative modifiers to do the math with: Perception first, then Stealth, then the other skills, with
     /// the template and conditions applied. Empty for PCs.
     func initiativeSkills(for combatant: Combatant) -> [InitiativeSkill] {

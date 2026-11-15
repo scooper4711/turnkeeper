@@ -7,6 +7,8 @@ struct BestiaryBrowser: View {
     let game: Game
     let partyLevel: Int?
     let add: (String) -> Void
+    /// On the board, the side the creatures added join on; the planner sets it on each creature instead.
+    var joiningSide: Binding<Side>?
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var filter = BestiaryFilter()
@@ -29,6 +31,15 @@ struct BestiaryBrowser: View {
         NavigationStack {
             let results = filter.results(in: customEntries + model.bestiary.index.entries, defaultGame: game)
             List {
+                if let joiningSide {
+                    Section {
+                        Picker("Joins as", selection: joiningSide) {
+                            Text("Enemy").tag(Side.enemy)
+                            Text("Ally").tag(Side.ally)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                }
                 Section { FilterControls(filter: $filter, partyLevel: partyLevel, sources: sources) }
                 Section("\(results.count) found") {
                     BestiarySearchField(text: $filter.text)
