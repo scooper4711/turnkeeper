@@ -182,6 +182,11 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   back, so all act that round. A delaying strip can be dragged down, never up. Fights saved with a strip
   in the old Delay zone come back with it delaying just below the current strip.
 - R4.8 Benched creatures can be brought into combat at any time.
+- R4.8a A creature the plan left out can be added from the board at any time, in setup or in combat: Add,
+  then Creature, opens the bestiary (custom creatures included), which stays open so several can be added.
+  Each joins as an enemy at the end of the order with no initiative, for the GM to enter one, and is
+  numbered after those of its kind already in the fight; nobody is renamed. The encounter's plan doesn't
+  change, and adding can be undone.
 - R4.9 Durations and events count down and fire in rules order.
 - R4.10 Turn reminders are modal and must be dismissed: slowed, stunned, quickened and dying at the
   start of a turn; persistent damage and frightened at the end of a turn; custom notes at either. Next

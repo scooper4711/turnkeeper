@@ -25,10 +25,8 @@ struct CompactTopBar<TurnButtons: View>: View {
                 PlayerScreenToggle()
                     .labelStyle(.iconOnly)
                 FightMenu(controller: controller) {
-                    if controller.state.phase != .setup {
-                        AddToFightButtons(sheet: $sheet)
-                        Divider()
-                    }
+                    AddToFightButtons(controller: controller, sheet: $sheet)
+                    Divider()
                 }
                 .labelStyle(.iconOnly)
                 turnButtons().frame(maxWidth: 360)

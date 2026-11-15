@@ -1,3 +1,4 @@
+import Bestiary
 import Foundation
 import Testing
 @testable import TurnkeeperKit
@@ -88,5 +89,60 @@ struct InitiativeTargetTests {
         state.setInitiative(12, for: ids[1])
         state.setInitiative(9, for: ids[2])
         #expect(state.initiativeTarget(chosen: nil) == nil)
+    }
+}
+
+@Suite("Adding a creature during a fight")
+struct AddingCreatureTests {
+    private func entry(_ name: String, kind: CreatureKind = .creature) -> BestiaryIndexEntry {
+        var creature = Creature(key: name.lowercased(), name: name, game: .pathfinder)
+        creature.kind = kind
+        return BestiaryIndexEntry(creature: creature)
+    }
+
+    @Test("A new creature joins as an enemy at the end of the order, without an initiative or a change of turn")
+    func joinsAtTheEnd() {
+        var (state, ids) = fight()
+        let wolf = state.addCreature(entry("Wolf"))
+        #expect(state.order == ids + [wolf])
+        #expect(state.currentID == ids[0])
+        #expect(state[wolf]?.name == "Wolf" && state[wolf]?.creatureKey == "wolf")
+        #expect(state[wolf]?.side == .enemy && state[wolf]?.place == .ladder)
+        #expect(state.combatantsWithoutInitiative.map(\.id) == [wolf])
+    }
+
+    @Test("It is numbered after those of its kind in the fight, and nobody is renamed")
+    func numbering() {
+        var (state, ids) = fight()
+        let second = state.addCreature(entry("Goblin"))
+        state.remove(second)
+        let third = state.addCreature(entry("Goblin"))
+        let fourth = state.addCreature(entry("Goblin"))
+        #expect(state[ids[0]]?.name == "Goblin")
+        #expect([third, fourth].map { state[$0]?.name } == ["Goblin 2", "Goblin 3"])
+    }
+
+    @Test("A longer name that starts the same way doesn't share the numbering")
+    func otherKinds() {
+        var state = CombatState(combatants: [Combatant(kind: .creature, name: "Goblin Warrior 3")])
+        let goblin = state.addCreature(entry("Goblin"))
+        #expect(state[goblin]?.name == "Goblin")
+    }
+
+    @Test("A hazard joins as a hazard, and takes the turn in a fight begun with nobody in it")
+    func hazardInAnEmptyFight() {
+        var state = CombatState()
+        state.beginCombat()
+        let pit = state.addCreature(entry("Drowning Pit", kind: .hazard))
+        #expect(state[pit]?.kind == .hazard)
+        #expect(state.currentID == pit)
+    }
+
+    @Test("In setup it joins the ladder and sorts into place once it has an initiative")
+    func duringSetup() {
+        var state = CombatState(combatants: [Combatant(kind: .playerCharacter, name: "Kyra")])
+        let wolf = state.addCreature(entry("Wolf"))
+        state.setInitiative(15, for: wolf)
+        #expect(state.order.first == wolf && state.currentID == nil)
     }
 }

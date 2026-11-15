@@ -174,6 +174,10 @@ Ported from the pf2e system, with tests.
   strip that takes no clicks, reads the window's scroll events with a local monitor. `TrackpadSwipeTracker`
   (TurnkeeperKit) decides: a gesture that begins over the strip and moves more sideways than up and down slides
   it the same way, and its events and the coasting after it are kept from the ladder; anything else scrolls.
+- **Adding a creature** (R4.8a). The Add menu's Creature opens `BestiaryBrowser` as `BoardSheet.creature`, the
+  browser the planner uses. `BoardController.addCreature` looks the key up and calls `CombatState.addCreature`
+  (TurnkeeperKit, tested), which names and numbers the combatant and appends it to the order. It goes through
+  `change`, so it is saved, undoable and reaches the player screen like any other edit.
 - **The ladder alone** (R1.1a). `BoardArrangement` (TurnkeeperKit, tested) decides from the board's size:
   `sideBySide`, or `ladderOnly` below 760 pt of width or 480 pt of height, and whether the turn buttons get a
   bar of their own (`hasTurnBar`). `BoardContent` then shows `CompactTopBar`, the ladder and

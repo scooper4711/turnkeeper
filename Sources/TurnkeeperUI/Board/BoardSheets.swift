@@ -6,6 +6,7 @@ import SwiftUI
 struct BoardSheetContent: View {
     let sheet: BoardSheet
     let controller: BoardController
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         switch sheet {
@@ -14,6 +15,10 @@ struct BoardSheetContent: View {
         case let .conditions(id): ConditionPalette(controller: controller, id: id)
         case .duration: DurationEditor(controller: controller)
         case .card: CompactCardSheet(controller: controller)
+        case .creature:
+            BestiaryBrowser(game: model.game, partyLevel: model.party(controller.session?.partyID)?.level) { key in
+                controller.addCreature(key)
+            }
         case .event:
             EventEditor(event: EncounterEvent(label: "", trigger: .initiative(20)), slots: []) { event in
                 controller.change { $0.addEvent(event) }

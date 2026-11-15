@@ -8,6 +8,8 @@ enum BoardSheet: Identifiable, Hashable {
     case conditions(UUID)
     case duration
     case event
+    /// The bestiary, to add a creature the plan left out.
+    case creature
     /// The battle card of the pinned strip, or of whoever is acting: a sheet where the board shows the ladder alone.
     case card
 
@@ -37,10 +39,10 @@ struct BoardTopBar: View {
             Spacer()
             PlayerScreenToggle()
                 .fixedSize()
+            Menu("Add", systemImage: "plus") { AddToFightButtons(controller: controller, sheet: $sheet) }
             if controller.state.phase == .setup {
                 BeginCombatButton(controller: controller)
             } else {
-                Menu("Add", systemImage: "plus") { AddToFightButtons(sheet: $sheet) }
                 FightMenu(controller: controller)
                 Button("Undo", systemImage: "arrow.uturn.backward") { controller.undo() }
                     .disabled(!controller.canUndo)
@@ -142,13 +144,17 @@ extension FightMenu where Additions == EmptyView {
     }
 }
 
-/// Adding a duration arrow or an event to the fight.
+/// Adding a creature to the fight at any time, and a duration arrow or an event once combat has begun.
 struct AddToFightButtons: View {
+    let controller: BoardController
     @Binding var sheet: BoardSheet?
 
     var body: some View {
-        Button("Duration Arrow…", systemImage: "arrow.uturn.right") { sheet = .duration }
-        Button("Event…", systemImage: "bell") { sheet = .event }
+        Button("Creature…", systemImage: "pawprint") { sheet = .creature }
+        if controller.state.phase == .active {
+            Button("Duration Arrow…", systemImage: "arrow.uturn.right") { sheet = .duration }
+            Button("Event…", systemImage: "bell") { sheet = .event }
+        }
     }
 }
 
