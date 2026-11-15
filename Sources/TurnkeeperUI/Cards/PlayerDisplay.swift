@@ -16,7 +16,10 @@ final class PlayerDisplay {
     var model: AppModel?
     /// The fight on the board, for the player screen; nil when no board is open. Setting it replaces any handout.
     var fight: PlayerScreenFight? {
-        didSet { if fight != nil { handout = nil } }
+        didSet {
+            if fight != nil { handout = nil }
+            if fight != oldValue { TableSharing.shared.refresh() }
+        }
     }
     /// The GM's Player Screen toggle: whether the fight shows on the second screen.
     var isPlayerScreenOn = false
@@ -28,6 +31,7 @@ final class PlayerDisplay {
 
     func show(handout: Handout) {
         self.handout = (handout.name, handout.imagePath)
+        TableSharing.shared.refresh()
     }
 }
 
@@ -50,7 +54,7 @@ struct PlayerScreen: View {
         if let handout = display.handout {
             HandoutPlayerView(name: handout.name, imagePath: handout.imagePath).transition(.opacity)
         } else if display.isPlayerScreenOn, let fight = display.fight {
-            PlayerScreenLayout(fight: fight)
+            LocalPlayerScreen(fight: fight)
         }
     }
 }

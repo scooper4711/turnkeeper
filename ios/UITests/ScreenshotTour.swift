@@ -128,10 +128,50 @@ final class ScreenshotTour: XCTestCase {
         save("planner-new-campaign")
     }
 
+    /// A device following its own shared player screen, with the demo's stand-in art.
+    func testFollowing() {
+        launch("board", "--demo-art", "--share-table", "4321", "--follow-table", "self", "4321")
+        save("following")
+        tapStrip("Goblin War Chanter")
+        save("following-tapped-art")
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        save("following-landscape")
+    }
+
+    /// The sharing half of a two-device check (`scripts/sharing-check.sh`): shares the demo fight, then passes
+    /// the turn and hurts a goblin, each when the script has pictured the following device and asks for the next.
+    func testSharingHost() {
+        launch("board", "--share-table", "4321")
+        tap(app.buttons["Fight"])
+        tap(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Shar'")).firstMatch)
+        save("share-sheet")
+        wait(forSignal: "followed")
+        save("share-sheet-followed")
+        tap(app.buttons["Done"])
+        tap(app.buttons["Next"])
+        tap(app.buttons["Got It"])
+        save("share-host-next")
+        wait(forSignal: "away")
+        tap(app.buttons.matching(NSPredicate(format: "label CONTAINS '6/6'")).firstMatch)
+        tap(app.buttons["5"])
+        tap(app.buttons["Damage"])
+        save("share-host-damage")
+        wait(forSignal: "done")
+    }
+
     // MARK: Steps
 
-    private func launch(_ demo: String) {
-        app.launchArguments = ["--demo", demo, "--fake-voice", "17,nineteen"]
+    /// Waits for the script driving a two-device check to make a file of this name in the pictures' folder.
+    private func wait(forSignal name: String) {
+        let file = folder.appendingPathComponent(name)
+        for _ in 0..<240 where !FileManager.default.fileExists(atPath: file.path) {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+    }
+
+    private func launch(_ demo: String, _ more: String...) {
+        app.launchArguments = ["--demo", demo, "--fake-voice", "17,nineteen"] + more
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 20))
         sleep(2)

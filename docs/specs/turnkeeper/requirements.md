@@ -25,11 +25,11 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   Files or Finder.
 - R1.3 "Sync with nearby device" merges the libraries of two devices over the local network.
 - R1.3a The campaign sidebar's toolbar holds Add Campaign and a More menu with Import…, Sync with Nearby Device…,
-  Creature Art… and, on the iPad, About, so none of them is lost when the sidebar is too narrow for a row of
+  Creature Art…, Share with Players… and Follow a Table… (R9) and, on the iPad and the iPhone, About, so none of them is lost when the sidebar is too narrow for a row of
   buttons. When art PDFs are missing, the menu's button and its Creature Art item say how many.
 - R1.3b The File menu has the same, whether or not the sidebar is showing: New Campaign… (⌘N, in place of New
   Window on the Mac, as every window shows the same library), Import Library…, Export Campaign… (the selected
-  campaign), Sync with Nearby Device… and Creature Art…. On the iPad they are in the menu bar a keyboard
+  campaign), Sync with Nearby Device…, Creature Art…, Share with Players… and Follow a Table…. On the iPad they are in the menu bar a keyboard
   brings up.
 - R1.4 Merging never loses edits silently. When both sides changed the same record, the newer one wins
   and the other is kept as a conflict copy, once. A record changed on only one device, however many times and
@@ -200,6 +200,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   external display or AirPlay screen when one is connected, else covering the iPad's screen until tapped;
   on the Mac in the Players window, which the toggle opens and closes. Battle cards have no Show Players
   button; a card turned over and shown full screen (R3.5f) is the way to hold one creature's art up.
+  The players' own devices can follow the fight too (R9).
 - R4.14 The player screen shows the initiative order on one half: the acting strip outlined, delaying strips
   shifted right as on the GM's ladder, benched combatants left out. Each enemy shows how hurt it looks:
   Unharmed (full HP), Healthy (over 75%), Injured (over 50%), Bloodied (over 25%), Near Death, or Down (0 HP
@@ -283,3 +284,28 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   from Scrollkeeper 2.0, scrollkeeper#52). It opens the folder picker when they aren't there: Scrollkeeper isn't
   sandboxed yet or is an older iPad version, or downloads to a folder the user chose. Folders watched before the
   move have to be picked once more, or, for Scrollkeeper's own, imported again from the shared folder.
+
+## R9 Sharing the player screen
+- R9.1 Share with Players (the board's Fight menu, the campaign list's More menu and the File menu) shares this
+  device's player screen with other devices on the same network. A Mac, an iPad or an iPhone can share, and
+  each can follow any of the others (Follow a Table, in the same menus).
+- R9.2 The sharing device shows a 4-digit code, kept for that device, and the names of the devices following;
+  the Fight menu's item counts them. A follower picks the sharing device from those nearby (the only one is
+  picked for it) and enters the code once; the table and its code are filled in the next time. A wrong code is
+  refused, and says so.
+- R9.3 Any number of devices (up to 24) follow at once, each on its own.
+- R9.4 Followers see what a second screen would (R4.14, R3.5d): the initiative order with the acting strip
+  outlined and delaying strips shifted, how hurt each enemy looks, the acting combatant's card back, and a
+  handout while one is on show. They see it whenever a fight is open on the sharing device's board, whether or
+  not its own Player Screen is on; with no fight and no handout they are told the GM hasn't started one.
+- R9.5 Only that is sent: names, strip colors, health descriptions, and for a card back the creature's name,
+  game, traits (which pick its landscape) and art. Never a stat block, an HP number, an initiative count, a
+  note or anything else of the GM's plan. Art is sent when a follower asks for a picture in what is on show,
+  and no other file can be asked for. A follower keeps the art in memory while it follows and never saves it.
+- R9.6 A tap on a strip shows that combatant's card back large, whoever's turn it is; a tap there goes back to
+  the fight. Combatants without a creature (quick PCs) have none.
+- R9.7 A follower that loses the sharing device (another app was in front, the phone slept, the network dropped,
+  the GM's device restarted sharing) goes back on its own, without the code, and shows the fight as it is now.
+  Coming back to Turnkeeper reconnects at once; otherwise it tries again after half a second, then less often,
+  up to every five seconds, and says it is reconnecting over what it showed last.
+- R9.8 A following device stays awake, and leaves with the button in the corner.

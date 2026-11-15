@@ -283,6 +283,44 @@ Ported from the pf2e system, with tests.
   `BestiaryStore.glossaryID`, falling back to Pathfinder names for Starfinder characters (Starfinder 2e
   shares the Player Core ancestries and feats); action text is replaced by the linked entry's rules text when there is one.
 
+## Sharing the player screen (R9)
+- **Protocol** (TurnkeeperKit, tested over real loopback connections). The same transport as nearby sync:
+  Network.framework TCP, found by Bonjour, each message a 4-byte length and JSON (`NearbyFraming`), on a
+  `MessageChannel` now generic over its protocol's message type. It has a Bonjour type of its own,
+  `_turnkeeper-table._tcp`, so a follower lists tables and not devices waiting to sync. Where sync is one
+  exchange of two libraries, this is a stream from one device to many: `TableMessage` is `join(code, name)`,
+  `welcome` or `refused`, then `snapshot` from the sharing device whenever the player screen changes, and
+  `needArt(id)` answered by `art(id, image)`.
+- **What is sent.** A `TableSnapshot` is whole, never a change: `waiting`, a `handout` (name and art ID) or a
+  `fight` of `TableLine`s, each a `PlayerScreenLine` without its creature key plus a `TableCard` (name, game,
+  traits, art ID), which is all Tabletop Kit's `CardBack` needs. Snapshots are numbered, and a follower drops
+  one older than it has, since a newcomer's first snapshot can cross one being published.
+- **`TableHost`** keeps a channel per follower (the `Followers` actor), sends each newcomer the latest
+  snapshot, refuses a wrong code after a second's wait and a 25th follower, accepts messages of at most 64 KB,
+  and answers `needArt` only for art IDs in the latest snapshot (`Content.artIDs`): an ID is an art path on the
+  sharing device, so anything else could name another file. `TableFollower` is one connection; it throws
+  `TableError.refused` or `connectionLost` when it ends.
+- **Sharing device.** `TableSharing` (a singleton, like `PlayerDisplay`) owns the host. `PlayerDisplay` calls
+  `refresh()` when its fight or handout changes, which publishes the content built from them: the fight
+  whether or not this device's own Player Screen is on. Art is the file itself for pasted art and handouts,
+  else `artPicture` at 1024 px as a PNG, which keeps a pawn's cut-out edges. iOS closes a listener in the
+  background, so the app restarts it on becoming active again. The code is made once and kept in user defaults.
+- **Following device.** `TableFollowing` runs a loop: connect to the table's Bonjour service by name
+  (`TablePeer.endpoint`, so no browsing is needed to go back), follow until the connection ends, then wait
+  `ReconnectDelay` (0.5 s doubling to 5 s) and try again; a refusal stops it. Becoming active again
+  (`returnedToForeground`) makes a new connection at once, which brings the current snapshot. Art is kept in
+  memory by ID, asked for once however many views want it, and never written to disk; views key on
+  `connections` so art that failed while reconnecting is asked for again.
+- **Views.** `TableShareSheet` and `FollowTableSheet` are library sheets. `TableViewer` is an overlay on
+  `RootView`, so nothing under it is closed. It draws `PlayerScreenLayout`, now generic over where its art
+  comes from and able to report a tapped strip (`LocalPlayerScreen` is this device's own), with card backs
+  whose `ArtPicture`s load through a loader that asks `TableFollowing`. It keeps the screen awake.
+- **For tests.** `--share-table <code>` shares from launch and `--follow-table <name|self> <code>` follows from
+  launch; `--demo-art` gives the demo's creatures drawn stand-in art (`DemoArt`), kept as pasted art.
+  `SharingUITests` follow the app's own table on one device; `scripts/sharing-check.sh` runs an iPad sharing
+  and an iPhone following in two simulators and saves pictures of both, through a turn and through a change
+  made while the iPhone had another app in front.
+
 ## Testing on devices
 - `scripts/run-ipad-uitests.sh` runs the UI tests on an iPad, or with `DEVICE_KIND=iPhone` on an iPhone
   (`make iphone-uitest`). `TestDevice.isPhone` and the `XCUIApplication` helpers in `ios/UITests/DeviceSupport.swift`

@@ -6,6 +6,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openURL) private var openURL
+    @State private var following = TableFollowing.shared
 
     var body: some View {
         @Bindable var model = model
@@ -34,6 +35,9 @@ struct RootView: View {
             Text(model.errorMessage ?? "")
         }
         .overlay(alignment: .bottom) { StatusToast() }
+        // Over everything, and nothing under it is closed: a GM's device can follow another table and come back.
+        .overlay { if following.isViewerOpen { TableViewer().transition(.opacity) } }
+        .animation(.easeInOut, value: following.isViewerOpen)
         // Here rather than in the sidebar, which isn't there while it is hidden or a fight is on screen.
         .sheet(item: $model.librarySheet) { $0.content }
         .fileImporter(isPresented: $model.isImportingLibrary,

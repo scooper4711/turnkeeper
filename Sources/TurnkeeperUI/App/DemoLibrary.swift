@@ -4,7 +4,8 @@ import Foundation
 
 /// A sample campaign for trying the app and for screenshots, used with the `--demo` launch argument:
 /// `--demo planner` opens the planner, `--demo setup` a fight in setup, `--demo board` a fight in round 1, and
-/// `--demo starfinder` a Starfinder fight in round 1.
+/// `--demo starfinder` a Starfinder fight in round 1. `--demo-art` gives the Pathfinder demo's creatures drawn
+/// stand-in art.
 enum DemoLibrary {
     @MainActor
     static func model(mode: String, bestiary: BestiaryStore) -> AppModel {
@@ -23,6 +24,7 @@ enum DemoLibrary {
         guard let scenario = model.library.scenarios(in: campaign.id).first else { return model }
         let encounter = encounter(in: scenario, bestiary: bestiary)
         model.library.save(encounter)
+        if DemoArt.isWanted { DemoArt.add(to: model) }
         guard mode != "planner" else {
             model.selection = .encounter(encounter.id)
             return model

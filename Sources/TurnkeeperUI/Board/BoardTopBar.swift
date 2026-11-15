@@ -106,12 +106,24 @@ struct DurationArrows: View {
 struct FightMenu<Additions: View>: View {
     let controller: BoardController
     @ViewBuilder let additions: () -> Additions
+    @Environment(AppModel.self) private var model
+    @State private var sharing = TableSharing.shared
     @State private var isConfirmingReset = false
+
+    /// Says how many devices follow while the player screen is shared.
+    private var shareTitle: String {
+        guard sharing.isOn else { return "Share with Players…" }
+        let count = sharing.followers.count
+        return "Sharing with \(count) Device\(count == 1 ? "" : "s")…"
+    }
 
     var body: some View {
         Menu("Fight", systemImage: "ellipsis.circle") {
             additions()
             PlayerNamesToggle()
+            Button(shareTitle, systemImage: "dot.radiowaves.left.and.right") {
+                model.librarySheet = .shareWithPlayers
+            }
             Divider()
             Button("Reset Combat…", systemImage: "arrow.counterclockwise") { isConfirmingReset = true }
             Button("End Combat", systemImage: "flag.checkered") { controller.endCombat() }

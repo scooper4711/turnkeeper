@@ -10,6 +10,19 @@ public struct PlayerScreenLine: Identifiable, Hashable, Sendable {
     public var isDelaying: Bool
     /// How hurt an enemy looks; nil for PCs, allies, and creatures without HP.
     public var health: HealthEstimate?
+    /// The combatant's creature key, for its art when the strip is tapped; empty when it has none.
+    public var creatureKey = ""
+
+    public init(id: UUID, name: String, magnet: Magnet, isActive: Bool, isDelaying: Bool, health: HealthEstimate?,
+                creatureKey: String = "") {
+        self.id = id
+        self.name = name
+        self.magnet = magnet
+        self.isActive = isActive
+        self.isDelaying = isDelaying
+        self.health = health
+        self.creatureKey = creatureKey
+    }
 }
 
 /// What the player screen shows of a fight: the initiative order, and the art of whoever is acting.
@@ -30,7 +43,8 @@ public extension CombatState {
         ladder.map { combatant in
             PlayerScreenLine(id: combatant.id, name: combatant.name, magnet: combatant.magnet,
                              isActive: combatant.id == currentID, isDelaying: combatant.isDelaying,
-                             health: healthEstimate(of: combatant, maxHitPoints: maxHitPoints(combatant)))
+                             health: healthEstimate(of: combatant, maxHitPoints: maxHitPoints(combatant)),
+                             creatureKey: combatant.creatureKey)
         }
     }
 

@@ -83,10 +83,11 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>Turnkeeper turns the initiative you say into a number, on this device when it can.</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>Turnkeeper syncs encounters with your other devices on this network.</string>
+    <string>Turnkeeper syncs encounters with your other devices on this network, and shares the player screen with the players' devices.</string>
     <key>NSBonjourServices</key>
     <array>
         <string>_turnkeeper._tcp</string>
+        <string>_turnkeeper-table._tcp</string>
     </array>
     <key>CFBundleDocumentTypes</key>
     <array>

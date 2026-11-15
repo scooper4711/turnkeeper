@@ -16,6 +16,7 @@ public struct TurnkeeperApp: App {
         let model = AppModel.live()
         Fonts.register(from: BestiaryStore.locateGeneratedDirectory())
         PlayerDisplay.shared.model = model
+        TableSharing.shared.model = model
         _model = State(initialValue: model)
     }
 
@@ -24,8 +25,10 @@ public struct TurnkeeperApp: App {
             RootView()
                 .environment(model)
                 .onOpenURL { url in model.importLibraryFile(url) }
-                .onChange(of: scenePhase) { _, phase in
+                .onChange(of: scenePhase) { old, phase in
                     if phase != .active { model.saveNow() }
+                    // iOS closes the listener in the background; the followers come back on their own.
+                    if phase == .active, old == .background { Task { await TableSharing.shared.resume() } }
                 }
         }
         .defaultSize(width: 1280, height: 860)
