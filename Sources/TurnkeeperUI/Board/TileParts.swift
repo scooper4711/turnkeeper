@@ -63,24 +63,7 @@ struct TileMenu: View {
             }
         }
         Divider()
-        if controller.state.phase == .active {
-            if combatant.isDelaying {
-                Button("Return from Delay", systemImage: "arrow.uturn.left") {
-                    controller.change { $0.endDelay(combatant.id) }
-                }
-            } else {
-                Button("Delay", systemImage: "hourglass") { controller.startDelay(combatant.id) }
-            }
-            if combatant.isDying {
-                Button("Stabilize (End Dying)", systemImage: "heart.text.square") {
-                    controller.change { $0.stabilize(combatant.id) }
-                }
-            } else {
-                Button("Knocked Out (Dying)", systemImage: "heart.slash") {
-                    controller.change { $0.knockOut(combatant.id) }
-                }
-            }
-        }
+        if controller.state.phase == .active { TurnStatusButtons(controller: controller, combatant: combatant) }
         Button("Move to Bench", systemImage: "chair.lounge") { controller.change { $0.moveToBench(combatant.id) } }
         Button("Remove", systemImage: "trash", role: .destructive) { controller.change { $0.remove(combatant.id) } }
     }
@@ -93,5 +76,42 @@ struct TileMenu: View {
     private var templateBinding: Binding<CreatureTemplate> {
         Binding(get: { combatant.template },
                 set: { template in controller.change { $0.setTemplate(template, for: combatant.id) } })
+    }
+}
+
+/// The strip menu's actions on a combatant's turns: delaying, dying and death.
+private struct TurnStatusButtons: View {
+    let controller: BoardController
+    let combatant: Combatant
+
+    var body: some View {
+        if combatant.isDead {
+            Button("Revive (Not Dead)", systemImage: "heart.fill") {
+                controller.change { $0.revive(combatant.id) }
+            }
+        } else {
+            delayButton
+            Button("Dead", systemImage: "xmark.circle.fill") { controller.change { $0.markDead(combatant.id) } }
+        }
+        if combatant.isDying {
+            Button("Stabilize (End Dying)", systemImage: "heart.text.square") {
+                controller.change { $0.stabilize(combatant.id) }
+            }
+        } else {
+            Button("Knocked Out (Dying)", systemImage: "heart.slash") {
+                controller.change { $0.knockOut(combatant.id) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var delayButton: some View {
+        if combatant.isDelaying {
+            Button("Return from Delay", systemImage: "arrow.uturn.left") {
+                controller.change { $0.endDelay(combatant.id) }
+            }
+        } else {
+            Button("Delay", systemImage: "hourglass") { controller.startDelay(combatant.id) }
+        }
     }
 }

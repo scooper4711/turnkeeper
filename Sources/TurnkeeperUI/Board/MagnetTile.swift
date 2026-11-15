@@ -20,11 +20,11 @@ struct MagnetTile: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: combatant.isDelaying ? "hourglass" : "arrowtriangle.right.fill")
+            Image(systemName: statusSymbol)
                 .foregroundStyle(.yellow)
-                .opacity(isCurrent || combatant.isDelaying ? 1 : 0)
+                .opacity(isCurrent || combatant.isDelaying || combatant.isDead ? 1 : 0)
                 .frame(width: 16)
-                .accessibilityLabel(combatant.isDelaying ? "Delaying" : "")
+                .accessibilityLabel(combatant.isDead ? "Dead" : combatant.isDelaying ? "Delaying" : "")
             initiativeBadge
             ArtImage(path: tileArt, size: 46, shape: .circle, alignment: .top)
             VStack(alignment: .leading, spacing: 4) {
@@ -73,6 +73,12 @@ struct MagnetTile: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isCurrent ? .isSelected : [])
         .accessibilityValue(isVoiceTarget ? "next for voice entry" : "")
+    }
+
+    /// The mark at the strip's left: dead, delaying, or the arrow of the current turn.
+    private var statusSymbol: String {
+        if combatant.isDead { return "xmark" }
+        return combatant.isDelaying ? "hourglass" : "arrowtriangle.right.fill"
     }
 
     /// "Valeros (Sam)", with the player's name softer, when player names are shown and the PC has one.

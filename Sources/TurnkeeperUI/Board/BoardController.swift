@@ -61,10 +61,12 @@ final class BoardController {
 
     // MARK: Changes
 
-    /// Applies a change, saving it and keeping the previous state for undo.
+    /// Applies a change, saving it and keeping the previous state for undo. A creature the change brings to
+    /// 0 HP dies.
     func change(_ edit: (inout CombatState) -> Void) {
         var newState = state
         edit(&newState)
+        newState.settleDeaths(since: state) { maxHitPoints(of: $0) }
         guard newState != state else { return }
         undoStack.append(state)
         if undoStack.count > 100 { undoStack.removeFirst() }
@@ -76,6 +78,7 @@ final class BoardController {
     func amend(_ edit: (inout CombatState) -> Void) {
         var newState = state
         edit(&newState)
+        newState.settleDeaths(since: state) { maxHitPoints(of: $0) }
         save(newState)
     }
 
@@ -251,7 +254,6 @@ final class BoardController {
         combatant.kind == .playerCharacter ? nil : creature(for: combatant)
     }
 
-    /// Maximum HP with the template and drained applied; 0 when the creature is unknown.
     /// AC with the template and conditions applied, such as 14 for off-guard; nil without a stat block or AC.
     func armorClass(of combatant: Combatant) -> AdjustedValue? {
         guard let creature = stripCreature(for: combatant), creature.defenses.armorClass > 0 else { return nil }
@@ -264,6 +266,7 @@ final class BoardController {
         state.playerScreen { maxHitPoints(of: $0) }
     }
 
+    /// Maximum HP with the template and drained applied; 0 when the creature is unknown.
     func maxHitPoints(of combatant: Combatant) -> Int {
         guard let creature = stripCreature(for: combatant) else { return 0 }
         return StatBlockPresenter(creature: creature, template: combatant.template,

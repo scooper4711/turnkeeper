@@ -2,8 +2,8 @@ import TurnkeeperKit
 import SwiftUI
 
 /// The initiative half of the board: the ladder of magnets with event markers between them, and the bench of
-/// creatures waiting to join. In combat, swiping a strip left to right delays it, and right to left knocks it
-/// out, or brings a delaying strip back.
+/// creatures waiting to join. In combat, swiping a strip left to right delays it, and right to left marks a
+/// creature dead or knocks a PC out, or brings a delaying strip back.
 struct LadderView: View {
     let controller: BoardController
     @Binding var sheet: BoardSheet?
@@ -41,7 +41,8 @@ struct LadderView: View {
                         MagnetTile(controller: controller, combatant: combatant, sheet: $sheet)
                             .modifier(SwipeableStrip(leading: delayAction(combatant),
                                                      trailing: knockOutAction(combatant)))
-                            .opacity(combatant.isDelaying ? 0.7 : 1)
+                            .grayscale(combatant.isDead ? 1 : 0)
+                            .opacity(combatant.isDead ? 0.5 : combatant.isDelaying ? 0.7 : 1)
                             .padding(.leading, combatant.isDelaying ? 24 : 0)
                             .dropDestination(for: String.self) { ids, _ in drop(ids, before: combatant.id) }
                     case let .event(event):
@@ -65,9 +66,9 @@ struct LadderView: View {
         }
     }
 
-    /// Left to right: delay, in combat and when not delaying already.
+    /// Left to right: delay, in combat and when neither delaying already nor dead.
     private func delayAction(_ combatant: Combatant) -> StripSwipeAction? {
-        guard controller.state.phase == .active, !combatant.isDelaying else { return nil }
+        guard controller.state.phase == .active, !combatant.isDelaying, !combatant.isDead else { return nil }
         return StripSwipeAction(title: "Delay", systemImage: "hourglass", color: .orange) {
             if Self.confirmsSwipeToDelay {
                 controller.delayToConfirm = combatant
@@ -77,9 +78,15 @@ struct LadderView: View {
         }
     }
 
-    /// Right to left: a delaying strip returns, a dying one is stabilized, and any other is knocked out.
+    /// Right to left: a dead strip is revived, a delaying one returns, a dying one is stabilized, and any other
+    /// dies, or is knocked out when it is a PC.
     private func knockOutAction(_ combatant: Combatant) -> StripSwipeAction? {
         guard controller.state.phase == .active else { return nil }
+        if combatant.isDead {
+            return StripSwipeAction(title: "Revive", systemImage: "heart.fill", color: .green) {
+                controller.change { $0.revive(combatant.id) }
+            }
+        }
         if combatant.isDelaying {
             return StripSwipeAction(title: "Return", systemImage: "arrow.uturn.left", color: .green) {
                 controller.change { $0.endDelay(combatant.id) }
@@ -88,6 +95,11 @@ struct LadderView: View {
         if combatant.isDying {
             return StripSwipeAction(title: "Stabilize", systemImage: "heart.text.square", color: .teal) {
                 controller.change { $0.stabilize(combatant.id) }
+            }
+        }
+        guard combatant.kind == .playerCharacter else {
+            return StripSwipeAction(title: "Dead", systemImage: "xmark.circle.fill", color: .gray) {
+                controller.change { $0.markDead(combatant.id) }
             }
         }
         return StripSwipeAction(title: "Knocked Out", systemImage: "heart.slash", color: .red) {
