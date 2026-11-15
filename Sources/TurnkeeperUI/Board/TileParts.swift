@@ -56,6 +56,12 @@ struct TileMenu: View {
                 Text("Elite").tag(CreatureTemplate.elite)
             }
         }
+        if combatant.kind == .creature {
+            Picker("Side", selection: sideBinding) {
+                Text("Enemy").tag(Side.enemy)
+                Text("Ally").tag(Side.ally)
+            }
+        }
         Divider()
         if controller.state.phase == .active {
             if combatant.isDelaying {
@@ -77,6 +83,11 @@ struct TileMenu: View {
         }
         Button("Move to Bench", systemImage: "chair.lounge") { controller.change { $0.moveToBench(combatant.id) } }
         Button("Remove", systemImage: "trash", role: .destructive) { controller.change { $0.remove(combatant.id) } }
+    }
+
+    private var sideBinding: Binding<Side> {
+        Binding(get: { combatant.side },
+                set: { side in controller.change { $0[combatant.id]?.side = side } })
     }
 
     private var templateBinding: Binding<CreatureTemplate> {

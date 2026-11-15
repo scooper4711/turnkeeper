@@ -6,7 +6,6 @@ import SwiftUI
 struct BoardSheetContent: View {
     let sheet: BoardSheet
     let controller: BoardController
-    @Environment(AppModel.self) private var model
 
     var body: some View {
         switch sheet {
@@ -15,15 +14,26 @@ struct BoardSheetContent: View {
         case let .conditions(id): ConditionPalette(controller: controller, id: id)
         case .duration: DurationEditor(controller: controller)
         case .card: CompactCardSheet(controller: controller)
-        case .creature:
-            BestiaryBrowser(game: model.game, partyLevel: model.party(controller.session?.partyID)?.level) { key in
-                controller.addCreature(key)
-            }
+        case .creature: AddCreatureSheet(controller: controller)
         case .event:
             EventEditor(event: EncounterEvent(label: "", trigger: .initiative(20)), slots: []) { event in
                 controller.change { $0.addEvent(event) }
             }
         }
+    }
+}
+
+/// The bestiary on the board, to add creatures the plan left out: enemies, or allies such as reinforcements.
+private struct AddCreatureSheet: View {
+    let controller: BoardController
+    @Environment(AppModel.self) private var model
+    @State private var side = Side.enemy
+
+    var body: some View {
+        let partyLevel = model.party(controller.session?.partyID)?.level
+        BestiaryBrowser(game: model.game, partyLevel: partyLevel, add: { key in
+            controller.addCreature(key, side: side)
+        }, joiningSide: $side)
     }
 }
 

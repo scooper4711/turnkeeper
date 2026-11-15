@@ -3,12 +3,14 @@ import Foundation
 
 /// Creatures the plan left out, added while the fight runs.
 public extension CombatState {
-    /// Adds a bestiary or custom creature as an enemy at the end of the order, with no initiative yet: the GM
-    /// rolls and enters one, as for a creature brought in from the bench. Returns the new combatant's ID.
+    /// Adds a bestiary or custom creature at the end of the order, as an enemy or as an ally such as
+    /// reinforcements for the party, with no initiative yet: the GM rolls and enters one, as for a creature
+    /// brought in from the bench. Returns the new combatant's ID.
     @discardableResult
-    mutating func addCreature(_ entry: BestiaryIndexEntry) -> UUID {
+    mutating func addCreature(_ entry: BestiaryIndexEntry, side: Side = .enemy) -> UUID {
         let kind: CombatantKind = entry.kind == .hazard ? .hazard : .creature
-        let combatant = Combatant(kind: kind, name: nextName(for: entry.name), creatureKey: entry.key)
+        let name = nextName(for: entry.name)
+        let combatant = Combatant(kind: kind, name: name, side: side, creatureKey: entry.key)
         combatants.append(combatant)
         order.append(combatant.id)
         // A fight begun with an empty ladder has nobody acting; the newcomer takes the turn.

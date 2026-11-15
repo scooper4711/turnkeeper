@@ -111,6 +111,15 @@ struct AddingCreatureTests {
         #expect(state.combatantsWithoutInitiative.map(\.id) == [wolf])
     }
 
+    @Test("Reinforcements join as allies: green, and no part of whether every enemy is down")
+    func allies() {
+        var (state, _) = fight()
+        let guardID = state.addCreature(entry("Guard"), side: .ally)
+        #expect(state[guardID]?.side == .ally && state[guardID]?.magnet == .green)
+        for id in state.order where id != guardID { state[id]?.damageTaken = 10 }
+        #expect(state.allEnemiesDown { _ in 10 })
+    }
+
     @Test("It is numbered after those of its kind in the fight, and nobody is renamed")
     func numbering() {
         var (state, ids) = fight()

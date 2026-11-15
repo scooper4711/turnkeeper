@@ -175,7 +175,7 @@ Ported from the pf2e system, with tests.
   (TurnkeeperKit) decides: a gesture that begins over the strip and moves more sideways than up and down slides
   it the same way, and its events and the coasting after it are kept from the ladder; anything else scrolls.
 - **Adding a creature** (R4.8a). The Add menu's Creature opens `BestiaryBrowser` as `BoardSheet.creature`, the
-  browser the planner uses. `BoardController.addCreature` looks the key up and calls `CombatState.addCreature`
+  browser the planner uses, with a Joins as picker that only the board passes (`joiningSide`). `BoardController.addCreature` looks the key up and calls `CombatState.addCreature`
   (TurnkeeperKit, tested), which names and numbers the combatant and appends it to the order. It goes through
   `change`, so it is saved, undoable and reaches the player screen like any other edit.
 - **The ladder alone** (R1.1a). `BoardArrangement` (TurnkeeperKit, tested) decides from the board's size:
