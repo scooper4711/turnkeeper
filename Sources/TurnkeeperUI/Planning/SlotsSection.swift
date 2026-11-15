@@ -207,8 +207,13 @@ private struct SlotRow: View {
         Button {
             isEditingConditions = true
         } label: {
-            Label(slot.conditions.isEmpty ? "Starting Conditions…" : startingConditionsText,
-                  systemImage: "staroflife")
+            // Not a Label: an iOS form sizes a label's title apart from its icon, and in the row that
+            // ViewThatFits measures, the title came out with no width and the row hundreds of points tall.
+            HStack {
+                Image(systemName: "staroflife")
+                Text(slot.conditions.isEmpty ? "Starting Conditions…" : startingConditionsText)
+                    .multilineTextAlignment(.leading)
+            }
         }
         .buttonStyle(.borderless)
     }
