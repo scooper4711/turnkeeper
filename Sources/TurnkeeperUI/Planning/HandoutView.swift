@@ -44,21 +44,37 @@ struct HandoutView: View {
 
     /// In the page rather than the toolbar: iOS ignores a paste button it can't see in full.
     private var controls: some View {
-        HStack(spacing: 12) {
-            PasteButton(supportedContentTypes: ArtworkPasteboard.pasteTypes) {
-                model.setImage(from: $0, forHandout: handout.id)
+        // Show Players goes on a line of its own where the three don't fit in a row, as on an iPhone.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                imageButtons
+                Spacer()
+                showPlayersButton
             }
-                .labelStyle(.titleAndIcon)
-            Button("Choose Image…", systemImage: "folder") { isChoosingFile = true }
-            Spacer()
-            Button("Show Players", systemImage: "eye") {
-                PlayerDisplay.shared.show(handout: handout)
-                if !PlayerDisplay.shared.hasSecondScreen { isPresentingHere = true }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) { imageButtons }
+                showPlayersButton
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!handout.hasImage)
         }
         .buttonStyle(.bordered)
+    }
+
+    @ViewBuilder
+    private var imageButtons: some View {
+        PasteButton(supportedContentTypes: ArtworkPasteboard.pasteTypes) {
+            model.setImage(from: $0, forHandout: handout.id)
+        }
+        .labelStyle(.titleAndIcon)
+        Button("Choose Image…", systemImage: "folder") { isChoosingFile = true }
+    }
+
+    private var showPlayersButton: some View {
+        Button("Show Players", systemImage: "eye") {
+            PlayerDisplay.shared.show(handout: handout)
+            if !PlayerDisplay.shared.hasSecondScreen { isPresentingHere = true }
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(!handout.hasImage)
     }
 
     private var nameBinding: Binding<String> {

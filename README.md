@@ -5,7 +5,7 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=scooper4711_turnkeeper&metric=coverage)](https://sonarcloud.io/summary/new_code?id=scooper4711_turnkeeper)
 [![GitHub Release](https://img.shields.io/github/v/release/scooper4711/turnkeeper)](https://github.com/scooper4711/turnkeeper/releases)
 [![GitHub Downloads](https://img.shields.io/github/downloads/scooper4711/turnkeeper/total)](https://github.com/scooper4711/turnkeeper/releases)
-[![Platforms](https://img.shields.io/badge/platforms-macOS%2015%2B%20%7C%20iPadOS%2018%2B-informational)](./Package.swift)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%2015%2B%20%7C%20iPadOS%2018%2B%20%7C%20iOS%2018%2B-informational)](./Package.swift)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 Running a Pathfinder or Starfinder fight at the table means keeping a lot in your head: the initiative order, hit
@@ -13,11 +13,14 @@ points, conditions that change every round, who is delaying, the persistent dama
 at the end of a turn, the stat block of whoever is up, open in a book or a PDF somewhere, and the rules for
 whatever spell or condition just came up.
 
-Turnkeeper is an encounter builder and initiative tracker for the iPad and the Mac that puts all of it on one
-screen. The left half is the initiative ladder: the creatures roll their own initiative, you say the players'
-numbers aloud or tap them in, and Next passes the turn. The right half shows the battle card of whoever's turn it
-is, and your notes. Reminders hold the turn until persistent damage and the like are dealt with, and the players
-can watch the creature's art on a second screen.
+Turnkeeper is an encounter builder and initiative tracker for the iPad, the iPhone and the Mac that puts all of it
+on one screen. The left half is the initiative ladder: the creatures roll their own initiative, you say the
+players' numbers aloud or tap them in, and Next passes the turn. The right half shows the battle card of whoever's
+turn it is, and your notes. Reminders hold the turn until persistent damage and the like are dealt with, and the
+players can watch the creature's art on a second screen.
+
+On an iPhone the ladder fills the screen, Next sits under your thumb, and a tap on a strip opens its battle card
+and notes in a sheet, so the whole app fits in a pocket.
 
 The battle card is the creature's whole stat block, and everything on it is linked. Tap a spell, an item, an
 action, a trait or a condition and its rules open right there, so "what's the range of that spell again?" and "what
@@ -44,9 +47,9 @@ requirements and design.
   a draft release. Commit `pf2e.release` and `import.sha256` after a local import.
 - `make dmg` builds `build/Turnkeeper-<version>.dmg`. Pushing a `v*` tag builds the universal app on GitHub
   from the same pf2e release and the `Artwork` submodule, and attaches its disk image to the release.
-- `make ipad-simulator` runs the iPad app in a simulator.
-- `make ipad-install` installs on a connected iPad. Put your team in `ios/Local.xcconfig`
-  (`DEVELOPMENT_TEAM = …`). A free team's signature lasts 7 days, so reinstall weekly.
+- `make ipad-simulator` and `make iphone-simulator` run the app in an iPad or iPhone simulator.
+- `make ipad-install` and `make iphone-install` install on a connected iPad or iPhone. Put your team in
+  `ios/Local.xcconfig` (`DEVELOPMENT_TEAM = …`). A free team's signature lasts 7 days, so reinstall weekly.
 
 ## Use
 - **Creature art** comes from your own Paizo pawn, token and Battle Cards PDFs, read on the device with
@@ -114,18 +117,21 @@ used under the ORC License and the Open Game License 1.0a. The condition icons a
 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/);
 [Resources/ConditionIcons/CREDITS.md](Resources/ConditionIcons/CREDITS.md) credits each one. The Roboto and Roboto
 Condensed fonts are by Google, under the Apache License 2.0. The same notices and credits, with the licenses' full
-texts, are in the app's About screen (the app menu on the Mac, the campaign sidebar's About button on the iPad).
+texts, are in the app's About screen (the app menu on the Mac, the campaign list's More menu on the iPad and the
+iPhone).
 Contact: [Turnkeeper's issues on GitHub](https://github.com/scooper4711/turnkeeper/issues).
 
 ## Test
-`make test` and `make lint` (Swift); `make ipad-uitest` (iPad UI tests, against the demo fight);
+`make test` and `make lint` (Swift); `make ipad-uitest` and `make iphone-uitest` (UI tests, against the demo
+fight, on an iPad and an iPhone); `make screenshots` saves a picture of every screen to `tmp/screenshots` for
+checking a device's layout by eye (`SIMULATOR="iPhone 17e"` names the simulator);
 `.venv/bin/python -m pytest` and `.venv/bin/ruff check .` (Python). `make cards KEYS="<creature key>[:elite]"`
 renders battle cards to `tmp/cards` for comparing with the printed decks.
 
 ## Layout
 - `Sources/TurnkeeperKit`: models and rules
-- `Sources/TurnkeeperUI`: SwiftUI shared by iPad and Mac
-- `Sources/Turnkeeper`: Mac entry point; `ios/`: iPad project
+- `Sources/TurnkeeperUI`: SwiftUI shared by iPad, iPhone and Mac
+- `Sources/Turnkeeper`: Mac entry point; `ios/`: iPad and iPhone project
 - `Sources/BestiaryImport`, `scripts/extract_pdf_art.py`: the bestiary import
 
 ## License

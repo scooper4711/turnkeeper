@@ -48,7 +48,7 @@ struct BestiaryBrowser: View {
                 CreaturePreview(key: key.id)
             }
         }
-        .frame(minWidth: 560, minHeight: 640)
+        .sheetFrame(minWidth: 560, minHeight: 640)
         .onAppear {
             guard !hasSetUpFilter else { return }
             hasSetUpFilter = true

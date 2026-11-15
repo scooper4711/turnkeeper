@@ -8,6 +8,8 @@ enum BoardSheet: Identifiable, Hashable {
     case conditions(UUID)
     case duration
     case event
+    /// The battle card of the pinned strip, or of whoever is acting: a sheet where the board shows the ladder alone.
+    case card
 
     var id: String { String(describing: self) }
 }
@@ -28,16 +30,17 @@ struct BoardTopBar: View {
                 Text(controller.session?.name ?? "").font(.headline)
                 Text(roundText).font(.caption).foregroundStyle(.secondary)
             }
-            DurationArrows(controller: controller)
+            // An upright iPad has little room beside the buttons: the name gives way, not their titles.
+            .lineLimit(2)
+            // Nothing running takes no room: an empty row of arrows squeezed the fight's name.
+            if !controller.state.durations.isEmpty { DurationArrows(controller: controller) }
             Spacer()
             PlayerScreenToggle()
+                .fixedSize()
             if controller.state.phase == .setup {
                 BeginCombatButton(controller: controller)
             } else {
-                Menu("Add", systemImage: "plus") {
-                    Button("Duration Arrow…", systemImage: "arrow.uturn.right") { sheet = .duration }
-                    Button("Event…", systemImage: "bell") { sheet = .event }
-                }
+                Menu("Add", systemImage: "plus") { AddToFightButtons(sheet: $sheet) }
                 FightMenu(controller: controller)
                 Button("Undo", systemImage: "arrow.uturn.backward") { controller.undo() }
                     .disabled(!controller.canUndo)
@@ -52,18 +55,23 @@ struct BoardTopBar: View {
     }
 
     private var roundText: String {
-        let state = controller.state
-        if state.phase == .setup {
-            return "Roll for initiative: hold the button below and say the total, or tap a number"
-        }
-        let name = state.current?.name ?? "—"
-        return "Round \(state.round) · \(name)'s turn"
+        controller.state.phase == .setup
+            ? "Roll for initiative: hold the button below and say the total, or tap a number"
+            : controller.turnText
+    }
+}
+
+extension BoardController {
+    /// "Round 2 · Kyra's turn".
+    var turnText: String {
+        "Round \(state.round) · \(state.current?.name ?? "—")'s turn"
     }
 }
 
 /// The colored duration arrows: what's running and how many rounds are left. Tap one to remove it.
-private struct DurationArrows: View {
+struct DurationArrows: View {
     let controller: BoardController
+    var maxWidth: CGFloat = 360
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -85,7 +93,7 @@ private struct DurationArrows: View {
                 }
             }
         }
-        .frame(maxWidth: 360)
+        .frame(maxWidth: maxWidth)
     }
 
     private func color(for marker: DurationMarker) -> Color {
@@ -94,13 +102,15 @@ private struct DurationArrows: View {
     }
 }
 
-/// Resetting or ending the whole fight.
-private struct FightMenu: View {
+/// Resetting or ending the whole fight, after any `additions` the bar has no room to show beside it.
+struct FightMenu<Additions: View>: View {
     let controller: BoardController
+    @ViewBuilder let additions: () -> Additions
     @State private var isConfirmingReset = false
 
     var body: some View {
         Menu("Fight", systemImage: "ellipsis.circle") {
+            additions()
             PlayerNamesToggle()
             Divider()
             Button("Reset Combat…", systemImage: "arrow.counterclockwise") { isConfirmingReset = true }
@@ -114,15 +124,35 @@ private struct FightMenu: View {
     }
 }
 
-/// Begins combat, first warning when someone on the ladder still has no initiative.
-private struct BeginCombatButton: View {
-    let controller: BoardController
-    @State private var missing: [Combatant] = []
+extension FightMenu where Additions == EmptyView {
+    init(controller: BoardController) {
+        self.init(controller: controller) { EmptyView() }
+    }
+}
+
+/// Adding a duration arrow or an event to the fight.
+struct AddToFightButtons: View {
+    @Binding var sheet: BoardSheet?
 
     var body: some View {
-        Button("Begin Combat", systemImage: "flag.checkered") {
+        Button("Duration Arrow…", systemImage: "arrow.uturn.right") { sheet = .duration }
+        Button("Event…", systemImage: "bell") { sheet = .event }
+    }
+}
+
+/// Begins combat, first warning when someone on the ladder still has no initiative.
+struct BeginCombatButton: View {
+    let controller: BoardController
+    @State private var missing: [Combatant] = []
+    @Environment(\.isCompactBoard) private var isCompact
+
+    var body: some View {
+        Button {
             missing = controller.state.combatantsWithoutInitiative
             if missing.isEmpty { controller.beginCombat() }
+        } label: {
+            // Across the bottom bar where the board shows the ladder alone.
+            Label("Begin Combat", systemImage: "flag.checkered").frame(maxWidth: isCompact ? .infinity : nil)
         }
         .buttonStyle(.borderedProminent)
         // An alert rather than a confirmation dialog: on the iPad a dialog becomes a popover, which hides the

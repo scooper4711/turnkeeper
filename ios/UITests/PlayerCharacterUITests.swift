@@ -18,6 +18,8 @@ final class PlayerCharacterUITests: XCTestCase {
         XCTAssertTrue(strip.waitForExistence(timeout: 10))
         XCTAssertFalse(strip.label.contains("AC"), "the strip reads \(strip.label)")
         XCTAssertFalse(strip.label.contains("Perc"), "the strip reads \(strip.label)")
+        // An iPhone's ladder is taller than its screen, and its last strip in view is half under the bench.
+        if TestDevice.isPhone { app.swipeUp() }
         strip.tap()
 
         // His card opens: no one else in the demo fight is human.

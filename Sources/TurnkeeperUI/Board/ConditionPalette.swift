@@ -53,7 +53,7 @@ struct ConditionEditor: View {
             .navigationTitle("Conditions")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
-        .frame(minWidth: 520, minHeight: 620)
+        .sheetFrame(minWidth: 520, minHeight: 620)
     }
 
     @ViewBuilder

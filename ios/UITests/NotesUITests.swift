@@ -11,7 +11,8 @@ final class NotesUITests: XCTestCase {
         app.launch()
     }
 
-    func testNotesPanesCollapseAndKeepWhatIsTyped() {
+    func testNotesPanesCollapseAndKeepWhatIsTyped() throws {
+        try XCTSkipIf(TestDevice.isPhone, "An iPhone shows the notes on a page of the card's sheet.")
         let encounterHeader = app.buttons["Encounter Notes"]
         XCTAssertTrue(encounterHeader.waitForExistence(timeout: 10))
         let planned = app.textViews.matching(NSPredicate(format: "value CONTAINS 'trapdoor'")).firstMatch
@@ -33,6 +34,25 @@ final class NotesUITests: XCTestCase {
             .firstMatch.waitForExistence(timeout: 3))
     }
 
+    /// On an iPhone the notes are a page of the card's sheet: the same text as planned, kept as it's typed.
+    func testNotesPageOfTheCardSheetKeepsWhatIsTyped() throws {
+        try XCTSkipUnless(TestDevice.isPhone, "An iPad shows the notes in panes under the card.")
+        app.showBoardCard()
+        let notes = app.buttons["Notes"]
+        XCTAssertTrue(notes.waitForExistence(timeout: 5))
+        notes.tap()
+        XCTAssertTrue(app.staticTexts["Encounter Notes"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.textViews.matching(NSPredicate(format: "value CONTAINS 'trapdoor'")).firstMatch.exists)
+        let creatureNotes = app.textViews.element(boundBy: 0)
+        creatureNotes.tap()
+        creatureNotes.typeText("Flees at half HP")
+        app.buttons["Done"].firstMatch.tap()
+        app.showBoardCard()
+        app.buttons["Notes"].tap()
+        XCTAssertTrue(app.textViews.matching(NSPredicate(format: "value CONTAINS 'Flees at half HP'"))
+            .firstMatch.waitForExistence(timeout: 3))
+    }
+
     /// A tap on the card shows the flip icon, which shows the GM the art; the next turn turns the card back to
     /// its stat block.
     func testFlipCardShowsArtUntilTheTurnMoves() {
@@ -41,14 +61,18 @@ final class NotesUITests: XCTestCase {
         let back = app.buttons["Show Stat Block"]
         XCTAssertTrue(back.waitForExistence(timeout: 3))
         XCTAssertFalse(perceptionLine.exists)
+        app.closeBoardCard()
         app.buttons["Next"].tap()
         XCTAssertTrue(waitUntil { !back.exists })
     }
 
     /// The full-screen icon shows the card over the board; a tap there shows its exit icon, which closes it.
     func testFullScreenCardCoversTheBoard() {
-        revealCardIcons(named: "Full Screen").tap()
-        let next = app.buttons["Next"]
+        let fullScreen = revealCardIcons(named: "Full Screen")
+        // What the full-screen card covers: the board's Next, or on an iPhone the card sheet's Done.
+        let next = TestDevice.isPhone ? app.buttons["Done"].firstMatch : app.buttons["Next"]
+        XCTAssertTrue(next.isHittable)
+        fullScreen.tap()
         XCTAssertTrue(waitUntil { !next.isHittable })
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8)).tap()
         let exit = app.buttons["Exit Full Screen"]
@@ -65,6 +89,7 @@ final class NotesUITests: XCTestCase {
     /// the line can hold links, such as a sense's, which open their popover instead.
     @discardableResult
     private func revealCardIcons(named name: String) -> XCUIElement {
+        app.showBoardCard()
         XCTAssertTrue(perceptionLine.waitForExistence(timeout: 10))
         perceptionLine.coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
         let icon = app.buttons[name]

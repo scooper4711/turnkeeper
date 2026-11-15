@@ -50,7 +50,7 @@ struct EventEditor: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Save", action: commit) }
             }
         }
-        .frame(minWidth: 420, minHeight: 420)
+        .sheetFrame(minWidth: 420, minHeight: 420)
     }
 
     private var triggerSection: some View {

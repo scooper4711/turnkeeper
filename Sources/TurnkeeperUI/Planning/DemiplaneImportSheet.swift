@@ -72,7 +72,7 @@ struct DemiplaneImportSheet: View {
             }
             #endif
         }
-        .frame(minWidth: 460, minHeight: 300)
+        .sheetFrame(minWidth: 460, minHeight: 300)
     }
 
     @ToolbarContentBuilder

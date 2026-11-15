@@ -1,16 +1,17 @@
 #!/bin/sh
-# Runs the iPad UI tests in a simulator. They drive the demo fight (--demo board), so they need no
+# Runs the iPad UI tests in a simulator, or with DEVICE_KIND=iPhone the same tests on an iPhone. They drive the demo fight (--demo board), so they need no
 # saved library, only an imported bestiary in Generated/.
 #
-# IPAD_SIMULATOR  name of the simulator to use (default: an iPad on the newest iOS installed)
+# DEVICE_KIND     iPad (the default) or iPhone
+# IPAD_SIMULATOR  name of the simulator to use (default: a device of that kind on the newest iOS installed)
 # ONLY            tests to run, space-separated, such as "DelayUITests PlanningUITests/testHandoutShownToPlayers"
 #                 (default: all of them, which takes several minutes)
 set -eu
 
 cd "$(dirname "$0")/.."
 
-DEVICE="$(scripts/ipad-simulator-id.sh)"
-[ -n "$DEVICE" ] || { echo "Running the UI tests failed: no iPad simulator is installed." >&2; exit 1; }
+DEVICE="$(IOS_SIMULATOR="${IPAD_SIMULATOR:-}" scripts/ios-simulator-id.sh)"
+[ -n "$DEVICE" ] || { echo "Running the UI tests failed: no such simulator is installed." >&2; exit 1; }
 echo "Running the UI tests on simulator $DEVICE..."
 
 set -- -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \

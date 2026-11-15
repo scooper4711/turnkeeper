@@ -29,20 +29,21 @@ private struct BoardContent: View {
     @State private var sheet: BoardSheet?
 
     var body: some View {
-        VStack(spacing: 0) {
-            if controller.isFinished { FinishedBanner(controller: controller) }
-            BoardTopBar(controller: controller, sheet: $sheet)
-            Divider()
-            GeometryReader { geometry in
-                let isWide = geometry.size.width > 760
-                HStack(spacing: 0) {
-                    LadderView(controller: controller, sheet: $sheet)
-                        .frame(width: isWide ? geometry.size.width * 0.48 : geometry.size.width)
-                    if isWide {
-                        Divider()
-                        CardPanel(controller: controller)
-                    }
+        GeometryReader { geometry in
+            // The bars are measured too, so the arrangement is steady while their height changes.
+            let height = geometry.size.height - 60
+            let arrangement = BoardArrangement(width: geometry.size.width, height: height)
+            VStack(spacing: 0) {
+                if controller.isFinished { FinishedBanner(controller: controller) }
+                switch arrangement {
+                case .sideBySide: sideBySide(ladderWidth: arrangement.ladderWidth(in: geometry.size.width))
+                case .ladderOnly: ladderOnly(hasTurnBar: BoardArrangement.hasTurnBar(height: height))
                 }
+            }
+            .environment(\.isCompactBoard, arrangement == .ladderOnly)
+            .onChange(of: sheet) { old, new in
+                // Closing a strip's card goes back to following the turn.
+                if old == .card, new == nil { controller.pinnedID = nil }
             }
         }
         .background(PadBackground())
@@ -64,6 +65,34 @@ private struct BoardContent: View {
         .focusable()
         .focusEffectDisabled()
         .onKeyPress(KeyEquivalent("i"), phases: [.down, .up]) { press in holdToSpeak(press) }
+    }
+
+    /// The top bar over the ladder and the card.
+    @ViewBuilder
+    private func sideBySide(ladderWidth: CGFloat) -> some View {
+        BoardTopBar(controller: controller, sheet: $sheet)
+        Divider()
+        HStack(spacing: 0) {
+            LadderView(controller: controller, sheet: $sheet).frame(width: ladderWidth)
+            Divider()
+            CardPanel(controller: controller)
+        }
+    }
+
+    /// The ladder alone, with the turn buttons below it in reach of a thumb, or in the top bar on a short board.
+    @ViewBuilder
+    private func ladderOnly(hasTurnBar: Bool) -> some View {
+        CompactTopBar(controller: controller, sheet: $sheet) {
+            if !hasTurnBar { CompactTurnButtons(controller: controller, sheet: $sheet) }
+        }
+        Divider()
+        LadderView(controller: controller, sheet: $sheet)
+        if hasTurnBar {
+            CompactTurnButtons(controller: controller, sheet: $sheet)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(.bar)
+        }
     }
 
     /// On the Mac, holding I works like the hold-to-talk button: it listens for the highlighted strip.
@@ -88,7 +117,7 @@ private struct BoardContent: View {
 }
 
 /// The board's surface: parchment-brown for Pathfinder, a dark console for Starfinder.
-private struct PadBackground: View {
+struct PadBackground: View {
     @Environment(\.boardTheme) private var theme
 
     var body: some View {
@@ -140,7 +169,8 @@ private struct VictorySheet: View {
             Button("Keep Going") { controller.keepGoing() }
         }
         .padding(32)
-        .frame(minWidth: 380)
+        .sheetFrame(minWidth: 380)
+        .fittedSheet()
         .interactiveDismissDisabled()
     }
 }
@@ -169,7 +199,8 @@ private struct EndOfCombatSheet: View {
                 .frame(maxWidth: .infinity)
         }
         .padding(32)
-        .frame(minWidth: 380)
+        .sheetFrame(minWidth: 380)
+        .fittedSheet()
         .interactiveDismissDisabled()
     }
 }
@@ -196,6 +227,7 @@ private struct FinishedBanner: View {
 private struct ListeningOverlay: View {
     let controller: BoardController
     @State private var voice = VoiceInitiative.shared
+    @Environment(\.isCompactBoard) private var isCompact
 
     var body: some View {
         if let id = voice.listeningFor, let combatant = controller.state[id] {
@@ -209,8 +241,9 @@ private struct ListeningOverlay: View {
             .frame(maxWidth: 460, alignment: .leading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
             .shadow(radius: 20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-            .padding(32)
+            // With the ladder alone, at the top: the held button is at the bottom, under the thumb.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: isCompact ? .top : .trailing)
+            .padding(isCompact ? 16 : 32)
             .allowsHitTesting(false)
             .transition(.opacity)
         }

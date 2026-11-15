@@ -73,7 +73,7 @@ private struct DelayedChoiceSheet: View {
                 }
             }
         }
-        .frame(minWidth: 360, minHeight: 280)
+        .sheetFrame(minWidth: 360, minHeight: 280)
         .interactiveDismissDisabled()
     }
 

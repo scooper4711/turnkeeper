@@ -94,7 +94,7 @@ struct CampaignSheet: View {
                 }
             }
         }
-        .frame(minWidth: 360, minHeight: 200)
+        .sheetFrame(minWidth: 360, minHeight: 200)
     }
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }

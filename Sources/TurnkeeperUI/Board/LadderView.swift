@@ -8,37 +8,61 @@ struct LadderView: View {
     let controller: BoardController
     @Binding var sheet: BoardSheet?
     @Environment(\.boardTheme) private var theme
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     /// Swiping to delay asks first, while the gesture is new to the table.
     private static let confirmsSwipeToDelay = true
 
     var body: some View {
-        VStack(spacing: 10) {
-            ScrollView {
-                VStack(spacing: 6) {
-                    ForEach(LadderItem.items(for: controller.state)) { item in
-                        switch item {
-                        case let .combatant(combatant):
-                            MagnetTile(controller: controller, combatant: combatant, sheet: $sheet)
-                                .modifier(SwipeableStrip(leading: delayAction(combatant),
-                                                         trailing: knockOutAction(combatant)))
-                                .opacity(combatant.isDelaying ? 0.7 : 1)
-                                .padding(.leading, combatant.isDelaying ? 24 : 0)
-                                .dropDestination(for: String.self) { ids, _ in drop(ids, before: combatant.id) }
-                        case let .event(event):
-                            EventMarker(event: event)
-                        }
-                    }
+        Group {
+            if verticalSizeClass == .compact {
+                // On an iPhone on its side, the voice button and the bench go beside the strips, not below
+                // them, where they would leave room for one strip.
+                HStack(alignment: .bottom, spacing: 0) {
+                    strips
+                    if hasExtras { VStack(spacing: 10) { extras }.frame(maxWidth: 300) }
                 }
-                .padding(12)
-            }
-            if controller.state.phase == .setup { HoldToTalkButton(controller: controller) }
-            BenchTray(controller: controller) { id in
-                controller.bringInFromBench(id)
-                sheet = .initiative(id)
+            } else {
+                VStack(spacing: 10) {
+                    strips
+                    extras
+                }
             }
         }
         .padding(.bottom, 10)
+    }
+
+    private var strips: some View {
+        ScrollView {
+            VStack(spacing: 6) {
+                ForEach(LadderItem.items(for: controller.state)) { item in
+                    switch item {
+                    case let .combatant(combatant):
+                        MagnetTile(controller: controller, combatant: combatant, sheet: $sheet)
+                            .modifier(SwipeableStrip(leading: delayAction(combatant),
+                                                     trailing: knockOutAction(combatant)))
+                            .opacity(combatant.isDelaying ? 0.7 : 1)
+                            .padding(.leading, combatant.isDelaying ? 24 : 0)
+                            .dropDestination(for: String.self) { ids, _ in drop(ids, before: combatant.id) }
+                    case let .event(event):
+                        EventMarker(event: event)
+                    }
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    private var hasExtras: Bool { controller.state.phase == .setup || !controller.state.bench.isEmpty }
+
+    /// Setup's voice button, and the bench.
+    @ViewBuilder
+    private var extras: some View {
+        if controller.state.phase == .setup { HoldToTalkButton(controller: controller) }
+        BenchTray(controller: controller) { id in
+            controller.bringInFromBench(id)
+            sheet = .initiative(id)
+        }
     }
 
     /// Left to right: delay, in combat and when not delaying already.

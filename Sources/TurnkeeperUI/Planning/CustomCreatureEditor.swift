@@ -56,7 +56,7 @@ struct CustomCreatureEditor: View {
                 }
             }
         }
-        .frame(minWidth: 760, minHeight: 760)
+        .sheetFrame(minWidth: 760, minHeight: 760)
     }
 
     private var preview: Creature { draft.creature(from: original.creature) }

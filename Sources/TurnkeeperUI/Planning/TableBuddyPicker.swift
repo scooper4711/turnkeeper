@@ -32,7 +32,7 @@ struct TableBuddyPicker: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
             }
         }
-        .frame(minWidth: 360, minHeight: 480)
+        .sheetFrame(minWidth: 360, minHeight: 480)
     }
 }
 

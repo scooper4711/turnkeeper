@@ -8,6 +8,7 @@ struct CreaturePreview: View {
     let key: String
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var template: CreatureTemplate
     /// Conditions shown on the card, such as a planned creature's starting conditions.
     let conditions: [AppliedCondition]
@@ -24,9 +25,11 @@ struct CreaturePreview: View {
             Group {
                 if let creature = model.creature(key) {
                     VStack(spacing: 8) {
+                        if isCompact && !isPlayerCharacter { templatePicker }
                         CreatureBattleCard(entry: model.entry(key), front: BattleCard(
                             creature: creature, template: template, conditions: conditions))
                         MissingArtNote(key: key)
+                        ArtworkPasteButton(key: key)
                     }
                     .padding()
                 } else if isPlayerCharacter {
@@ -40,22 +43,27 @@ struct CreaturePreview: View {
             .acceptsArtwork(for: key, model: model)
             .toolbar { ArtworkControls(key: key) }
             .toolbar {
-                if !isPlayerCharacter {
-                    ToolbarItem {
-                        Picker("Template", selection: $template) {
-                            Text("Weak").tag(CreatureTemplate.weak)
-                            Text("Normal").tag(CreatureTemplate.normal)
-                            Text("Elite").tag(CreatureTemplate.elite)
-                        }
-                        .pickerStyle(.segmented)
-                    }
+                if !isPlayerCharacter && !isCompact {
+                    ToolbarItem { templatePicker }
                 }
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
         }
         .battleCardFullScreenHost()
-        .frame(minWidth: 600, minHeight: 760)
+        .sheetFrame(minWidth: 600, minHeight: 760)
     }
+
+    /// In the toolbar, or above the card on an iPhone, whose toolbar has no room for it.
+    private var templatePicker: some View {
+        Picker("Template", selection: $template) {
+            Text("Weak").tag(CreatureTemplate.weak)
+            Text("Normal").tag(CreatureTemplate.normal)
+            Text("Elite").tag(CreatureTemplate.elite)
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var isCompact: Bool { sizeClass == .compact }
 
     /// PCs have no Weak or Elite templates.
     private var isPlayerCharacter: Bool { PlayerCharacter.isKey(key) }

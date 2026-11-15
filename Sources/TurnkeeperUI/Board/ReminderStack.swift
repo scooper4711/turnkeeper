@@ -31,7 +31,8 @@ struct ReminderStack: View {
                 .keyboardShortcut(.defaultAction)
             }
             .padding(28)
-            .frame(minWidth: 460)
+            .sheetFrame(minWidth: 460)
+            .fittedSheet()
             .interactiveDismissDisabled()
             .sensoryFeedback(.warning, trigger: reminder.id)
             .id(reminder.id)

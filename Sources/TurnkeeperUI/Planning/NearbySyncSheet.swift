@@ -39,7 +39,7 @@ struct NearbySyncSheet: View {
             .task(id: role) { await start(role) }
             .onDisappear(perform: stopAll)
         }
-        .frame(minWidth: 460, minHeight: 380)
+        .sheetFrame(minWidth: 460, minHeight: 380)
     }
 
     private var hostSection: some View {

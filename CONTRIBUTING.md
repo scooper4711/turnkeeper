@@ -1,7 +1,7 @@
 # Contributing to Turnkeeper
 
-Thank you for helping with Turnkeeper. It builds encounters and runs initiative at the table, on the iPad and the
-Mac. It is part of the [Tableside Toolkit](https://github.com/scooper4711/scrollkeeper#tableside-toolkit), free
+Thank you for helping with Turnkeeper. It builds encounters and runs initiative at the table, on the iPad, the
+iPhone and the Mac. It is part of the [Tableside Toolkit](https://github.com/scooper4711/scrollkeeper#tableside-toolkit), free
 tools for Pathfinder and Starfinder players and GMs, kept by one maintainer in spare time.
 
 ## Before you start
@@ -25,8 +25,9 @@ make test
 
 `make bestiary` imports creatures, conditions and the glossary into `Generated/` from the pf2e release in
 `pf2e.release`, which it downloads; the app needs it before its first build. `make run` opens the Mac app,
-`make ipad-simulator` the iPad app, and `make ipad-uitest` runs the iPad interface tests (`ONLY=<test class>` runs
-one class). The `Artwork/` folder is a private submodule of licensed art and fonts. You don't need it: without it
+`make ipad-simulator` and `make iphone-simulator` the iPad and iPhone app, and `make ipad-uitest` and
+`make iphone-uitest` run the interface tests on each (`ONLY=<test class>` runs one class). An interface change
+is checked on both: `make screenshots` saves a picture of every screen of a simulator. The `Artwork/` folder is a private submodule of licensed art and fonts. You don't need it: without it
 the build falls back to built-in artwork. Leave the submodule pointer alone in your commits.
 
 ## Making a change

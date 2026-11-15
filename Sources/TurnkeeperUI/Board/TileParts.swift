@@ -34,8 +34,16 @@ struct TileMenu: View {
     let controller: BoardController
     let combatant: Combatant
     @Binding var sheet: BoardSheet?
+    @Environment(\.isCompactBoard) private var isCompact
 
     var body: some View {
+        // In setup a tap chooses the strip for its initiative, so its card is here.
+        if isCompact {
+            Button("Show Card", systemImage: "rectangle.portrait") {
+                controller.pinnedID = combatant.id
+                sheet = .card
+            }
+        }
         Button("Conditions…", systemImage: "staroflife") { sheet = .conditions(combatant.id) }
         if combatant.tracksHitPoints {
             Button("Damage or Heal…", systemImage: "heart") { sheet = .hitPoints(combatant.id) }

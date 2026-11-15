@@ -45,6 +45,27 @@ struct NumberPad: View {
     }
 }
 
+/// A pad's title: whose number it is. An iPhone's sheet has no outside to tap, so there it has a close button.
+private struct PadTitle: View {
+    let title: String
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        Text(title)
+            .font(.title2.bold())
+            .frame(maxWidth: .infinity)
+            .overlay(alignment: .trailing) {
+                if sizeClass == .compact {
+                    Button("Close", systemImage: "xmark.circle.fill") { dismiss() }
+                        .labelStyle(.iconOnly)
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+    }
+}
+
 /// Damage, healing and temporary HP for a creature.
 struct HitPointsPad: View {
     let controller: BoardController
@@ -54,7 +75,7 @@ struct HitPointsPad: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(controller.state[id]?.name ?? "").font(.title2.bold())
+            PadTitle(title: controller.state[id]?.name ?? "")
             NumberPad(digits: $digits)
             HStack {
                 action("Damage", "minus.circle.fill", .red) { $0.applyDamage($1, to: id) }
@@ -63,7 +84,8 @@ struct HitPointsPad: View {
             }
         }
         .padding(24)
-        .frame(minWidth: 340)
+        .sheetFrame(minWidth: 340)
+        .fittedSheet()
     }
 
     private func action(
@@ -74,7 +96,11 @@ struct HitPointsPad: View {
             controller.change { apply(&$0, amount) }
             dismiss()
         } label: {
-            Label(title, systemImage: image).frame(maxWidth: .infinity, minHeight: 44)
+            Label(title, systemImage: image)
+                // Three across an iPhone: shrink the title before wrapping it.
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.borderedProminent)
         .tint(color)
@@ -92,7 +118,7 @@ struct InitiativePad: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            Text(controller.state[id]?.name ?? "").font(.title2.bold())
+            PadTitle(title: controller.state[id]?.name ?? "")
             if let combatant = controller.state[id] {
                 InitiativeSkillsView(skills: controller.initiativeSkills(for: combatant))
             }
@@ -110,7 +136,8 @@ struct InitiativePad: View {
             }
         }
         .padding(24)
-        .frame(minWidth: 340)
+        .sheetFrame(minWidth: 340)
+        .fittedSheet()
     }
 
     private func set(_ value: Double) {

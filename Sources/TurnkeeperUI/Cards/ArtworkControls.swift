@@ -2,20 +2,34 @@ import TurnkeeperKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Toolbar controls for a creature's pasted artwork: Paste (the system button, so iOS doesn't ask), and a
-/// menu to choose an image file or go back to the bundled art.
+/// Pastes the copied image as a creature's art: the system button, so iOS doesn't ask. It goes in the page, not
+/// the toolbar: iOS 27 gives a paste button in a toolbar the clipboard's types but refuses their contents
+/// ("Operation not authorized").
+struct ArtworkPasteButton: View {
+    let key: String
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        HStack(spacing: 10) {
+            PasteButton(supportedContentTypes: ArtworkPasteboard.pasteTypes) { providers in
+                model.setArtwork(from: providers, for: key)
+            }
+            .labelStyle(.titleAndIcon)
+            Text("Use a copied image as this creature's art")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+/// The toolbar's menu for a creature's pasted artwork: choose an image file, or go back to the bundled art.
 struct ArtworkControls: ToolbarContent {
     let key: String
     @Environment(AppModel.self) private var model
     @State private var isChoosingFile = false
 
     var body: some ToolbarContent {
-        ToolbarItem {
-            PasteButton(supportedContentTypes: ArtworkPasteboard.pasteTypes) { providers in
-                model.setArtwork(from: providers, for: key)
-            }
-            .help("Use the copied image as this creature's art")
-        }
         ToolbarItem {
             Menu("Artwork", systemImage: "photo") {
                 Button("Choose Image…", systemImage: "folder") { isChoosingFile = true }

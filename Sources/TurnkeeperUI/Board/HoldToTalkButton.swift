@@ -37,6 +37,10 @@ struct HoldToTalkButton: View {
         Label(isPressing ? "Listening…" : "Hold to Say Initiative",
               systemImage: isPressing ? "waveform" : "mic.fill")
             .font(.title2.bold())
+            // Beside the strips on an iPhone on its side, the title has half the room.
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .padding(.horizontal, 8)
             .foregroundStyle(isPressing ? .black : .white)
     }
 
