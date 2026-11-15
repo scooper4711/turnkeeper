@@ -17,7 +17,8 @@ final class GlossaryUITests: XCTestCase {
         dogslicer.tap()
         XCTAssertTrue(text(containing: "crude makeshift blade").waitForExistence(timeout: 5))
 
-        let agile = app.links["agile"].firstMatch
+        // The popover's own link: the card's "agile" is behind the popover, where a tap would close it.
+        let agile = app.popovers.links["agile"].firstMatch
         XCTAssertTrue(waitUntil { agile.exists && agile.isHittable })
         let linksBefore = app.links.count
         agile.tap()
