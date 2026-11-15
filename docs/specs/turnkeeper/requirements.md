@@ -166,8 +166,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 - R4.7d Each condition in the palette has an icon from game-icons.net, used under CC BY 3.0 and credited
   to its authors. Turnkeeper takes no condition icons from the pf2e system.
 - R4.7a In combat, swiping a strip left to right delays it (asking first, for now), and right to left
-  knocks it out (dying 1 plus wounded, with unconscious and prone) or, on a delaying strip, brings it back
-  where it is. On a dying strip the right-to-left swipe stabilizes it: dying ends, unconscious stays, and
+  marks a creature or hazard dead (R4.7e), knocks a PC out (dying 1 plus wounded, with unconscious and prone)
+  or, on a delaying strip, brings it back where it is. On a dead strip the right-to-left swipe revives it. On
+  a dying strip the right-to-left swipe stabilizes it: dying ends, unconscious stays, and
   wounded goes up by 1 (added as wounded 1 when there's none). On the Mac a two-finger trackpad swipe does
   the same as a click and drag. The context menu has the same actions for the Mac and accessibility. There
   are no Delay or Dying drop zones.
@@ -181,6 +182,14 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   delaying. When the last strip that isn't delaying starts its turn, every delaying strip below it comes
   back, so all act that round. A delaying strip can be dragged down, never up. Fights saved with a strip
   in the old Delay zone come back with it delaying just below the current strip.
+- R4.7e A dead strip stays on the ladder, grayed out and marked with an X. Its turns are skipped and it
+  raises no reminders: none for its conditions or notes, and none for events on its turn. Duration arrows
+  anchored to it still count down and report when they end. A strip that dies on its own turn stays current
+  until Next. Damage that brings a creature or hazard with tracked HP to 0 HP marks it dead, and healing it
+  above 0 HP revives it. The strip menu has Dead for any combatant, and Revive on a dead one, for a misclick
+  or a resurrection; Knocked Out stays in the menu for the GM's call, such as nonlethal damage or an important
+  NPC, and makes a dead strip dying. A recovery check that takes a combatant to dying 4, lowered by doomed,
+  marks it dead. A dead strip can't delay. Marking dead and reviving can be undone.
 - R4.8 Benched creatures can be brought into combat at any time.
 - R4.8a A creature the plan left out can be added from the board at any time, in setup or in combat: Add,
   then Creature, opens the bestiary (custom creatures included), which stays open so several can be added.
@@ -196,7 +205,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 - R4.11a Closing the board never loses a fight: Run resumes the unfinished fight for that encounter and
   difficulty (shown as Resume, with Start Over behind a confirmation).
 - R4.11b Reset Combat returns the fight to setup from the current plan; it can be undone.
-- R4.11c When every enemy that joined the fight is at 0 HP, the app offers to end combat. Benched enemies,
+- R4.11c When every enemy that joined the fight is dead or at 0 HP, the app offers to end combat. Benched enemies,
   hazards and allies don't count. Finished fights can be reopened.
 - R4.11d Changing an in-progress difficulty's creatures or events in the planner warns that the fight will
   be reset, and ends it if the GM goes ahead.
@@ -208,9 +217,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   button; a card turned over and shown full screen (R3.5f) is the way to hold one creature's art up.
   The players' own devices can follow the fight too (R9).
 - R4.14 The player screen shows the initiative order on one half: the acting strip outlined, delaying strips
-  shifted right as on the GM's ladder, benched combatants left out. Each enemy shows how hurt it looks:
-  Unharmed (full HP), Healthy (over 75%), Injured (over 50%), Bloodied (over 25%), Near Death, or Down (0 HP
-  or dying). PCs and allies show no health. The other half shows the acting combatant's card back (R5.5)
+  shifted right and dead strips grayed out as on the GM's ladder, benched combatants left out. Each enemy shows how hurt it looks:
+  Unharmed (full HP), Healthy (over 75%), Injured (over 50%), Bloodied (over 25%), Near Death, or Down (0 HP,
+  dying or dead). PCs and allies show no health. The other half shows the acting combatant's card back (R5.5)
   around its portrait. It never shows a stat block or a number.
 
 ## R5 Battle cards
