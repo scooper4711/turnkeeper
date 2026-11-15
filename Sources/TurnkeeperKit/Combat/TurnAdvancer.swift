@@ -2,7 +2,8 @@ import Foundation
 
 /// Moves the fight to the next turn and gathers the reminders that come due, in rules order:
 /// the outgoing combatant's end of turn, the end of the round, the start of the next round, initiative
-/// events passed on the way, and the incoming combatant's start of turn.
+/// events passed on the way, and the incoming combatant's start of turn. Dead strips are passed over without
+/// reminders; only the duration arrows anchored to them count down.
 public enum TurnAdvancer {
     /// Delaying strips are skipped. Those between this turn and the next strip that isn't delaying act now
     /// if they're in `actingNow`, and otherwise wait below that strip. A strip that delays on its own turn
@@ -14,6 +15,7 @@ public enum TurnAdvancer {
         let outgoing = state.currentID.flatMap { state.order.contains($0) ? $0 : nil }
         if let outgoing { reminders += endOfTurn(&state, outgoing) }
         let outgoingInitiative = outgoing.flatMap { state[$0]?.initiative } ?? .infinity
+        let orderBefore = state.order
         if let incoming = state.passDelayedStrips(actingNow: actingNow) {
             state.currentID = incoming
             reminders += initiativeEvents(state, after: initiative(of: incoming, in: state), upTo: outgoingInitiative)
@@ -22,12 +24,15 @@ public enum TurnAdvancer {
             reminders += roundEvents(state, .endOfRound)
             state.round += 1
             reminders += roundEvents(state, .startOfRound)
-            let first = state.order[state.nextActingIndex(after: -1) ?? 0]
+            let first = state.firstOfRound ?? state.order[0]
             state.currentID = first
             reminders += initiativeEvents(state, after: initiative(of: first, in: state), upTo: .infinity)
         }
+        for id in deadStripsPassed(state, in: orderBefore, after: outgoing) {
+            reminders += ReminderRules.passedTurn(&state, combatantID: id)
+        }
         state.returnDelayedStripsAtRoundEnd()
-        if let incoming = state.currentID, state[incoming]?.delayedMidTurn == false {
+        if let incoming = state.currentID, let strip = state[incoming], !strip.delayedMidTurn, !strip.isDead {
             reminders += ReminderRules.startOfTurn(&state, combatantID: incoming)
             reminders += turnEvents(state, slotOf: incoming, isStart: true)
         }
@@ -35,14 +40,23 @@ public enum TurnAdvancer {
     }
 
     /// The outgoing strip's end of turn. One returning from a delay finishes its turn quietly: its end of turn
-    /// came when it delayed.
+    /// came when it delayed. One that died on its turn has no reminders.
     private static func endOfTurn(_ state: inout CombatState, _ id: UUID) -> [Reminder] {
         guard let combatant = state[id] else { return [] }
+        if combatant.isDead { return ReminderRules.endOfFinalTurn(&state, combatantID: id) }
         if combatant.delayedMidTurn && !combatant.isDelaying {
             state[id]?.delayedMidTurn = false
             return []
         }
         return ReminderRules.endOfTurn(&state, combatantID: id) + turnEvents(state, slotOf: id, isStart: false)
+    }
+
+    /// The dead strips between the outgoing strip and the new current one, in the order as it was before the
+    /// turn passed, going around the end of the round.
+    private static func deadStripsPassed(_ state: CombatState, in order: [UUID], after outgoing: UUID?) -> [UUID] {
+        let start = outgoing.flatMap { order.firstIndex(of: $0) }.map { $0 + 1 } ?? 0
+        let ahead = order[start...] + order[..<start]
+        return ahead.prefix { $0 != state.currentID }.filter { state[$0]?.isDead == true }
     }
 
     private static func initiative(of id: UUID, in state: CombatState) -> Double {

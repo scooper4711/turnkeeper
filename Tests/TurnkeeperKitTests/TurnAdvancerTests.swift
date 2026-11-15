@@ -133,7 +133,8 @@ struct TurnAdvancerTests {
         #expect(state[ids[1]]?.condition("wounded")?.value == 1)
         state.addCondition(AppliedCondition(slug: "dying", value: 2), to: ids[1])
         state.apply(.recoveryCheck(.criticalFailure, combatantID: ids[1]))
-        #expect(state.isDead(ids[1]))
+        #expect(state.hasDiedOfDying(ids[1]))
+        #expect(state[ids[1]]?.isDead == true)
     }
 
     @Test("A duration arrow counts down at its anchor's turn and reports when it ends")

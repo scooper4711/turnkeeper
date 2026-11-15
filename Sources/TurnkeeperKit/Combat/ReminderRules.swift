@@ -27,6 +27,17 @@ public enum ReminderRules {
         return reminders
     }
 
+    /// A dead combatant's turn, passed over: no reminders of its own, but duration arrows anchored to it still
+    /// count down, since an effect outlasts the turn it is counted from.
+    static func passedTurn(_ state: inout CombatState, combatantID id: UUID) -> [Reminder] {
+        countDurations(&state, anchor: id, at: .startOfTurn) + countDurations(&state, anchor: id, at: .endOfTurn)
+    }
+
+    /// The end of a turn for a combatant that died during it: only its duration arrows count down.
+    static func endOfFinalTurn(_ state: inout CombatState, combatantID id: UUID) -> [Reminder] {
+        countDurations(&state, anchor: id, at: .endOfTurn)
+    }
+
     private static func startReminders(
         for condition: AppliedCondition, of combatant: Combatant, state: inout CombatState
     ) -> [Reminder] {

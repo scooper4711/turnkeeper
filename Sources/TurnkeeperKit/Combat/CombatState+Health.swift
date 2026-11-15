@@ -41,8 +41,10 @@ public extension CombatState {
 
     /// Knocked out at 0 HP: dying 1 plus wounded, unconscious and prone, and its place moves to just before the
     /// current turn. Unconscious and prone are applied rather than left implied by dying, since both outlast it:
-    /// a stable creature stays unconscious, and one that wakes stays prone until it Stands.
+    /// a stable creature stays unconscious, and one that wakes stays prone until it Stands. A dead strip
+    /// knocked out is no longer dead: the GM ruled it dying after all.
     mutating func knockOut(_ id: UUID) {
+        self[id]?.isDead = false
         let wounded = self[id]?.condition(ConditionSlug.wounded)?.value ?? 0
         addCondition(AppliedCondition(slug: ConditionSlug.dying, value: 1 + wounded), to: id)
         addCondition(AppliedCondition(slug: ConditionSlug.unconscious), to: id)

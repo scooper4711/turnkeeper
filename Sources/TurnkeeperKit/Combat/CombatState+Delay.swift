@@ -3,17 +3,18 @@ import Foundation
 /// Delay: a delaying strip stays on the ladder, shifted aside, and its turns are skipped until it returns.
 public extension CombatState {
     /// The delaying strips between the current turn and the next strip that isn't delaying, top to bottom.
-    /// Before the turn passes, the GM chooses which of them act now.
+    /// Before the turn passes, the GM chooses which of them act now. Dead strips in between are passed over.
     var delayedStripsAhead: [Combatant] {
         guard let current = currentID, let index = order.firstIndex(of: current) else { return [] }
-        return Array(order[(index + 1)...].lazy.compactMap { self[$0] }.prefix { $0.isDelaying })
+        let living = order[(index + 1)...].lazy.compactMap { self[$0] }.filter { !$0.isDead }
+        return Array(living.prefix { $0.isDelaying })
     }
 
     /// Starts delaying. Off its own turn the strip moves to just below the next strip that isn't delaying.
     /// On its own turn it stays put until the turn passes, and `TurnAdvancer.next` moves it then and raises
     /// its end-of-turn reminders at once, as the Delay rule says.
     mutating func startDelay(_ id: UUID) {
-        guard self[id]?.isDelaying == false, let index = order.firstIndex(of: id) else { return }
+        guard self[id]?.takesTurns == true, let index = order.firstIndex(of: id) else { return }
         self[id]?.isDelaying = true
         if currentID == id {
             self[id]?.delayedMidTurn = true
@@ -44,9 +45,17 @@ public extension CombatState {
 
 /// The turn passing over delaying strips, used by `TurnAdvancer`.
 extension CombatState {
-    /// The first strip below `index` that isn't delaying; nil when every strip below is delaying.
+    /// The first strip below `index` that takes its turn, being neither delaying nor dead; nil when there is
+    /// none.
     func nextActingIndex(after index: Int) -> Int? {
-        order.indices.first { $0 > index && self[order[$0]]?.isDelaying == false }
+        order.indices.first { $0 > index && self[order[$0]]?.takesTurns == true }
+    }
+
+    /// Who starts a round: the first strip that takes its turn. When all are delaying or dead, the first that
+    /// isn't dead returns from its delay, and a ladder of the dead starts at the top.
+    var firstOfRound: UUID? {
+        let index = nextActingIndex(after: -1) ?? order.firstIndex { self[$0]?.isDead == false } ?? 0
+        return order.indices.contains(index) ? order[index] : nil
     }
 
     /// Before the turn passes: the delaying strips ahead that the GM chose act now, and the rest, with a

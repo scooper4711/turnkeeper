@@ -49,6 +49,8 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
     /// Delayed after its turn began. As the Delay rule says, its end of turn came at once; when it returns it
     /// takes the rest of that turn, without start- or end-of-turn reminders again.
     public var delayedMidTurn: Bool
+    /// Dead: still on the ladder, grayed out, with no turns and no reminders until it is revived.
+    public var isDead: Bool
     public var conditions: [AppliedCondition]
     public var notes: String
     /// The real person playing a PC, from the party; blank for creatures.
@@ -68,6 +70,7 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
         place = .ladder
         isDelaying = false
         delayedMidTurn = false
+        isDead = false
         conditions = []
         notes = ""
         playerName = ""
@@ -75,7 +78,7 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
 
     private enum CodingKeys: String, CodingKey {
         case id, kind, side, name, creatureKey, slotID, template, damageTaken, temporaryHitPoints, initiative
-        case place, isDelaying, delayedMidTurn, conditions, notes, playerName
+        case place, isDelaying, delayedMidTurn, isDead, conditions, notes, playerName
     }
 
     /// Sessions saved before delayed strips stayed on the ladder have no `isDelaying`, and keep delayed
@@ -96,6 +99,7 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
         place = savedPlace == .delaying ? .ladder : savedPlace
         isDelaying = try container.decodeIfPresent(Bool.self, forKey: .isDelaying) ?? (savedPlace == .delaying)
         delayedMidTurn = try container.decodeIfPresent(Bool.self, forKey: .delayedMidTurn) ?? false
+        isDead = try container.decodeIfPresent(Bool.self, forKey: .isDead) ?? false
         conditions = try container.decode([AppliedCondition].self, forKey: .conditions)
         notes = try container.decode(String.self, forKey: .notes)
         playerName = try container.decodeIfPresent(String.self, forKey: .playerName) ?? ""
@@ -117,6 +121,9 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
     }
 
     public var isDying: Bool { condition(ConditionSlug.dying) != nil }
+
+    /// Whether the order stops at this strip: not while it delays, and never once it is dead.
+    var takesTurns: Bool { !isDelaying && !isDead }
 }
 
 public enum Magnet: String, Codable, Sendable {

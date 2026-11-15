@@ -20,19 +20,21 @@ public extension CombatState {
     }
 
     /// Whether a dying combatant has died: dying 4, lowered by doomed.
-    func isDead(_ id: UUID) -> Bool {
+    func hasDiedOfDying(_ id: UUID) -> Bool {
         guard let combatant = self[id], let dying = combatant.condition(ConditionSlug.dying)?.value
         else { return false }
         return dying >= 4 - (combatant.condition("doomed")?.value ?? 0)
     }
 
-    /// A recovery check changes dying by 1 or 2. Reaching dying 0 ends dying and raises wounded by 1.
+    /// A recovery check changes dying by 1 or 2. Reaching dying 0 ends dying and raises wounded by 1, and
+    /// reaching dying 4, lowered by doomed, is death.
     private mutating func recordRecoveryCheck(_ degree: DegreeOfSuccess, for id: UUID) {
         guard let dying = self[id]?.condition(ConditionSlug.dying), let value = dying.value else { return }
         let change = [DegreeOfSuccess.criticalSuccess: -2, .success: -1, .failure: 1, .criticalFailure: 2][degree] ?? 0
         let newValue = value + change
         setConditionValue(newValue, conditionID: dying.id, on: id)
         if newValue <= 0 { raiseWounded(on: id) }
+        if hasDiedOfDying(id) { markDead(id) }
     }
 
     /// Puts a condition back as it was before an automatic change, re-adding it if the change removed it.
