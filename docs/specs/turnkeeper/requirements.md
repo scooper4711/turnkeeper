@@ -1,11 +1,26 @@
 # Turnkeeper: requirements
 
-Turnkeeper is an iPad and Mac app for running Pathfinder 2e and Starfinder 2e encounters at an
+Turnkeeper is an iPad, iPhone and Mac app for running Pathfinder 2e and Starfinder 2e encounters at an
 in-person table. It replaces a paper initiative tracker. The left half of the screen is the initiative
-ladder, and the right half is the notes side, which shows the battle card of the active creature.
+ladder, and the right half is the notes side, which shows the battle card of the active creature. On an
+iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 
 ## R1 Platforms and sharing
-- R1.1 The same app runs on iPad and Mac, with every feature available on both.
+- R1.1 The same app runs on iPad, iPhone and Mac, with every feature available on all three.
+- R1.1a Where the board has no room for both halves (narrower than 760 pt or shorter than 480 pt: an iPhone
+  either way up, an iPad's narrow split), it shows the ladder alone:
+  - The top bar holds Close, the fight's name and turn on one line each, Player Screen and the Fight menu, which
+    there also adds a duration arrow or an event. Duration arrows get a row of their own.
+  - Undo, Card and a wide Next sit in a bar below the ladder, in reach of a thumb; in setup, Begin Combat fills
+    it. On an iPhone on its side they join the top bar, and the voice button and the bench sit beside the strips.
+  - In combat a tap on a strip opens its battle card in a sheet, with a Card page and a Notes page (the
+    creature's notes and the encounter's); Card opens the acting combatant's. Closing the sheet goes back to
+    following the turn. In setup a tap still chooses the strip for its initiative, and Show Card is in its menu.
+- R1.1b On an iPhone every sheet fits the screen's width. A number pad, a reminder and the victory and
+  end-of-combat sheets are as tall as their content, with the board in view above; the pads have a close
+  button. Rows too wide for the screen stack instead of squeezing their text: an encounter's creature rows (the
+  count and the temporary HP on lines of their own), a handout's buttons and Creature Art's. A battle card's
+  Weak, Normal and Elite sit above the card instead of in the toolbar. The planner shows one column at a time.
 - R1.2 Planning data moves between devices in both directions as `.turnkeeper` files, through AirDrop,
   Files or Finder.
 - R1.3 "Sync with nearby device" merges the libraries of two devices over the local network.
@@ -179,7 +194,8 @@ ladder, and the right half is the notes side, which shows the battle card of the
   hazards and allies don't count. Finished fights can be reopened.
 - R4.11d Changing an in-progress difficulty's creatures or events in the planner warns that the fight will
   be reset, and ends it if the GM goes ahead.
-- R4.12 The battle card follows the current turn. Tapping a tile pins that card.
+- R4.12 The battle card follows the current turn. Tapping a tile pins that card (on an iPhone, in its sheet:
+  R1.1a).
 - R4.13 A Player Screen toggle on the board's top bar shows the fight to the players: on the iPad on an
   external display or AirPlay screen when one is connected, else covering the iPad's screen until tapped;
   on the Mac in the Players window, which the toggle opens and closes. Battle cards have no Show Players
@@ -251,7 +267,8 @@ ladder, and the right half is the notes side, which shows the battle card of the
   Starting a fight puts the Table Buddy at that level, with that level's card.
 
 ## R7 About
-- R7.1 An About screen (the app menu's About Turnkeeper on the Mac, the sidebar's About button on the iPad) shows
+- R7.1 An About screen (the app menu's About Turnkeeper on the Mac, the campaign list's More menu on the iPad and
+  the iPhone) shows
   the notice Paizo's Community Use Policy requires, the Paizo Compatibility License's trademark line, credits for
   the creature text, the Rexard art, the action icon font and the condition icons, and a link for reaching the
   author. It also lists the full texts of the licenses the bundled content requires: the Open Game License and the

@@ -64,37 +64,16 @@ private struct SlotRow: View {
     var body: some View {
         let entry = model.entry(slot.creatureKey)
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                Button { isShowingCard = true } label: {
-                    HStack(spacing: 12) {
-                        ArtImage(path: entry?.art.thumbnail ?? "", size: 44, shape: .circle, alignment: .top)
-                        VStack(alignment: .leading) {
-                            Text(entry?.name ?? "Unknown creature").font(.headline)
-                            Text(details(entry)).font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
+            // The count goes on a line of its own where the name would be squeezed, as on an iPhone.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    identity(entry)
+                    countControls
                 }
-                .buttonStyle(.borderless)
-                .foregroundStyle(.primary)
-                .help("Show the battle card")
-                .layoutPriority(1)
-                Spacer()
-                if slot.isCustom {
-                    Button("Edit Creature…", systemImage: "pencil") { isEditingCreature = true }
-                        .labelStyle(.iconOnly)
-                        .buttonStyle(.borderless)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) { identity(entry) }
+                    HStack(spacing: 12) { countControls }
                 }
-                Button("Card", systemImage: "rectangle.portrait") { isShowingCard = true }
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.borderless)
-                AdjacentStepper(label: "× \(slot.count)", value: field(\.count), range: 1...20)
-                #if os(macOS)
-                // The Mac has no swipe to delete.
-                Button("Remove from Encounter", systemImage: "trash", action: remove)
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.borderless)
-                    .help("Remove from Encounter")
-                #endif
             }
             HStack {
                 Picker("Template", selection: field(\.template)) {
@@ -166,21 +145,77 @@ private struct SlotRow: View {
         }
     }
 
-    /// Conditions and temporary HP the creatures start the fight with.
-    private var startingState: some View {
-        HStack {
-            Button {
-                isEditingConditions = true
-            } label: {
-                Label(slot.conditions.isEmpty ? "Starting Conditions…" : startingConditionsText,
-                      systemImage: "staroflife")
+    /// The creature's art, name and details, which open its card, then the buttons for its card and editor.
+    @ViewBuilder
+    private func identity(_ entry: BestiaryIndexEntry?) -> some View {
+        Button { isShowingCard = true } label: {
+            HStack(spacing: 12) {
+                ArtImage(path: entry?.art.thumbnail ?? "", size: 44, shape: .circle, alignment: .top)
+                VStack(alignment: .leading) {
+                    Text(entry?.name ?? "Unknown creature").font(.headline)
+                    Text(details(entry)).font(.caption).foregroundStyle(.secondary)
+                }
+                .multilineTextAlignment(.leading)
             }
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(.primary)
+        .help("Show the battle card")
+        .layoutPriority(1)
+        Spacer()
+        if slot.isCustom {
+            Button("Edit Creature…", systemImage: "pencil") { isEditingCreature = true }
+                .labelStyle(.iconOnly)
+                .buttonStyle(.borderless)
+        }
+        Button("Card", systemImage: "rectangle.portrait") { isShowingCard = true }
+            .labelStyle(.iconOnly)
             .buttonStyle(.borderless)
-            Spacer()
-            AdjacentStepper(label: "Temp HP \(slot.temporaryHitPoints)", value: field(\.temporaryHitPoints),
-                            range: 0...500, step: 5)
+    }
+
+    @ViewBuilder
+    private var countControls: some View {
+        AdjacentStepper(label: "× \(slot.count)", value: field(\.count), range: 1...20)
+        #if os(macOS)
+        // The Mac has no swipe to delete.
+        Button("Remove from Encounter", systemImage: "trash", action: remove)
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .help("Remove from Encounter")
+        #endif
+    }
+
+    /// Conditions and temporary HP the creatures start the fight with, in a row or, where that doesn't fit, one
+    /// under the other.
+    private var startingState: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                // At its full width, so a row that would wrap it counts as not fitting.
+                startingConditionsButton.fixedSize()
+                Spacer()
+                temporaryHitPointsStepper
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                startingConditionsButton
+                temporaryHitPointsStepper
+            }
         }
         .font(.callout)
+    }
+
+    private var startingConditionsButton: some View {
+        Button {
+            isEditingConditions = true
+        } label: {
+            Label(slot.conditions.isEmpty ? "Starting Conditions…" : startingConditionsText,
+                  systemImage: "staroflife")
+        }
+        .buttonStyle(.borderless)
+    }
+
+    private var temporaryHitPointsStepper: some View {
+        AdjacentStepper(label: "Temp HP \(slot.temporaryHitPoints)", value: field(\.temporaryHitPoints),
+                        range: 0...500, step: 5)
     }
 
     private var startingConditionsText: String {

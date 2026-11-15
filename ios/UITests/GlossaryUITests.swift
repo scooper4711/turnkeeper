@@ -12,6 +12,7 @@ final class GlossaryUITests: XCTestCase {
     }
 
     func testLinksOpenTwoLevelsOfPopovers() {
+        app.showBoardCard()
         let dogslicer = app.links["dogslicer"].firstMatch
         XCTAssertTrue(dogslicer.waitForExistence(timeout: 10))
         dogslicer.tap()

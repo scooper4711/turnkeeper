@@ -42,6 +42,9 @@ final class InitiativeUITests: XCTestCase {
         let chosen = app.descendants(matching: .any)
             .matching(NSPredicate(format: "label CONTAINS 'Merisiel' AND NOT (label CONTAINS 'Next')")).firstMatch
         XCTAssertNotEqual(second, "Merisiel")
+        // Without a number yet, Merisiel is the last strip, half under the voice button: drag it up into view.
+        chosen.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+            .press(forDuration: 0.1, thenDragTo: chosen.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -3)))
         chosen.tap()
         XCTAssertTrue(waitUntil { status.label == "Next: Merisiel" }, "status is \(status.label)")
         hold(talk, app: app)

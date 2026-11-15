@@ -110,6 +110,7 @@ final class PlanningUITests: XCTestCase {
         }
         app.launchArguments = ["--demo", "planner"]
         app.launch()
+        app.showCampaignList()
         let add = app.buttons["Add Handout"].firstMatch
         XCTAssertTrue(add.waitForExistence(timeout: 10))
         add.tap()

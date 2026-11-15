@@ -194,7 +194,7 @@ private struct NewScenarioSheet: View {
                 ToolbarItem(placement: .confirmationAction) { Button("Add", action: add) }
             }
         }
-        .frame(minWidth: 420, minHeight: 280)
+        .sheetFrame(minWidth: 420, minHeight: 280)
     }
 
     private func add() {

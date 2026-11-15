@@ -39,22 +39,39 @@ struct CreatureArtView: View {
             }
             .task { await model.refreshCreatureArt() }
         }
-        .frame(minWidth: 520, minHeight: 560)
+        .sheetFrame(minWidth: 520, minHeight: 560)
     }
 
+    /// In a row, or one under the other where a row doesn't fit, as on an iPhone.
     private var importButtons: some View {
-        HStack {
-            Button("Import from Scrollkeeper…", systemImage: "books.vertical", action: importFromScrollkeeper)
-            Button("Add PDFs…", systemImage: "doc.badge.plus") { choose(.pdfs) }
-            Spacer()
-            Button("Check Again", systemImage: "arrow.clockwise") {
-                Task { await model.refreshCreatureArt(addingNew: true) }
+        ViewThatFits(in: .horizontal) {
+            // At their full width, so a row that would wrap its titles counts as not fitting.
+            HStack {
+                addButtons.fixedSize()
+                Spacer()
+                checkAgainButton.fixedSize()
+            }
+            VStack(alignment: .leading, spacing: 14) {
+                addButtons
+                checkAgainButton
             }
         }
         // In a form row, every button fires on a tap anywhere in the row: Add PDFs… then set the picker to
         // PDFs, so Scrollkeeper's folder couldn't be opened. Borderless buttons take only their own taps.
         .buttonStyle(.borderless)
         .disabled(model.artProgress != nil)
+    }
+
+    @ViewBuilder
+    private var addButtons: some View {
+        Button("Import from Scrollkeeper…", systemImage: "books.vertical", action: importFromScrollkeeper)
+        Button("Add PDFs…", systemImage: "doc.badge.plus") { choose(.pdfs) }
+    }
+
+    private var checkAgainButton: some View {
+        Button("Check Again", systemImage: "arrow.clockwise") {
+            Task { await model.refreshCreatureArt(addingNew: true) }
+        }
     }
 
     /// Scrollkeeper's downloads in the Tableside Toolkit's App Group are used straight away, on the Mac and the iPad;

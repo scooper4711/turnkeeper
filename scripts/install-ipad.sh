@@ -1,10 +1,11 @@
 #!/bin/sh
-# Builds the iPad app, installs it on a connected iPad and starts it.
+# Builds the app, installs it on a connected iPad (or, with DEVICE_KIND=iPhone, an iPhone) and starts it.
 #
 # The iPad must be connected by cable or on the same network, unlocked, with Developer Mode on.
 # Your Apple developer team goes in ios/Local.xcconfig (see ios/Signing.xcconfig).
 #
-# IPAD         name of the iPad to install on (default: the first connected iPad)
+# DEVICE_KIND  iPad (the default) or iPhone
+# IPAD         name of the device to install on (default: the first connected device of that kind)
 # IPAD_LAUNCH  "no" to leave the app closed after installing, as a scheduled reinstall does
 # VERSION      version shown in About (default: the latest release tag, such as 1.2.4)
 set -eu
@@ -20,20 +21,20 @@ BUILD_LOG="$(mktemp)"
 trap 'rm -f "$DEVICES" "$BUILD_LOG"' EXIT
 xcrun devicectl list devices --json-output "$DEVICES" >/dev/null
 
-IPAD="${IPAD:-$(/usr/bin/python3 - "$DEVICES" <<'PYTHON'
+IPAD="${IPAD:-$(/usr/bin/python3 - "$DEVICES" "${DEVICE_KIND:-iPad}" <<'PYTHON'
 import json
 import sys
 
 devices = json.load(open(sys.argv[1]))["result"]["devices"]
 ipads = [
     device["deviceProperties"]["name"] for device in devices
-    if device.get("hardwareProperties", {}).get("deviceType") == "iPad"
+    if device.get("hardwareProperties", {}).get("deviceType") == sys.argv[2]
     and device.get("connectionProperties", {}).get("tunnelState") != "unavailable"
 ]
 print(ipads[0] if ipads else "")
 PYTHON
 )}"
-[ -n "$IPAD" ] || { echo "Installing failed: no iPad is connected." >&2; exit 1; }
+[ -n "$IPAD" ] || { echo "Installing failed: no ${DEVICE_KIND:-iPad} is connected." >&2; exit 1; }
 
 BUNDLE_ID="$(xcodebuild -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
     -showBuildSettings 2>/dev/null | sed -n 's/^ *PRODUCT_BUNDLE_IDENTIFIER = //p' | head -n 1)"

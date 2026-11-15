@@ -12,6 +12,8 @@ struct MagnetTile: View {
     @Binding var sheet: BoardSheet?
     @State private var voice = VoiceInitiative.shared
     @AppStorage(PlayerNamesToggle.key) private var showsPlayerNames = true
+    /// With the ladder alone, a tap on a strip opens its card in a sheet.
+    @Environment(\.isCompactBoard) private var isCompact
 
     private var isCurrent: Bool { controller.state.currentID == combatant.id }
     private var isSetup: Bool { controller.state.phase == .setup }
@@ -60,7 +62,11 @@ struct MagnetTile: View {
         .contentShape(Rectangle())
         .onTapGesture {
             controller.pinnedID = combatant.id
-            if isSetup { controller.chosenForInitiative = combatant.id }
+            if isSetup {
+                controller.chosenForInitiative = combatant.id
+            } else if isCompact {
+                sheet = .card
+            }
         }
         .contextMenu { TileMenu(controller: controller, combatant: combatant, sheet: $sheet) }
         .modifier(DraggableUnlessSetup(id: combatant.id, isSetup: isSetup))

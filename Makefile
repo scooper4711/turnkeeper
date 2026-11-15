@@ -1,5 +1,5 @@
 .PHONY: build test lint coverage bestiary update-pf2e dmg appstore cards icon app run install \
-	ipad-simulator ipad-install ipad-uitest clean
+	ipad-simulator ipad-install ipad-uitest iphone-simulator iphone-install iphone-uitest screenshots clean
 
 build:
 	swift build
@@ -52,6 +52,13 @@ ipad-simulator:
 ipad-install:
 	scripts/install-ipad.sh
 
+# The same for the iPhone. IPAD_SIMULATOR and IPAD name the simulator and the iPhone.
+iphone-simulator:
+	DEVICE_KIND=iPhone scripts/run-ipad-simulator.sh
+
+iphone-install:
+	DEVICE_KIND=iPhone scripts/install-ipad.sh
+
 # Redraws the Mac and iPad icons from scripts/make-icon.swift.
 icon:
 	swift scripts/make-icon.swift
@@ -59,6 +66,15 @@ icon:
 # Runs the iPad UI tests in a simulator, against the demo fight. ONLY="DelayUITests ..." runs just those.
 ipad-uitest:
 	scripts/run-ipad-uitests.sh
+
+# The same tests on an iPhone, where the board shows the ladder alone and cards open in a sheet.
+iphone-uitest:
+	DEVICE_KIND=iPhone scripts/run-ipad-uitests.sh
+
+# Saves a picture of every screen of the demo library to tmp/screenshots, to check a device's layout by eye.
+# SIMULATOR names the simulator (default: an iPhone).
+screenshots:
+	scripts/screenshot-tour.sh
 
 # Renders battle cards to tmp/cards for comparing with the printed decks: make cards KEYS="key[:elite] ..."
 cards:

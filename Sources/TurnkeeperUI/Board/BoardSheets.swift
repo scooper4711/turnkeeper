@@ -13,6 +13,7 @@ struct BoardSheetContent: View {
         case let .initiative(id): InitiativePad(controller: controller, id: id)
         case let .conditions(id): ConditionPalette(controller: controller, id: id)
         case .duration: DurationEditor(controller: controller)
+        case .card: CompactCardSheet(controller: controller)
         case .event:
             EventEditor(event: EncounterEvent(label: "", trigger: .initiative(20)), slots: []) { event in
                 controller.change { $0.addEvent(event) }
@@ -61,6 +62,6 @@ private struct DurationEditor: View {
                 }
             }
         }
-        .frame(minWidth: 400, minHeight: 320)
+        .sheetFrame(minWidth: 400, minHeight: 320)
     }
 }

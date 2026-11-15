@@ -1,17 +1,17 @@
 # Turnkeeper: design
 
 ## Layout
-A SwiftPM package with a thin iPad Xcode project, following the Scrollkeeper pattern.
+A SwiftPM package with a thin Xcode project for the iPad and the iPhone, following the Scrollkeeper pattern.
 
 | Path | Contents |
 |---|---|
 | `Sources/TurnkeeperKit` | Models and rules, with no UI: Bestiary, Rules, Library, Combat, Sharing, Text. |
-| `Sources/TurnkeeperUI` | SwiftUI shared by iPad and Mac: themes, board, battle cards, planning, bestiary browser. |
+| `Sources/TurnkeeperUI` | SwiftUI shared by iPad, iPhone and Mac: themes, board, battle cards, planning, bestiary browser. |
 | `Sources/Turnkeeper` | Mac app entry point. |
 | `Sources/FoundryImport` | Library that parses Foundry documents, converts rules text and matches art. |
 | `Sources/BestiaryImport` | CLI around FoundryImport that writes `Generated/`. |
 | `Sources/CharacterImport` | Demiplane character import (links and QR codes, the sheet PDF reader, the client) and the Table Buddies' pregen catalog. |
-| `ios/Turnkeeper.xcodeproj` | iPad app. It references the package as `..` and bundles `Generated/` as a folder reference. |
+| `ios/Turnkeeper.xcodeproj` | iPad and iPhone app (one target, device families 1 and 2; the target and scheme are still named `Turnkeeper-iPad`). It references the package as `..` and bundles `Generated/` as a folder reference. |
 | `scripts/extract_pdf_art.py`, `scripts/pdfart/` | PyMuPDF extractor for token, pawn and card art from the Paizo PDFs, run in the project `.venv`. |
 | `Generated/` | Import output, gitignored and bundled into both apps. |
 
@@ -174,6 +174,19 @@ Ported from the pf2e system, with tests.
   strip that takes no clicks, reads the window's scroll events with a local monitor. `TrackpadSwipeTracker`
   (TurnkeeperKit) decides: a gesture that begins over the strip and moves more sideways than up and down slides
   it the same way, and its events and the coasting after it are kept from the ladder; anything else scrolls.
+- **The ladder alone** (R1.1a). `BoardArrangement` (TurnkeeperKit, tested) decides from the board's size:
+  `sideBySide`, or `ladderOnly` below 760 pt of width or 480 pt of height, and whether the turn buttons get a
+  bar of their own (`hasTurnBar`). `BoardContent` then shows `CompactTopBar`, the ladder and
+  `CompactTurnButtons`, and sets the `isCompactBoard` environment value, which `MagnetTile` (a tap opens
+  `BoardSheet.card`), `TileMenu` (Show Card), `BeginCombatButton` and the listening overlay read.
+  `CompactCardSheet` shows `BoardCard` and the notes, which `CardPanel` shows too; `BoardNotes` gives both
+  their bindings. Closing the sheet clears `pinnedID`. `LadderView` puts the voice button and the bench beside
+  the strips when the vertical size class is compact.
+- **Sheets on an iPhone** (R1.1b). `sheetFrame(minWidth:minHeight:)` gives a sheet its minimum size on the Mac
+  and the iPad and none in a compact width, where a minimum wider than the screen pushed content off both
+  edges. `fittedSheet()` measures a short sheet and sets a height detent to match, or on an iPhone on its
+  side lets it scroll. Rows that may not fit use `ViewThatFits` with a stacked second choice; the row's
+  buttons are `fixedSize` in the first, since a form row would otherwise wrap their titles and call it a fit.
 - **Player names.** `PartyMember.playerName` and `notes` are blank in libraries saved before them.
   `CombatSetup` copies the player's name onto the PC's `Combatant.playerName`, so a fight keeps the name it
   started with. `MagnetTile` adds it after the character's name while `PlayerNamesToggle`'s `@AppStorage` key
@@ -269,6 +282,14 @@ Ported from the pf2e system, with tests.
 - **Glossary links.** `CharacterGlossaryLinker` fills the sheet's `LinkTable` by name through
   `BestiaryStore.glossaryID`, falling back to Pathfinder names for Starfinder characters (Starfinder 2e
   shares the Player Core ancestries and feats); action text is replaced by the linked entry's rules text when there is one.
+
+## Testing on devices
+- `scripts/run-ipad-uitests.sh` runs the UI tests on an iPad, or with `DEVICE_KIND=iPhone` on an iPhone
+  (`make iphone-uitest`). `TestDevice.isPhone` and the `XCUIApplication` helpers in `ios/UITests/DeviceSupport.swift`
+  cover what differs: the card is opened from Card, and the planner's list is one page back.
+- `ScreenshotTour` (`make screenshots`, `scripts/screenshot-tour.sh`) walks the demo library and saves a picture
+  of each screen, upright and on its side, to `tmp/screenshots/<simulator>`; it is skipped unless
+  `SCREENSHOT_DIR` is set. `scripts/ios-simulator-id.sh` finds the simulator by name or kind.
 
 ## Known limits
 - The iPad build uses a free personal team, so it must be reinstalled every 7 days.
