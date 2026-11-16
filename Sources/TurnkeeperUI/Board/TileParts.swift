@@ -49,6 +49,7 @@ struct TileMenu: View {
             Button("Damage or Heal…", systemImage: "heart") { sheet = .hitPoints(combatant.id) }
         }
         Button("Initiative…", systemImage: "number") { sheet = .initiative(combatant.id) }
+        Button("Rename…", systemImage: "pencil") { sheet = .rename(combatant.id) }
         if combatant.kind == .creature || combatant.kind == .hazard {
             Picker("Template", selection: templateBinding) {
                 Text("Weak").tag(CreatureTemplate.weak)

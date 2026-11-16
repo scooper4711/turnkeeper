@@ -6,6 +6,7 @@ enum BoardSheet: Identifiable, Hashable {
     case hitPoints(UUID)
     case initiative(UUID)
     case conditions(UUID)
+    case rename(UUID)
     case duration
     case event
     /// The bestiary, to add a creature the plan left out.
