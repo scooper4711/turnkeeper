@@ -72,7 +72,14 @@ struct MagnetTile: View {
         .modifier(DraggableUnlessSetup(id: combatant.id, isSetup: isSetup))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(isCurrent ? .isSelected : [])
-        .accessibilityValue(isVoiceTarget ? "next for voice entry" : "")
+        .accessibilityValue(accessibilityValue)
+    }
+
+    /// What VoiceOver reads after the strip's name: its conditions, such as "Dying 1, Unconscious", which the
+    /// strip's chips show as a button of their own, and whether voice entry fills it next.
+    private var accessibilityValue: String {
+        let conditions = combatant.conditions.map(ConditionLabel.short)
+        return (conditions + (isVoiceTarget ? ["next for voice entry"] : [])).joined(separator: ", ")
     }
 
     /// The mark at the strip's left: dead, delaying, or the arrow of the current turn.

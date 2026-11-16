@@ -122,6 +122,9 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
 
     public var isDying: Bool { condition(ConditionSlug.dying) != nil }
 
+    /// Whether taking it out kills it: enemies die, while PCs and allies are knocked out and fall dying.
+    public var diesWhenTakenOut: Bool { side == .enemy }
+
     /// Whether the order stops at this strip: not while it delays, and never once it is dead.
     var takesTurns: Bool { !isDelaying && !isDead }
 }

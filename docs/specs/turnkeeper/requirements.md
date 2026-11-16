@@ -166,8 +166,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 - R4.7d Each condition in the palette has an icon from game-icons.net, used under CC BY 3.0 and credited
   to its authors. Turnkeeper takes no condition icons from the pf2e system.
 - R4.7a In combat, swiping a strip left to right delays it (asking first, for now), and right to left
-  marks a creature or hazard dead (R4.7e), knocks a PC out (dying 1 plus wounded, with unconscious and prone)
-  or, on a delaying strip, brings it back where it is. On a dead strip the right-to-left swipe revives it. On
+  marks an enemy creature or hazard dead (R4.7e), where it stays in the order, knocks a PC or an ally out
+  (dying 1 plus wounded, with unconscious and prone), moving it to just before the current strip, or, on a
+  delaying strip, brings it back where it is. On a dead strip the right-to-left swipe revives it. On
   a dying strip the right-to-left swipe stabilizes it: dying ends, unconscious stays, and
   wounded goes up by 1 (added as wounded 1 when there's none). On the Mac a two-finger trackpad swipe does
   the same as a click and drag. The context menu has the same actions for the Mac and accessibility. There

@@ -2,8 +2,8 @@ import TurnkeeperKit
 import SwiftUI
 
 /// The initiative half of the board: the ladder of magnets with event markers between them, and the bench of
-/// creatures waiting to join. In combat, swiping a strip left to right delays it, and right to left marks a
-/// creature dead or knocks a PC out, or brings a delaying strip back.
+/// creatures waiting to join. In combat, swiping a strip left to right delays it, and right to left marks an
+/// enemy dead or knocks a PC or an ally out, or brings a delaying strip back.
 struct LadderView: View {
     let controller: BoardController
     @Binding var sheet: BoardSheet?
@@ -79,7 +79,8 @@ struct LadderView: View {
     }
 
     /// Right to left: a dead strip is revived, a delaying one returns, a dying one is stabilized, and any other
-    /// dies, or is knocked out when it is a PC.
+    /// enemy dies, keeping its place, while a PC or an ally is knocked out and moves to just before the current
+    /// strip.
     private func knockOutAction(_ combatant: Combatant) -> StripSwipeAction? {
         guard controller.state.phase == .active else { return nil }
         if combatant.isDead {
@@ -97,7 +98,7 @@ struct LadderView: View {
                 controller.change { $0.stabilize(combatant.id) }
             }
         }
-        guard combatant.kind == .playerCharacter else {
+        if combatant.diesWhenTakenOut {
             return StripSwipeAction(title: "Dead", systemImage: "xmark.circle.fill", color: .gray) {
                 controller.change { $0.markDead(combatant.id) }
             }
