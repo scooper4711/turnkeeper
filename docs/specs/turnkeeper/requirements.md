@@ -284,7 +284,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 
 ## R7 About
 - R7.1 An About screen (the app menu's About Turnkeeper on the Mac, the campaign list's More menu on the iPad and
-  the iPhone) shows
+  the iPhone, and on the iPad also About Turnkeeper in the menu bar, in a window of its own) shows
   the notice Paizo's Community Use Policy requires, the Paizo Compatibility License's trademark line, credits for
   the creature text, the Rexard art, the action icon font and the condition icons, and a link for reaching the
   author. It also lists the full texts of the licenses the bundled content requires: the Open Game License and the
