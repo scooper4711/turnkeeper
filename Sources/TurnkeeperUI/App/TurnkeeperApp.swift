@@ -33,12 +33,15 @@ public struct TurnkeeperApp: App {
         }
         .defaultSize(width: 1280, height: 860)
         .commands {
-            #if os(macOS)
             AboutCommands(info: .turnkeeper)
+            #if os(macOS)
             PrivacyCommands()
             #endif
             LibraryCommands(model: model)
         }
+        #if os(iOS)
+        AboutWindow(info: .turnkeeper)
+        #endif
         #if os(macOS)
         Window("Players", id: PlayerWindow.id) {
             PlayerScreen()
