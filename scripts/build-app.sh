@@ -1,11 +1,11 @@
 #!/bin/sh
 # Builds "build/Turnkeeper.app" from the Swift package.
 #
-# VERSION    version written to the bundle (default 0.0.0)
+# VERSION    version written to the bundle (default: scripts/version.sh marketing)
 # UNIVERSAL  set to 1 to build for both Apple silicon and Intel
 # TEAM_ID    the team that owns the App Group (default: read from the Developer ID certificate)
 # SIGNING_IDENTITY  passed to scripts/sign-app.sh; "-" signs ad hoc, without the App Group
-# BUILD_NUMBER  CFBundleVersion, which must increase with every App Store upload (default: VERSION)
+# BUILD_NUMBER  CFBundleVersion, which must increase with every App Store upload (default: scripts/version.sh build)
 # CHANNEL    "appstore" also builds the Mac App Store package, build/appstore/Turnkeeper.pkg, from the same sources,
 #            compiled with -DAPP_STORE; needs TEAM_ID and the variables of tabletop-kit's
 #            scripts/package-appstore.sh (PACKAGER names another copy; TRIAL=1 checks it without them)
@@ -13,7 +13,8 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-VERSION="${VERSION:-0.0.0}"
+VERSION="${VERSION:-$(scripts/version.sh marketing)}"
+BUILD_NUMBER="${BUILD_NUMBER:-$(scripts/version.sh build)}"
 APP="build/Turnkeeper.app"
 EXECUTABLE="Turnkeeper"
 
@@ -68,7 +69,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleShortVersionString</key>
     <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>${BUILD_NUMBER:-$VERSION}</string>
+    <string>$BUILD_NUMBER</string>
     <!-- Only HTTPS to Demiplane, which is exempt, so uploads don't ask about export compliance. -->
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
@@ -167,7 +168,7 @@ scripts/sign-app.sh "$APP" "$ENTITLEMENTS"
 touch "$APP"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 [ -x "$LSREGISTER" ] && "$LSREGISTER" -f "$APP"
-echo "Built $APP ($VERSION)"
+echo "Built $APP ($VERSION, build $BUILD_NUMBER)"
 
 if [ "${CHANNEL:-}" = "appstore" ]; then
     # Found beside the package after "swift package resolve", so the script follows the dependency pin.
