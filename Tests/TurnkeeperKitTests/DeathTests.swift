@@ -226,4 +226,11 @@ struct SettleDeathsTests {
         state.settleDeaths(since: CombatState()) { _ in 20 }
         #expect(state[ids[0]]?.isDead == false)
     }
+
+    @Test("Enemies die when taken out; PCs and allies fall dying",
+          arguments: [(CombatantKind.creature, Side.enemy, true), (.hazard, .enemy, true),
+                      (.creature, .ally, false), (.playerCharacter, .ally, false)])
+    func diesWhenTakenOut(kind: CombatantKind, side: Side, dies: Bool) {
+        #expect(Combatant(kind: kind, name: "Someone", side: side).diesWhenTakenOut == dies)
+    }
 }
