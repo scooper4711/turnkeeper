@@ -12,6 +12,7 @@ struct BoardSheetContent: View {
         case let .hitPoints(id): HitPointsPad(controller: controller, id: id)
         case let .initiative(id): InitiativePad(controller: controller, id: id)
         case let .conditions(id): ConditionPalette(controller: controller, id: id)
+        case let .rename(id): RenameStripSheet(controller: controller, id: id)
         case .duration: DurationEditor(controller: controller)
         case .card: CompactCardSheet(controller: controller)
         case .creature: AddCreatureSheet(controller: controller)
@@ -78,5 +79,44 @@ private struct DurationEditor: View {
             }
         }
         .sheetFrame(minWidth: 400, minHeight: 320)
+    }
+}
+
+/// Renames a strip for this fight, such as "Goblin Archer" for "Goblin 2"; the plan and the party keep their names.
+private struct RenameStripSheet: View {
+    let controller: BoardController
+    let id: UUID
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @FocusState private var isEditing: Bool
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Name", text: $name)
+                    .nameEntry()
+                    .focused($isEditing)
+                    .onSubmit(rename)
+            }
+            .formStyle(.grouped)
+            .navigationTitle("Rename")
+            .onAppear {
+                name = controller.state[id]?.name ?? ""
+                isEditing = true
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Rename", action: rename)
+                        .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+        .sheetFrame(minWidth: 360, minHeight: 160)
+    }
+
+    private func rename() {
+        controller.change { $0.rename(id, to: name) }
+        dismiss()
     }
 }

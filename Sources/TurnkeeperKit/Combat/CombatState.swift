@@ -97,6 +97,13 @@ public struct CombatState: Codable, Sendable, Hashable {
 
     // MARK: Setup
 
+    /// Renames a combatant for this fight, trimmed; a blank name changes nothing.
+    public mutating func rename(_ id: UUID, to name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        self[id]?.name = trimmed
+    }
+
     /// Sets a rolled initiative. During setup the ladder re-sorts at once.
     public mutating func setInitiative(_ value: Double, for id: UUID) {
         self[id]?.initiative = value

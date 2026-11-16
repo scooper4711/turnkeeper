@@ -197,6 +197,10 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   end of the order with no initiative, for the GM to enter one, and is numbered after those of its kind
   already in the fight; nobody is renamed. The encounter's plan doesn't change, and adding can be undone.
 - R4.8b A creature's strip menu has Side, which makes an enemy an ally or an ally an enemy.
+- R4.8c Every strip's menu has Rename…, in setup and in combat, to tell creatures apart ("Goblin Archer" for
+  "Goblin 2") or fix a name. A blank name changes nothing. The new name shows wherever the strip does, the
+  player screen included, for this fight only: the encounter's plan and the party keep theirs. Renaming can
+  be undone.
 - R4.9 Durations and events count down and fire in rules order.
 - R4.10 Turn reminders are modal and must be dismissed: slowed, stunned, quickened and dying at the
   start of a turn; persistent damage and frightened at the end of a turn; custom notes at either. Next
