@@ -101,6 +101,8 @@ Starfinder games in person. Like any good toolkit, each one grants a +1 item bon
 - **Turnkeeper** builds encounters and runs initiative at the table, with the battle card of whoever's turn it is.
 - [Field Guide](https://github.com/scooper4711/field-guide) carries the Pathfinder and Starfinder compendium,
   offline.
+- [Chronicle Keeper](https://github.com/scooper4711/chronicle-keeper) keeps a record of your Organized Play
+  characters: their sessions, XP, level, reputation and Fame.
 
 ## Supporting the project
 
