@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-11-21
+
+### Added
+- Rename a strip from its menu on the board
+- Mark a strip dead or revive it from the board
+- Count dead enemies as down, and gray them out on the player screen
+- Skip dead strips in the initiative order
+- Add creatures as allies, and switch a strip's side
+- Add a creature to a fight from the board
+- Share the player screen with the players' devices
+- Run on the iPhone
+
+### Fixed
+- Show the About screen from the iPad's menu bar
+- Knock allies out with the swipe instead of killing them
+- Close the gap around a creature's starting conditions on the iPhone
+- Paste creature art on iOS 27
+
+### Changed
+- Require tabletop-kit 1.12.0
+- Update tabletop-kit to 1.11.4
+- Time out CI jobs instead of waiting 6 hours
+- Require tabletop-kit 1.11.3
+- Require tabletop-kit 1.11.2
+- Pin the GitHub actions to commit hashes
+- Run the tests on the self-hosted Mac mini
+- Require tabletop-kit 1.11.1
+- Require tabletop-kit 1.11.0
+- Require tabletop-kit 1.10.0
+- Require tabletop-kit 1.9.0
+- Require tabletop-kit 1.8.1
+- Require tabletop-kit 1.8.0
+- Require tabletop-kit 1.7.0
+- Require tabletop-kit 1.6.0
+- Require tabletop-kit 1.5.0
+- Require tabletop-kit 1.4.1
+- Require tabletop-kit 1.4.0
+- Drop the AI disclosure rule from CONTRIBUTING
+- Keep the release checkout to one with block
+- Number every build by the commits on main
+- Number every build by the commits on main
+- Specify About in the iPad's menu bar
+- Specify that a swipe knocks allies out
+- Specify renaming a strip on the board
+- Specify the Dead status for strips
+- Send any protocol's messages over a channel
+- Scroll to the creatures before opening a card in the screenshot tour
+- Tap the glossary popover's own link
+
+[2.1.0]: https://github.com/scooper4711/turnkeeper/releases/tag/v2.1.0
+
 ## [2.0.1] - 2026-11-13
 
 ### Fixed
