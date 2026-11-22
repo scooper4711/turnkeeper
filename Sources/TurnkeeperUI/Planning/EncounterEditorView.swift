@@ -37,7 +37,8 @@ struct EncounterEditorView: View {
         .onChange(of: encounter.id) { setUp(scenario) }
         .onChange(of: partyID) { if let label = pickedLabel(scenario) { self.label = label } }
         .sheet(isPresented: $isBrowsing) {
-            BestiaryBrowser(game: model.game, partyLevel: model.party(partyID)?.level) { key in addCreature(key) }
+            BestiaryBrowser(game: model.game, partyLevel: model.party(partyID)?.level,
+                            add: { key in addCreature(key) }, scenarioID: encounter.scenarioID)
         }
         .sheet(isPresented: $isAddingCustom) {
             if let scenario {

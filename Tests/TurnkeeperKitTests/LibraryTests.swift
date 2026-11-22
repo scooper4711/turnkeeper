@@ -147,7 +147,7 @@ struct LibraryTests {
         #expect(throws: LibraryError.newerFormat(99)) { try LibraryPackage.decode(data) }
     }
 
-    @Test("Custom creatures travel with their campaign and are found by key")
+    @Test("Custom creatures travel with their campaign, are found by key, and outlive it")
     func customCreatures() throws {
         var (library, _) = plannedLibrary()
         let campaign = library.campaigns[0]
@@ -158,7 +158,7 @@ struct LibraryTests {
         let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
         #expect(package.library.customCreatures.map(\.id) == [custom.id])
         library.deleteCampaign(campaign.id)
-        #expect(library.customCreature(key: custom.key) == nil)
+        #expect(library.customCreature(key: custom.key) != nil, "it outlives the campaign it was made in")
     }
 
     @Test("A library missing newer kinds of records, or with an unreadable record, still loads")

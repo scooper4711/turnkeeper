@@ -140,7 +140,7 @@ private struct SlotRow: View {
         }
         .sheet(isPresented: $isEditingCreature) {
             if let custom = model.library.customCreature(key: slot.creatureKey) {
-                CustomCreatureEditor(custom: custom) { model.library.save($0) }
+                CustomCreatureEditor(custom: custom) { model.saveCustomCreature($0) }
             }
         }
     }

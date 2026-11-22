@@ -75,7 +75,7 @@ struct StatBlockImportModifier: ViewModifier {
             }
             .sheet(item: $reviewing) { custom in
                 CustomCreatureEditor(custom: model.library.customCreature(key: custom.key) ?? custom) {
-                    model.library.save($0)
+                    model.saveCustomCreature($0)
                 }
             }
     }

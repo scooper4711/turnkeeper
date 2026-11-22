@@ -16,6 +16,8 @@ let package = Package(
     targets: [
         .target(name: "TurnkeeperKit", dependencies: [
             .product(name: "Bestiary", package: "tabletop-kit"),
+            .product(name: "CreatureArt", package: "tabletop-kit"),
+            .product(name: "SharedLibraries", package: "tabletop-kit"),
             .product(name: "TablesideShared", package: "tabletop-kit")
         ]),
         .target(name: "TurnkeeperUI", dependencies: [
@@ -33,7 +35,8 @@ let package = Package(
         .executableTarget(name: "CardSnapshots", dependencies: ["TurnkeeperUI"]),
         .testTarget(
             name: "TurnkeeperKitTests",
-            dependencies: ["TurnkeeperKit", .product(name: "TablesideShared", package: "tabletop-kit")]
+            dependencies: ["TurnkeeperKit", .product(name: "TablesideShared", package: "tabletop-kit"),
+                           .product(name: "SharedLibraries", package: "tabletop-kit")]
         ),
         .testTarget(
             name: "CharacterImportTests",

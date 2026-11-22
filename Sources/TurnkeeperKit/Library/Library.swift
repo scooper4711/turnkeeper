@@ -83,9 +83,14 @@ public struct Library: Codable, Sendable, Hashable {
     }
 
     /// The image files that live art and handout records point to.
-    public var liveImageFileNames: Set<String> {
-        Set(customArt.filter { !$0.isDeleted }.map(\.fileName))
-            .union(handouts.filter { !$0.isDeleted && $0.hasImage }.map(\.fileName))
+    public var liveImageFileNames: Set<String> { liveArtFileNames.union(liveHandoutFileNames) }
+
+    /// The image files of live custom art, which the shared library keeps once the app has moved in.
+    public var liveArtFileNames: Set<String> { Set(customArt.filter { !$0.isDeleted }.map(\.fileName)) }
+
+    /// The image files of live handouts, which stay in the app's own `ArtStore`.
+    public var liveHandoutFileNames: Set<String> {
+        Set(handouts.filter { !$0.isDeleted && $0.hasImage }.map(\.fileName))
     }
 
     /// The note about a creature in a scenario, or an empty one ready to write.
@@ -98,9 +103,14 @@ public struct Library: Codable, Sendable, Hashable {
         handouts.filter { $0.scenarioID == scenarioID && !$0.isDeleted }.sorted { $0.name < $1.name }
     }
 
-    public func customCreatures(in campaignID: UUID) -> [CustomCreature] {
-        customCreatures.filter { $0.campaignID == campaignID && !$0.isDeleted }
-            .sorted { $0.creature.name < $1.creature.name }
+    /// Every custom creature, those made for the scenario first, then the campaign's, then by name (R4.1).
+    public func customCreaturesListed(campaignID: UUID?, scenarioID: UUID? = nil) -> [CustomCreature] {
+        func rank(_ custom: CustomCreature) -> Int {
+            if scenarioID != nil && custom.scenarioID == scenarioID { return 0 }
+            return campaignID != nil && custom.campaignID == campaignID ? 1 : 2
+        }
+        return customCreatures.filter { !$0.isDeleted }
+            .sorted { (rank($0), $0.creature.name) < (rank($1), $1.creature.name) }
     }
 
     public func sessions(in campaignID: UUID) -> [CombatSession] {
@@ -159,7 +169,6 @@ public struct Library: Codable, Sendable, Hashable {
         mark(\.handouts, now) { scenarioIDs.contains($0.scenarioID) }
         mark(\.creatureNotes, now) { scenarioIDs.contains($0.scenarioID) }
         mark(\.sessions, now) { $0.campaignID == id }
-        mark(\.customCreatures, now) { $0.campaignID == id }
     }
 
     public mutating func deleteScenario(_ id: UUID) {
@@ -174,6 +183,18 @@ public struct Library: Codable, Sendable, Hashable {
     public mutating func deleteEncounter(_ id: UUID) { mark(\.encounters, ChangeClock.now()) { $0.id == id } }
     public mutating func deleteSession(_ id: UUID) { mark(\.sessions, ChangeClock.now()) { $0.id == id } }
     public mutating func deleteCustomCreature(_ id: UUID) { mark(\.customCreatures, ChangeClock.now()) { $0.id == id } }
+
+    /// Takes a creature out of every variant of every live encounter.
+    public mutating func removeFromEncounters(key: String) {
+        for var encounter in encounters where !encounter.isDeleted {
+            guard encounter.variants.contains(where: { $0.slots.contains { $0.creatureKey == key } }) else { continue }
+            for var variant in encounter.variants {
+                variant.slots.removeAll { $0.creatureKey == key }
+                encounter.setVariant(variant)
+            }
+            save(encounter)
+        }
+    }
 
     /// Saves a record stamped now, unless it's the same as the one stored: a save that changes nothing isn't an
     /// edit, so it mustn't look like one to the other device.

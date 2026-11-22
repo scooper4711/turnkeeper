@@ -4,6 +4,7 @@ import TurnkeeperKit
 import CreatureArt
 import Foundation
 import Observation
+import TablesideShared
 
 /// What the planner's detail column shows.
 enum PlannerSelection: Hashable {
@@ -49,8 +50,12 @@ final class AppModel {
     /// The party member whose sheet is being refreshed, for the progress on its row.
     var refreshingMemberID: UUID?
 
-    /// Where pasted artwork is kept; nil when there's nowhere to keep it.
+    /// Where handouts' images are kept, and pasted artwork until the app moves into the shared library.
     @ObservationIgnored let artStore: ArtStore?
+    /// The shared creature library; nil when the app keeps custom creatures in its own library (R6.5).
+    @ObservationIgnored let sharedCreatures: SharedCreatureStore?
+    /// Tells the model when another app changes the shared library.
+    @ObservationIgnored var sharedChangeObserver: LibraryChangeObserver?
     /// The creature art from the user's PDFs; nil when there's nowhere to keep it.
     @ObservationIgnored let creatureArt: CreatureArtStore?
     /// What the art library holds, and the creatures' art matched from it.
@@ -58,19 +63,21 @@ final class AppModel {
     var artMatcher = LibraryArtMatcher()
     /// What reading PDFs of art is doing, while it runs.
     var artProgress: String?
-    @ObservationIgnored private let file: LibraryFile?
+    @ObservationIgnored let file: LibraryFile?
     /// The iconic pregens a GM can add as Table Buddies, read when first needed.
     @ObservationIgnored lazy var pregens: PregenCatalog = BestiaryStore.locateGeneratedDirectory()
         .map { PregenCatalog(folder: $0.appendingPathComponent("Pregens")) } ?? PregenCatalog()
     @ObservationIgnored private var saveTask: Task<Void, Never>?
 
     init(library: Library = Library(), bestiary: BestiaryStore = BestiaryStore(), file: LibraryFile? = nil,
-         artStore: ArtStore? = nil, creatureArt: CreatureArtStore? = nil) {
+         artStore: ArtStore? = nil, creatureArt: CreatureArtStore? = nil,
+         sharedCreatures: SharedCreatureStore? = nil) {
         self.library = library
         self.bestiary = bestiary
         self.file = file
         self.artStore = artStore
         self.creatureArt = creatureArt
+        self.sharedCreatures = sharedCreatures
         selectedCampaignID = library.activeCampaign(preferring: file == nil ? nil : LastCampaign.id)?.id
     }
 
@@ -88,9 +95,14 @@ final class AppModel {
             let file = try LibraryFile.standard()
             let library = try file.load()
             let artStore = try? ArtStore.standard()
-            artStore?.sweep(keeping: library.liveImageFileNames)
+            let opening = SharedLibraryOpening.open(moving: library, pastedArt: artStore)
+            // Once moved, the art folder holds only handouts; before that it still holds the pasted art too.
+            artStore?.sweep(keeping: opening.creatures == nil ? library.liveImageFileNames
+                                                              : library.liveHandoutFileNames)
             let model = AppModel(library: library, bestiary: bestiary ?? BestiaryStore(), file: file,
-                                 artStore: artStore, creatureArt: try? CreatureArtStore.standard())
+                                 artStore: artStore, creatureArt: opening.art, sharedCreatures: opening.creatures)
+            model.errorMessage = opening.failure
+            model.startFollowingSharedLibrary()
             Task { await model.refreshCreatureArt(addingNew: true) }
             return model
         } catch {
@@ -125,11 +137,13 @@ final class AppModel {
         return entry.art.hasArt ? entry : withLibraryArt(entry)
     }
 
-    /// The file behind an art path: pasted art from the art store, anything else from the bundled bestiary. Art
-    /// from the user's PDFs has no file; `artPicture(for:maxPixels:)` draws it.
+    /// The file behind an art path: pasted art from its store, anything else from the bundled bestiary. Art from
+    /// the user's PDFs has no file; `artPicture(for:maxPixels:)` draws it.
     func artURL(for path: String) -> URL? {
         guard path.hasPrefix(CustomArt.pathPrefix) else { return bestiary.url(for: path) }
-        return artStore?.url(for: String(path.dropFirst(CustomArt.pathPrefix.count)))
+        let fileName = String(path.dropFirst(CustomArt.pathPrefix.count))
+        if let pastedArtStore, pastedArtStore.contains(fileName) { return pastedArtStore.url(for: fileName) }
+        return artStore?.url(for: fileName)
     }
 
     /// A creature's full stat block, from a linked PC's sheet, the campaign's custom creatures or the bestiary.
@@ -159,7 +173,7 @@ final class AppModel {
     private func write() {
         guard let file else { return }
         do {
-            try file.save(library)
+            try saveLibrary(to: file)
         } catch {
             errorMessage = "Saving the library failed: \(error.localizedDescription)"
         }
