@@ -99,13 +99,19 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   slot, so one stack can be made weak or elite. Combatants of the same creature are numbered together across
   slots (Wolf 1, Wolf 2, even when one is weak), and on the board weak and elite strips have a colored border,
   a different color for each.
-- R3.5a Custom creatures and complex hazards belong to a campaign and work everywhere bestiary creatures do
+- R3.5a Custom creatures and complex hazards are kept in the library the Tableside apps share (Tabletop Kit's shared
+  libraries spec, R4), belong to no campaign, and work everywhere bestiary creatures do
   (cards, templates, conditions, budget, initiative). They are made or edited in a form with a live battle
   card; lists are typed as printed ("Acrobatics +5", "2d8+11 bludgeoning plus 1d6 fire", "DC 22 basic
   Reflex"), and DCs and damage in ability text still adjust with templates and conditions.
-  The bestiary browser lists the campaign's custom creatures first, with a Custom Creatures source filter.
+  The bestiary browser lists all of them first, the current scenario's and then the campaign's ahead of the rest,
+  with a Custom Creatures source filter.
   A custom creature's slot offers Edit Creature… and Delete Custom Creature… (which removes it from every
-  encounter), and the editor's Paste button replaces it with a stat block copied from Pluck.
+  encounter and from the other apps, with its art), and the editor's Paste button replaces it with a stat block
+  copied from Pluck. A custom pawn made in Pawn Shop has a name, a size and art but no stat block: it is listed in
+  every campaign whatever the level filter says, can be added to an encounter, and takes the campaign and its game
+  when given a stat block. A name or size changed in Pawn Shop wins over the stat block's. A creature deleted in
+  another app, here or on another device, leaves every encounter.
 - R3.5b Stat blocks copied or dragged from Pluck (or pasted as plain text) become custom creatures in the
   encounter. A block for a subtier goes into the variant with that subtier; a summary lists what was added
   and anything kept as text, with Review… to open the editor.

@@ -26,7 +26,7 @@ public struct TurnkeeperApp: App {
                 .environment(model)
                 .onOpenURL { url in model.importLibraryFile(url) }
                 .onChange(of: scenePhase) { old, phase in
-                    if phase != .active { model.saveNow() }
+                    if phase != .active { model.saveAndCloseSharedLibrary() }
                     // iOS closes the listener in the background; the followers come back on their own.
                     if phase == .active, old == .background { Task { await TableSharing.shared.resume() } }
                 }

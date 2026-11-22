@@ -38,19 +38,21 @@ public struct LibraryPackage: Codable, Sendable {
         images = try container.decodeIfPresent([String: Data].self, forKey: .images) ?? [:]
     }
 
-    /// The package with the images its art records point to, read from `store`.
-    public func addingImages(from store: ArtStore) -> LibraryPackage {
+    /// The package with the images its records point to: handouts' from `store`, custom art's from `artStore`
+    /// (the shared library's folder), or from `store` when the app keeps its art there.
+    public func addingImages(from store: ArtStore, artStore: ArtStore? = nil) -> LibraryPackage {
         var package = self
-        for fileName in library.liveImageFileNames {
-            package.images[fileName] = store.data(for: fileName)
-        }
+        for fileName in library.liveHandoutFileNames { package.images[fileName] = store.data(for: fileName) }
+        for fileName in library.liveArtFileNames { package.images[fileName] = (artStore ?? store).data(for: fileName) }
         return package
     }
 
-    /// Writes the package's images that `store` doesn't have yet; do this before merging the library.
-    public func writeImages(to store: ArtStore) throws {
-        for (fileName, data) in images where !store.contains(fileName) {
-            try store.write(data, as: fileName)
+    /// Writes the package's images that their store doesn't have yet; do this before merging the library.
+    public func writeImages(to store: ArtStore, artStore: ArtStore? = nil) throws {
+        let artFiles = Set(library.customArt.map(\.fileName))
+        for (fileName, data) in images {
+            let target = artFiles.contains(fileName) ? artStore ?? store : store
+            if !target.contains(fileName) { try target.write(data, as: fileName) }
         }
     }
 
@@ -63,9 +65,9 @@ public struct LibraryPackage: Codable, Sendable {
         let scenarioIDs = Set(subset.scenarios.map(\.id))
         subset.encounters = library.encounters.filter { scenarioIDs.contains($0.scenarioID) }
         subset.sessions = library.sessions.filter { $0.campaignID == id }
-        subset.customCreatures = library.customCreatures.filter { $0.campaignID == id }
-        let subjects = Set(subset.encounters.flatMap { $0.variants.flatMap { $0.slots.map(\.creatureKey) } })
-            .union(subset.customCreatures.map(\.key))
+        let slotKeys = Set(subset.encounters.flatMap { $0.variants.flatMap { $0.slots.map(\.creatureKey) } })
+        subset.customCreatures = library.customCreatures.filter { $0.campaignID == id || slotKeys.contains($0.key) }
+        let subjects = slotKeys.union(subset.customCreatures.map(\.key))
         subset.customArt = library.customArt.filter { subjects.contains($0.subject) }
         subset.handouts = library.handouts.filter { scenarioIDs.contains($0.scenarioID) }
         subset.creatureNotes = library.creatureNotes.filter { scenarioIDs.contains($0.scenarioID) }

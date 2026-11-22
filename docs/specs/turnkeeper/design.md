@@ -129,6 +129,16 @@ Ported from the pf2e system, with tests.
   records' files, written to the store before the library is merged. `AppModel.entry` swaps pasted art in as
   `Pasted/<file>` paths, which `AppModel.artURL` resolves to the store, so every view and the player view
   show it; the card back is cleared so the drawn back frames it.
+- **Shared creature library.** `SharedCreatureStore` keeps custom creatures and pasted art in Tabletop Kit's
+  `SharedLibrary`, moved in once at launch with the PDF art library (`SharedLibraryOpening`). `Library` stays the
+  model the app edits: saving pushes changed rows, then pulls, and `library.json` keeps only deletions, which
+  sharing carries to other devices. If the shared library can't be written, `library.json` keeps everything. The
+  row's name and size win over the stat block's and are written back. Only deletions the store recorded since this
+  app's saved position remove a creature from encounters, so another build's separate library can't empty them. A
+  record this version can't decode is left untouched. Pasted art lives in the store's `Custom` folder; the launch
+  sweep only touches the app's `Art` folder, which holds handouts once moved.
+  A build outside the App Group (ad hoc) shares the signed app's container, so it skips the move and keeps using
+  the app's own library; moving would strand the creatures in a folder the signed app never reads.
 - **Handouts.** `Handout` records (scenario, name, image file) store their image in the same `ArtStore`
   and travel in packages the same way. `PlayerDisplay` shows either a handout or, while the player screen is
   on, the fight.

@@ -46,13 +46,13 @@ extension AppModel {
     /// Deletes a custom creature and takes it out of every encounter.
     func deleteCustomCreature(key: String) {
         guard let custom = library.customCreature(key: key) else { return }
-        for var encounter in encountersUsing(key: key) {
-            for var variant in encounter.variants {
-                variant.slots.removeAll { $0.creatureKey == key }
-                encounter.setVariant(variant)
-            }
-            library.save(encounter)
-        }
+        library.removeFromEncounters(key: key)
         library.deleteCustomCreature(custom.id)
+    }
+
+    /// Saves an edited custom creature. The first stat block of a custom pawn settles its campaign and game (R4.10).
+    func saveCustomCreature(_ edited: CustomCreature) {
+        let stored = library.customCreature(key: edited.key) ?? edited
+        library.save(stored.givingStatBlock(edited.creature, campaignID: selectedCampaignID, game: game))
     }
 }

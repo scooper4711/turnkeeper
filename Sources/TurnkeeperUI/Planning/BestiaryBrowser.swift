@@ -9,6 +9,8 @@ struct BestiaryBrowser: View {
     let add: (String) -> Void
     /// On the board, the side the creatures added join on; the planner sets it on each creature instead.
     var joiningSide: Binding<Side>?
+    /// The scenario being planned, whose custom creatures are listed first.
+    var scenarioID: UUID?
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var filter = BestiaryFilter()
@@ -18,10 +20,16 @@ struct BestiaryBrowser: View {
         let entries = model.bestiary.index.entries.filter { filter.games == .both || $0.game == game }
         return Set(entries.map(\.source.title).filter { !$0.isEmpty }).sorted()
     }
-    /// The campaign's custom creatures, listed with the bestiary and first among equals.
-    private var customEntries: [BestiaryIndexEntry] {
-        guard let campaignID = model.selectedCampaign?.id else { return [] }
-        return model.library.customCreatures(in: campaignID).map { BestiaryIndexEntry(creature: $0.creature) }
+    /// Every custom creature, the scenario's and campaign's first. One without a stat block has no game yet, so it
+    /// shows in every campaign's (R4.10).
+    private var customCreatures: [CustomCreature] {
+        model.library.customCreaturesListed(campaignID: model.selectedCampaign?.id, scenarioID: scenarioID)
+    }
+
+    private func customEntry(_ custom: CustomCreature) -> BestiaryIndexEntry {
+        var entry = model.entry(custom.key) ?? BestiaryIndexEntry(creature: custom.creature)
+        if !custom.hasStatBlock { entry.game = game }
+        return entry
     }
 
     @State private var added: [String: Int] = [:]
@@ -29,7 +37,9 @@ struct BestiaryBrowser: View {
 
     var body: some View {
         NavigationStack {
-            let results = filter.results(in: customEntries + model.bestiary.index.entries, defaultGame: game)
+            let custom = customCreatures
+            let results = filter.results(in: custom.map(customEntry) + model.bestiary.index.entries,
+                                         defaultGame: game, custom: CustomListing(custom))
             List {
                 if let joiningSide {
                     Section {
@@ -127,11 +137,12 @@ struct BestiaryFilter: Equatable {
         maximumLevel = range.upperBound
     }
 
-    func results(in entries: [BestiaryIndexEntry], defaultGame: Game) -> [BestiaryIndexEntry] {
+    func results(in entries: [BestiaryIndexEntry], defaultGame: Game,
+                 custom: CustomListing = CustomListing([])) -> [BestiaryIndexEntry] {
         let query = text.lowercased().trimmingCharacters(in: .whitespaces)
         return entries.filter { entry in
             (games == .both || entry.game == defaultGame)
-                && (minimumLevel...maximumLevel).contains(entry.level)
+                && (custom.isNameOnly(entry.key) || (minimumLevel...maximumLevel).contains(entry.level))
                 && matchesKind(entry) && (rarity == "any" || entry.traits.rarity == rarity)
                 && matchesSource(entry)
                 && (query.isEmpty || entry.name.lowercased().contains(query) || entry.traits.traits.contains(query))
@@ -139,6 +150,7 @@ struct BestiaryFilter: Equatable {
         .sorted { first, second in
             let firstIsCustom = CustomCreature.isCustomKey(first.key)
             guard firstIsCustom == CustomCreature.isCustomKey(second.key) else { return firstIsCustom }
+            if firstIsCustom { return custom.rank(first.key) < custom.rank(second.key) }
             return (first.level, first.name) < (second.level, second.name)
         }
     }
@@ -151,7 +163,7 @@ struct BestiaryFilter: Equatable {
         }
     }
 
-    /// The Source picker's tag for the campaign's custom creatures.
+    /// The Source picker's tag for the custom creatures.
     static let customSource = "custom creatures"
 
     private func matchesKind(_ entry: BestiaryIndexEntry) -> Bool {
@@ -236,4 +248,19 @@ private struct BestiaryRow: View {
         parts.append(entry.source.title)
         return parts.filter { !$0.isEmpty }.joined(separator: " · ")
     }
+}
+
+/// How the browser lists custom creatures: in the library's order, and those without a stat block, which have no
+/// level yet, whatever the level filter says.
+struct CustomListing {
+    private let ranks: [String: Int]
+    private let nameOnly: Set<String>
+
+    init(_ creatures: [CustomCreature]) {
+        ranks = Dictionary(uniqueKeysWithValues: creatures.enumerated().map { ($1.key, $0) })
+        nameOnly = Set(creatures.filter { !$0.hasStatBlock }.map(\.key))
+    }
+
+    func rank(_ key: String) -> Int { ranks[key] ?? .max }
+    func isNameOnly(_ key: String) -> Bool { nameOnly.contains(key) }
 }

@@ -24,7 +24,7 @@ extension AppModel {
     }
 
     private func withImages(_ package: LibraryPackage) -> LibraryPackage {
-        artStore.map(package.addingImages(from:)) ?? package
+        artStore.map { package.addingImages(from: $0, artStore: pastedArtStore) } ?? package
     }
 
     /// The file name an export should use, such as "PFS Season 7.turnkeeper".
@@ -46,7 +46,7 @@ extension AppModel {
 
     func importPackage(_ package: LibraryPackage) {
         do {
-            if let artStore { try package.writeImages(to: artStore) }
+            if let artStore { try package.writeImages(to: artStore, artStore: pastedArtStore) }
         } catch {
             errorMessage = error.localizedDescription
         }

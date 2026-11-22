@@ -6,12 +6,12 @@ import UniformTypeIdentifiers
 extension AppModel {
     /// Stores an image as a creature's art, downscaling it off the main actor.
     func setArtwork(_ image: Data, for key: String) async {
-        guard let artStore else {
+        guard let pastedArtStore else {
             errorMessage = "Adding the artwork failed: there's no folder to keep it in."
             return
         }
         do {
-            let art = try await Task.detached { try artStore.add(image, for: key) }.value
+            let art = try await Task.detached { try pastedArtStore.add(image, for: key) }.value
             library.save(art)
         } catch {
             errorMessage = error.localizedDescription
