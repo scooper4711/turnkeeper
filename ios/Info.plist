@@ -4,7 +4,6 @@
 <dict>
     <key>NSBonjourServices</key>
     <array>
-        <string>_turnkeeper._tcp</string>
         <string>_turnkeeper-table._tcp</string>
     </array>
     <key>UIAppFonts</key>
