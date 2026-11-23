@@ -86,7 +86,10 @@ extension AppModel {
         let prefix = LibraryArtMatcher.pathPrefix
         if path.hasPrefix(prefix) {
             guard let id = UUID(uuidString: String(path.dropFirst(prefix.count))) else { return nil }
-            return await creatureArt?.picture(id: id, maxPixels: maxPixels > 0 ? maxPixels : Self.fullArtPixels)
+            let pixels = maxPixels > 0 ? maxPixels : Self.fullArtPixels
+            if let picture = await creatureArt?.picture(id: id, maxPixels: pixels) { return picture }
+            guard await fetchCloudPictures(ofArt: id) else { return nil }
+            return await creatureArt?.picture(id: id, maxPixels: pixels)
         }
         guard let url = artURL(for: path) else { return nil }
         return await ArtLoader.shared.image(at: url, maxPixels: maxPixels)

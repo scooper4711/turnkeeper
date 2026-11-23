@@ -47,6 +47,7 @@ extension AppModel {
         var merged = library
         let summary = LibraryMerger.merge(package.library, into: &merged)
         library = merged
+        campaignSync?.libraryMerged()
         if selectedCampaignID == nil { selectedCampaignID = library.activeCampaign(preferring: nil)?.id }
         statusMessage = describe(summary, package: package)
     }

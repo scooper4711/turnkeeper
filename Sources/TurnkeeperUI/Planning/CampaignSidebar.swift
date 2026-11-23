@@ -34,6 +34,7 @@ struct CampaignSidebar: View {
         let missing = model.artCatalog.missingSources.count
         return Menu {
             Button("Import…", systemImage: "square.and.arrow.down") { model.isImportingLibrary = true }
+            Button(model.cloudSyncStatusText, systemImage: "icloud") {}.disabled(true)
             Button(missing > 0 ? "Creature Art (\(missing) missing)…" : "Creature Art…",
                    systemImage: "photo.on.rectangle.angled") { model.librarySheet = .creatureArt }
             Divider()

@@ -52,6 +52,7 @@ struct LibraryCommands: Commands {
             }
             .disabled(model.selectedCampaignID == nil)
             Divider()
+            Button(model.cloudSyncStatusText) {}.disabled(true)
             Button("Creature Art…") { model.librarySheet = .creatureArt }
             Divider()
             Button("Share with Players…") { model.librarySheet = .shareWithPlayers }

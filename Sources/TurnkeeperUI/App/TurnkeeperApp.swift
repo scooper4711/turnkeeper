@@ -27,6 +27,7 @@ public struct TurnkeeperApp: App {
                 .onOpenURL { url in model.importLibraryFile(url) }
                 .onChange(of: scenePhase) { old, phase in
                     if phase != .active { model.saveAndCloseSharedLibrary() }
+                    if phase == .active { model.resumeCloudSync() }
                     // iOS closes the listener in the background; the followers come back on their own.
                     if phase == .active, old == .background { Task { await TableSharing.shared.resume() } }
                 }
