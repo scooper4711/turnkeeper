@@ -11,7 +11,7 @@ set -eu
 cd "$(dirname "$0")/.."
 PF_PREGENS="${PF_PREGENS:-$HOME/Documents/Pathfinder/Pregens $HOME/Documents/Pathfinder/CommunityUsePackagePathfinderRemasterIconicsPregeneratedCharacters}"
 SF_PREGENS="${SF_PREGENS:-$HOME/Downloads/Starfinder 2E Pregens (CUP28E)}"
-ICONIC_ART="${ICONIC_ART:-$HOME/git/community-use-artwork/Community Use Package- Iconics|$HOME/Downloads/Community Use Package- Starfinder Iconic Characters}"
+ICONIC_ART="${ICONIC_ART:-$HOME/git/tableside-toolkit/community-use-artwork/Community Use Package- Iconics|$HOME/Downloads/Community Use Package- Starfinder Iconic Characters}"
 OUT=Resources/Pregens/Art
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
