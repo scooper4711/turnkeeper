@@ -56,7 +56,9 @@ struct PartyEditorView: View {
                 }
                 .onMove { source, target in update { $0.members.move(fromOffsets: source, toOffset: target) } }
                 Button("Add Member", systemImage: "plus") {
-                    update { $0.members.append(PartyMember(name: "Player \($0.members.count + 1)")) }
+                    update {
+                        $0.members.append(PartyMember(name: PartyMember.placeholderName(number: $0.members.count + 1)))
+                    }
                 }
                 Button("Add from Demiplane…", systemImage: "person.crop.rectangle.badge.plus") {
                     demiplaneTarget = DemiplaneTarget(memberID: nil)

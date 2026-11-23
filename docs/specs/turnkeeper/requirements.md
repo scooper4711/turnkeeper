@@ -267,7 +267,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 ## R6 Player characters
 - R6.1 A PC can be added from Demiplane by scanning the QR code on its character sheet (iPad), or by pasting
   the sheet's link, its ID or an image of the QR code. A quick PC (name and level only) can be linked later,
-  and a linked one unlinked. Only characters whose player shares them by link can be imported; a private
+  and a linked one unlinked. Linking or refreshing keeps a name the GM gave, but a placeholder such as "Player 1"
+  becomes the character's name. Only characters whose player shares them by link can be imported; a private
   character can't, and the import says so. Campaigns aren't imported: each character is added on its own.
 - R6.2 Importing asks Demiplane to export the character sheet PDF and reads the computed numbers from it:
   AC, saves, Perception, skills, speeds, Strikes, spells, actions and reactions, feats, class features,
