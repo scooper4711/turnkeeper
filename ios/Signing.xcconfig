@@ -11,6 +11,11 @@
 DEVELOPMENT_TEAM =
 PRODUCT_BUNDLE_IDENTIFIER = io.github.scooper4711.Turnkeeper
 
+// The iCloud container the library syncs through, which Info.plist names (TablesideSyncContainer). It belongs to
+// the publishing team: with another team, empty it in Local.xcconfig and remove the iCloud entitlements, and the app
+// keeps its library on the device alone.
+TABLESIDE_SYNC_CONTAINER = iCloud.io.github.scooper4711.tableside
+
 // The version and build number come from git (scripts/version.sh): the Turnkeeper-iPad scheme's build
 // pre-action writes them to Version.xcconfig before every build, Product > Archive included. These are the
 // fallbacks for a build that skips the scheme.

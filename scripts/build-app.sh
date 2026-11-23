@@ -6,6 +6,9 @@
 # TEAM_ID    the team that owns the App Group (default: read from the Developer ID certificate)
 # SIGNING_IDENTITY  passed to scripts/sign-app.sh; "-" signs ad hoc, without the App Group
 # BUILD_NUMBER  CFBundleVersion, which must increase with every App Store upload (default: scripts/version.sh build)
+# PROVISIONING_PROFILE  a profile with iCloud; with a team, the app syncs its library through iCloud (tabletop-kit's
+#            scripts/add-icloud-entitlements.sh, which ICLOUD_ENVIRONMENT also affects: Development to sync with an iPad
+#            build from Xcode). Without it the library stays on this device. For CHANNEL=appstore, the App Store profile.
 # CHANNEL    "appstore" also builds the Mac App Store package, build/appstore/Turnkeeper.pkg, from the same sources,
 #            compiled with -DAPP_STORE; needs TEAM_ID and the variables of tabletop-kit's
 #            scripts/package-appstore.sh (PACKAGER names another copy; TRIAL=1 checks it without them)
@@ -160,6 +163,13 @@ if [ -n "${TEAM_ID:-}" ]; then
 else
     cp Resources/Turnkeeper.entitlements "$ENTITLEMENTS"
     /usr/libexec/PlistBuddy -c "Delete :com.apple.security.application-groups" "$ENTITLEMENTS"
+fi
+# With a provisioning profile that allows iCloud, the app joins the toolkit's container and names it in its
+# Info.plist, which turns syncing on; an ad hoc signature can't carry them. The script is found beside the package
+# after the build above resolved it, so it follows the dependency pin.
+if [ -n "${TEAM_ID:-}" ] && [ -n "${PROVISIONING_PROFILE:-}" ] && [ "${SIGNING_IDENTITY:-}" != "-" ]; then
+    "${ICLOUD_ENTITLER:-.build/checkouts/tabletop-kit/scripts/add-icloud-entitlements.sh}" "$APP" "$ENTITLEMENTS" \
+        "$TEAM_ID" "$PROVISIONING_PROFILE"
 fi
 scripts/sign-app.sh "$APP" "$ENTITLEMENTS"
 # The bundle is rebuilt at the same path, so Finder and LaunchServices keep showing the icon they cached
