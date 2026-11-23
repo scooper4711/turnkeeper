@@ -170,6 +170,33 @@ struct LibraryTests {
         #expect(library.customCreatures.isEmpty && library.sessions.isEmpty)
     }
 
+    @Test("A screen saving its old copy as it closes doesn't bring a deleted record back")
+    func staleSaveAfterDelete() throws {
+        var (library, encounter) = plannedLibrary()
+        let campaign = library.campaigns[0]
+        let staleScenario = library.scenarios[0]
+        library.deleteCampaign(campaign.id)
+        let deleted = library.scenarios[0]
+
+        library.save(staleScenario)
+        library.save(encounter)
+
+        #expect(library.scenarios[0] == deleted)
+        #expect(library.encounters.first { $0.id == encounter.id }?.isDeleted == true)
+    }
+
+    @Test("Saving art again under its own ID keeps it, and retires the subject's other art")
+    func resavedCustomArt() throws {
+        var library = Library()
+        let old = CustomArt(subject: "goblin", fileName: "old.png", byteCount: 1)
+        let new = CustomArt(subject: "goblin", fileName: "new.png", byteCount: 1)
+        library.save(old)
+        library.save(new)
+        library.save(new)
+        #expect(library.customArt(for: "goblin")?.id == new.id)
+        #expect(library.customArt.first { $0.id == old.id }?.isDeleted == true)
+    }
+
     @Test("Copying a variant gives new slot IDs")
     func copyVariant() {
         var encounter = Encounter(scenarioID: UUID(), name: "B")
