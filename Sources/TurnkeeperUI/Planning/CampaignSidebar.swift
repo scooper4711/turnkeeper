@@ -31,7 +31,7 @@ struct CampaignSidebar: View {
     /// menu has the same (`LibraryCommands`). Missing art PDFs are counted on the menu's button and its
     /// Creature Art item.
     private var moreMenu: some View {
-        let missing = model.artCatalog.sourcesWithLostArt.count
+        let missing = model.artSourcesNeeded.count
         return Menu {
             Button("Import…", systemImage: "square.and.arrow.down") { model.isImportingLibrary = true }
             Button(model.cloudSyncStatusText, systemImage: "icloud") {}.disabled(true)

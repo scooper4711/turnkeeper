@@ -65,8 +65,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   (no copies; new downloads are added on request and at launch), and Add PDFs…, which keeps copies of other
   PDFs. Art is matched to creatures by name and game, remastered creatures preferring remastered products'
   art; a Battle Card's creature or a pawn gives the portrait, a token the token (else the portrait).
-- R2.3a A referenced PDF that was deleted or moved is listed as missing in Creature Art, with the art it
-  took away, and a creature whose art came only from missing PDFs says on its card which PDF it needs. Art
+- R2.3a A referenced PDF that a creature needs for its art, and that was deleted, moved or left on another
+  device, is listed as missing in Creature Art and counted on the menu. A PDF whose art no creature needs is not
+  a warning. A creature whose art came only from missing PDFs says on its card which PDF it needs. Art
   returns when the PDF does (Check Again), or, when Turnkeeper can no longer reach their folder, when the folder
   is picked again with Import from Scrollkeeper.
 - R2.3b Creature Art shows watched folders and each PDF's folder by name and place, not by path: Scrollkeeper's

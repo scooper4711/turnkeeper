@@ -65,6 +65,8 @@ final class AppModel {
     /// What the art library holds, and the creatures' art matched from it.
     var artCatalog = ArtCatalog()
     var artMatcher = LibraryArtMatcher()
+    /// The missing PDFs a creature needs for its art, which are the ones worth a warning.
+    var artSourcesNeeded: [ArtSourceSummary] = []
     /// What reading PDFs of art is doing, while it runs.
     var artProgress: String?
     @ObservationIgnored let file: LibraryFile?

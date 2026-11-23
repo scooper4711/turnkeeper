@@ -26,7 +26,7 @@ struct CreatureArtView: View {
                         HStack { ProgressView().controlSize(.small); Text(progress).font(.callout) }
                     }
                 }
-                if !model.artCatalog.sourcesWithLostArt.isEmpty { missingSection }
+                if !model.artSourcesNeeded.isEmpty { missingSection }
                 if !model.artCatalog.watchedFolders.isEmpty { foldersSection }
                 pdfsSection
             }
@@ -104,15 +104,15 @@ struct CreatureArtView: View {
 
     private var missingSection: some View {
         Section {
-            ForEach(model.artCatalog.sourcesWithLostArt) { source in
+            ForEach(model.artSourcesNeeded) { source in
                 SourceRow(source: source)
             }
         } header: {
             Label("Missing PDFs", systemImage: "exclamationmark.triangle")
         } footer: {
-            Text("Turnkeeper can't reach these PDFs, so their art can't be shown. If they're still there, choose "
-                 + "Import from Scrollkeeper… and pick their folder again. If they were deleted or moved, download "
-                 + "them again in Scrollkeeper and choose Check Again, or remove them.")
+            Text("Creatures need these PDFs for their art, and Turnkeeper can't reach them. If they're still "
+                 + "there, choose Import from Scrollkeeper… and pick their folder again. If they were deleted or "
+                 + "moved, download them again in Scrollkeeper and choose Check Again, or remove them.")
         }
     }
 
@@ -140,7 +140,7 @@ struct CreatureArtView: View {
             if model.artCatalog.sources.isEmpty {
                 Text("No PDFs yet.").foregroundStyle(.secondary)
             }
-            ForEach(model.artCatalog.sources.filter { !$0.hasLostArt }) { source in
+            ForEach(model.artCatalog.sources.filter { !model.artSourcesNeeded.contains($0) }) { source in
                 SourceRow(source: source)
             }
         }

@@ -19,7 +19,18 @@ extension AppModel {
         let catalog = await creatureArt.catalog()
         artCatalog = catalog
         artMatcher = LibraryArtMatcher(art: catalog.art, overrides: bestiary.artOverrides)
+        artSourcesNeeded = await sourcesNeeded(from: catalog)
         artProgress = nil
+    }
+
+    /// Off the main actor, as it matches every creature in the bestiary.
+    private func sourcesNeeded(from catalog: ArtCatalog) async -> [ArtSourceSummary] {
+        let (creatures, matcher) = (bestiary.index.entries, artMatcher)
+        let customArtSubjects = Set(library.customArt.filter { !$0.isDeleted }.map(\.subject))
+        let titles = await Task.detached {
+            CreatureArtNeeds.sourceTitles(of: creatures, matcher: matcher, customArtSubjects: customArtSubjects)
+        }.value
+        return catalog.missingSources.filter { titles.contains($0.title) }
     }
 
     /// Watches Scrollkeeper's download folder and uses the PDFs of creature art in it, where they are.
