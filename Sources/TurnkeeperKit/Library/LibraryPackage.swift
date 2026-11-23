@@ -6,7 +6,7 @@ public extension UTType {
     static let turnkeeperLibrary = UTType(exportedAs: "io.github.scooper4711.turnkeeper.library", conformingTo: .json)
 }
 
-/// The contents of a `.turnkeeper` file, or of a nearby-sync exchange: some or all of a library.
+/// The contents of a `.turnkeeper` file: some or all of a library.
 public struct LibraryPackage: Codable, Sendable {
     public static let currentFormat = 1
 

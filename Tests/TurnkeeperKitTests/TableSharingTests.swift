@@ -186,9 +186,38 @@ struct TableSharingTests {
     @Test("A follower can't send the sharing device more than a request's worth")
     func incomingLimit() {
         var buffer = Data([0x00, 0x02, 0x00, 0x00])
-        #expect(throws: NearbyError.self) {
-            try NearbyFraming.next(TableMessage.self, from: &buffer, limit: TableHost.incomingLimit)
+        #expect(throws: ChannelError.self) {
+            try MessageFraming.next(TableMessage.self, from: &buffer, limit: TableHost.incomingLimit)
         }
+    }
+
+    @Test("Messages survive framing, even when they arrive in pieces")
+    func framing() throws {
+        let data = try MessageFraming.encode(TableMessage.refused(reason: "nope"))
+        var buffer = Data(data.prefix(3))
+        #expect(try MessageFraming.next(TableMessage.self, from: &buffer) == nil)
+        buffer.append(data.dropFirst(3))
+        guard case let .refused(reason) = try MessageFraming.next(TableMessage.self, from: &buffer) else {
+            Issue.record("Expected a refusal")
+            return
+        }
+        #expect(reason == "nope")
+        #expect(buffer.isEmpty)
+    }
+
+    @Test("Oversized frames are refused")
+    func oversized() {
+        var buffer = Data([0xFF, 0xFF, 0xFF, 0xFF])
+        #expect(throws: ChannelError.self) { try MessageFraming.next(TableMessage.self, from: &buffer) }
+    }
+
+    @Test("Pairing codes have four digits and ignore spaces when entered")
+    func codes() {
+        var generator = SystemRandomNumberGenerator()
+        let code = PairingCode.make(using: &generator)
+        #expect(code.count == 4 && code.allSatisfy(\.isNumber))
+        #expect(PairingCode.matches("12 34", "1234"))
+        #expect(!PairingCode.matches("1235", "1234"))
     }
 
     @Test("Errors say what failed")
