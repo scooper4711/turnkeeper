@@ -18,14 +18,17 @@ let package = Package(
             .product(name: "Bestiary", package: "tabletop-kit"),
             .product(name: "CreatureArt", package: "tabletop-kit"),
             .product(name: "SharedLibraries", package: "tabletop-kit"),
-            .product(name: "TablesideShared", package: "tabletop-kit")
+            .product(name: "TablesideShared", package: "tabletop-kit"),
+            .product(name: "TablesideSync", package: "tabletop-kit")
         ]),
         .target(name: "TurnkeeperUI", dependencies: [
             "TurnkeeperKit", "CharacterImport", .product(name: "ArtExtraction", package: "tabletop-kit"),
             .product(name: "BattleCards", package: "tabletop-kit"),
             .product(name: "CreatureArt", package: "tabletop-kit"),
             .product(name: "AppNotices", package: "tabletop-kit"),
-            .product(name: "TablesideShared", package: "tabletop-kit")
+            .product(name: "SharedLibraries", package: "tabletop-kit"),
+            .product(name: "TablesideShared", package: "tabletop-kit"),
+            .product(name: "TablesideSync", package: "tabletop-kit")
         ]),
         .target(name: "CharacterImport", dependencies: ["TurnkeeperKit"]),
         .executableTarget(name: "Turnkeeper", dependencies: ["TurnkeeperUI"]),
@@ -36,7 +39,8 @@ let package = Package(
         .testTarget(
             name: "TurnkeeperKitTests",
             dependencies: ["TurnkeeperKit", .product(name: "TablesideShared", package: "tabletop-kit"),
-                           .product(name: "SharedLibraries", package: "tabletop-kit")]
+                           .product(name: "SharedLibraries", package: "tabletop-kit"),
+                           .product(name: "TablesideSync", package: "tabletop-kit")]
         ),
         .testTarget(
             name: "CharacterImportTests",
