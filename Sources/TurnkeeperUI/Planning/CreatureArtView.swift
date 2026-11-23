@@ -56,6 +56,9 @@ struct CreatureArtView: View {
                 checkAgainButton
             }
         }
+        // A form row on the iPad otherwise grows to fill the sheet and hides the buttons' titles.
+        .fixedSize(horizontal: false, vertical: true)
+        .labelStyle(.titleAndIcon)
         // In a form row, every button fires on a tap anywhere in the row: Add PDFs… then set the picker to
         // PDFs, so Scrollkeeper's folder couldn't be opened. Borderless buttons take only their own taps.
         .buttonStyle(.borderless)
