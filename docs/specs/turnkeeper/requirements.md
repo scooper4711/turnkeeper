@@ -23,23 +23,32 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   Weak, Normal and Elite sit above the card instead of in the toolbar. The planner shows one column at a time.
 - R1.2 Planning data moves between devices in both directions as `.turnkeeper` files, through AirDrop,
   Files or Finder.
-- R1.3 "Sync with nearby device" merges the libraries of two devices over the local network.
-- R1.3a The campaign sidebar's toolbar holds Add Campaign and a More menu with Import…, Sync with Nearby Device…,
+- R1.3 A GM's own devices stay in step through their private iCloud, in the background, with nothing to press:
+  campaigns, parties, scenarios, encounters, fights, handouts and creature notes, and through the shared library
+  custom creatures, pasted art and the art read from PDFs (the PDFs themselves don't sync). The first sync merges the
+  device's library into iCloud and never replaces it. Signed out of iCloud, or in a build without iCloud, the app
+  works on the device alone. A change from another device to the fight on screen waits until the GM leaves it. There
+  is no way to exchange a whole library with someone else's device.
+- R1.3a The campaign sidebar's toolbar holds Add Campaign and a More menu with Import…, a line saying how iCloud sync is doing,
   Creature Art…, Share with Players… and Follow a Table… (R9) and, on the iPad and the iPhone, About, so none of them is lost when the sidebar is too narrow for a row of
   buttons. When art PDFs are missing, the menu's button and its Creature Art item say how many.
 - R1.3b The File menu has the same, whether or not the sidebar is showing: New Campaign… (⌘N, in place of New
   Window on the Mac, as every window shows the same library), Import Library…, Export Campaign… (the selected
-  campaign), Sync with Nearby Device…, Creature Art…, Share with Players… and Follow a Table…. On the iPad they are in the menu bar a keyboard
+  campaign), the iCloud line, Creature Art…, Share with Players… and Follow a Table…. On the iPad they are in the menu bar a keyboard
   brings up.
 - R1.4 Merging never loses edits silently. When both sides changed the same record, the newer one wins
   and the other is kept as a conflict copy, once. A record changed on only one device, however many times and
   across however many syncs, never makes a conflict copy. Opening, viewing or running something doesn't count
-  as a change.
+  as a change. Deleting a campaign or scenario deletes what's inside it on every device, including anything that
+  arrives after the delete, such as a conflict copy. The fight on screen stays until the GM leaves it.
 - R1.4a Players are synced one at a time. When both devices changed a party, each player keeps its latest
   edit, players added or removed on either device carry across, and a Demiplane sheet fetched later is
   kept even when the other device edited the same player.
-- R1.5 Building and running need no paid Apple developer account; only signing and notarizing releases does. There
-  is no iCloud or CloudKit.
+- R1.4b A change arriving from iCloud is saved to disk at once, even in the background, so an app iOS ends while
+  suspended can't send its older copy back over the change.
+- R1.5 Building and running the Mac app needs no paid Apple developer account; signing releases does, and so does
+  iCloud sync, which a build without a provisioning profile leaves out. The iPad project asks for the iCloud
+  entitlements, so another team removes them and empties `TABLESIDE_SYNC_CONTAINER` (`ios/Signing.xcconfig`).
 - R1.6 Pushing a version tag makes GitHub build the universal Mac app and attach its disk image, signed with the
   Developer ID and notarized, to the tag's release. It bundles the same data as a local build: both import the pf2e
   release named in `pf2e.release` and the art in the `Artwork` submodule.
@@ -59,8 +68,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   (no copies; new downloads are added on request and at launch), and Add PDFs…, which keeps copies of other
   PDFs. Art is matched to creatures by name and game, remastered creatures preferring remastered products'
   art; a Battle Card's creature or a pawn gives the portrait, a token the token (else the portrait).
-- R2.3a A referenced PDF that was deleted or moved is listed as missing in Creature Art, with the art it
-  took away, and a creature whose art came only from missing PDFs says on its card which PDF it needs. Art
+- R2.3a A referenced PDF that a creature needs for its art, and that was deleted, moved or left on another
+  device, is listed as missing in Creature Art and counted on the menu. A PDF whose art no creature needs is not
+  a warning. A creature whose art came only from missing PDFs says on its card which PDF it needs. Art
   returns when the PDF does (Check Again), or, when Turnkeeper can no longer reach their folder, when the folder
   is picked again with Import from Scrollkeeper.
 - R2.3b Creature Art shows watched folders and each PDF's folder by name and place, not by path: Scrollkeeper's
@@ -117,7 +127,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   and anything kept as text, with Review… to open the editor.
 - R3.5c Any creature can be given pasted artwork: Paste (under its battle card; an image copied from Pluck or
   anywhere), Choose Image…, or a drop onto its card or encounter row, plus ⌘V on the Mac. It replaces the bundled art
-  everywhere, including the player view, travels with exports and nearby sync, and can be removed to go back
+  everywhere, including the player view, travels with exports and iCloud sync, and can be removed to go back
   to the bundled art.
 - R3.5d Each scenario can have handouts: a name and one image (pasted, chosen or dropped), listed under its
   encounters. Show Players shows the image full screen with its name as a caption, on the second screen
@@ -259,7 +269,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 ## R6 Player characters
 - R6.1 A PC can be added from Demiplane by scanning the QR code on its character sheet (iPad), or by pasting
   the sheet's link, its ID or an image of the QR code. A quick PC (name and level only) can be linked later,
-  and a linked one unlinked. Only characters whose player shares them by link can be imported; a private
+  and a linked one unlinked. Linking or refreshing keeps a name the GM gave, but a placeholder such as "Player 1"
+  becomes the character's name. Only characters whose player shares them by link can be imported; a private
   character can't, and the import says so. Campaigns aren't imported: each character is added on its own.
 - R6.2 Importing asks Demiplane to export the character sheet PDF and reads the computed numbers from it:
   AC, saves, Perception, skills, speeds, Strikes, spells, actions and reactions, feats, class features,

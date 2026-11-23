@@ -10,12 +10,6 @@ extension AppModel {
                                                       bestiaryRevision: bestiary.index.sourceRevision)).encoded()
     }
 
-    /// The whole library for nearby sync, with its pasted images.
-    func fullPackage() -> LibraryPackage {
-        markSent()
-        return withImages(LibraryPackage(library: library, bestiaryRevision: bestiary.index.sourceRevision))
-    }
-
     /// Records that every record's current version has left this device, so when the other device sends it
     /// back unchanged, the merge knows it's this device's own earlier version and not an edit made there.
     private func markSent() {
@@ -53,6 +47,7 @@ extension AppModel {
         var merged = library
         let summary = LibraryMerger.merge(package.library, into: &merged)
         library = merged
+        campaignSync?.libraryMerged()
         if selectedCampaignID == nil { selectedCampaignID = library.activeCampaign(preferring: nil)?.id }
         statusMessage = describe(summary, package: package)
     }

@@ -42,6 +42,7 @@ public enum LibraryMerger {
         _ incoming: [Record], into local: inout [Record], summary: inout MergeSummary,
         copy: ((Record) -> Record)? = nil, combine: ((_ newer: Record, _ older: Record) -> Record)? = nil
     ) {
+        let rules = MergeRules(copy: copy, combine: combine)
         for theirs in incoming {
             guard let index = local.firstIndex(where: { $0.id == theirs.id }) else {
                 local.append(theirs.received(alongside: nil))
@@ -53,27 +54,38 @@ public enum LibraryMerger {
                 local[index] = ours.received(alongside: theirs)
                 continue
             }
-            let oursUnchanged = theirs.hasShared(ours.modifiedAt)
-            let theirsUnchanged = ours.hasShared(theirs.modifiedAt)
-            let theirsWins = oursUnchanged || (!theirsUnchanged && theirs.modifiedAt > ours.modifiedAt)
-            let (winner, loser) = theirsWins ? (theirs, ours) : (ours, theirs)
-            let bothChanged = !oursUnchanged && !theirsUnchanged && !theirs.isDeleted && !ours.isDeleted
-            if bothChanged, let combine {
-                local[index] = combine(winner, loser).received(alongside: loser)
-                summary.updated += 1
-                continue
-            }
-            if bothChanged, let copy {
-                local.append(copy(loser))
-                summary.conflicts += 1
-            }
-            local[index] = winner.received(alongside: loser)
-            guard theirsWins else { continue }
-            if theirs.isDeleted { summary.deleted += 1 } else { summary.updated += 1 }
+            let sides = MergeSides(oursUnchanged: theirs.hasShared(ours.modifiedAt),
+                                   theirsUnchanged: ours.hasShared(theirs.modifiedAt))
+            settle(MergeDecision(theirs: theirs, index: index, sides: sides, rules: rules), in: &local,
+                   summary: &summary)
         }
     }
 
-    private static func conflictCopy(_ scenario: Scenario) -> Scenario {
+    /// Keeps the winner of two different versions of a record, with a conflict copy or a combined record when
+    /// both sides changed it and the record's kind has a rule for that.
+    static func settle<Record: LibraryRecord>(
+        _ decision: MergeDecision<Record>, in local: inout [Record], summary: inout MergeSummary
+    ) {
+        let (theirs, index, sides, rules) = (decision.theirs, decision.index, decision.sides, decision.rules)
+        let ours = local[index]
+        let theirsWins = sides.oursUnchanged || (!sides.theirsUnchanged && theirs.modifiedAt > ours.modifiedAt)
+        let (winner, loser) = theirsWins ? (theirs, ours) : (ours, theirs)
+        let bothChanged = !sides.oursUnchanged && !sides.theirsUnchanged && !theirs.isDeleted && !ours.isDeleted
+        if bothChanged, let combine = rules.combine {
+            local[index] = combine(winner, loser).received(alongside: loser)
+            summary.updated += 1
+            return
+        }
+        if bothChanged, let copy = rules.copy {
+            local.append(copy(loser))
+            summary.conflicts += 1
+        }
+        local[index] = winner.received(alongside: loser)
+        guard theirsWins else { return }
+        if theirs.isDeleted { summary.deleted += 1 } else { summary.updated += 1 }
+    }
+
+    static func conflictCopy(_ scenario: Scenario) -> Scenario {
         var copy = scenario
         copy.id = conflictCopyID(of: scenario)
         copy.name += " (conflict copy)"
@@ -82,7 +94,7 @@ public enum LibraryMerger {
         return copy
     }
 
-    private static func conflictCopy(_ encounter: Encounter) -> Encounter {
+    static func conflictCopy(_ encounter: Encounter) -> Encounter {
         var copy = encounter
         copy.id = conflictCopyID(of: encounter)
         copy.name += " (conflict copy)"
@@ -100,6 +112,26 @@ public enum LibraryMerger {
         return UUID(uuid: (bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
                            bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]))
     }
+}
+
+/// Whether each side of a merge still holds the version the other one started from.
+struct MergeSides {
+    var oursUnchanged: Bool
+    var theirsUnchanged: Bool
+}
+
+/// What a kind of record does when both sides changed it.
+struct MergeRules<Record> {
+    var copy: ((Record) -> Record)?
+    var combine: ((_ newer: Record, _ older: Record) -> Record)?
+}
+
+/// One record to settle: the other side's version, where ours is, who changed it and the kind's rules.
+struct MergeDecision<Record> {
+    var theirs: Record
+    var index: Int
+    var sides: MergeSides
+    var rules: MergeRules<Record>
 }
 
 extension LibraryRecord {

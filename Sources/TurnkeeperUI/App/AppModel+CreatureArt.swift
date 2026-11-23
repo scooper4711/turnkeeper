@@ -19,7 +19,18 @@ extension AppModel {
         let catalog = await creatureArt.catalog()
         artCatalog = catalog
         artMatcher = LibraryArtMatcher(art: catalog.art, overrides: bestiary.artOverrides)
+        artSourcesNeeded = await sourcesNeeded(from: catalog)
         artProgress = nil
+    }
+
+    /// Off the main actor, as it matches every creature in the bestiary.
+    private func sourcesNeeded(from catalog: ArtCatalog) async -> [ArtSourceSummary] {
+        let (creatures, matcher) = (bestiary.index.entries, artMatcher)
+        let customArtSubjects = Set(library.customArt.filter { !$0.isDeleted }.map(\.subject))
+        let titles = await Task.detached {
+            CreatureArtNeeds.sourceTitles(of: creatures, matcher: matcher, customArtSubjects: customArtSubjects)
+        }.value
+        return catalog.missingSources.filter { titles.contains($0.title) }
     }
 
     /// Watches Scrollkeeper's download folder and uses the PDFs of creature art in it, where they are.
@@ -86,7 +97,10 @@ extension AppModel {
         let prefix = LibraryArtMatcher.pathPrefix
         if path.hasPrefix(prefix) {
             guard let id = UUID(uuidString: String(path.dropFirst(prefix.count))) else { return nil }
-            return await creatureArt?.picture(id: id, maxPixels: maxPixels > 0 ? maxPixels : Self.fullArtPixels)
+            let pixels = maxPixels > 0 ? maxPixels : Self.fullArtPixels
+            if let picture = await creatureArt?.picture(id: id, maxPixels: pixels) { return picture }
+            guard await fetchCloudPictures(ofArt: id) else { return nil }
+            return await creatureArt?.picture(id: id, maxPixels: pixels)
         }
         guard let url = artURL(for: path) else { return nil }
         return await ArtLoader.shared.image(at: url, maxPixels: maxPixels)

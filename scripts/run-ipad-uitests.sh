@@ -15,7 +15,8 @@ DEVICE="$(IOS_SIMULATOR="${IPAD_SIMULATOR:-}" scripts/ios-simulator-id.sh)"
 echo "Running the UI tests on simulator $DEVICE..."
 
 set -- -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
-    -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios/build -skipPackageUpdates
+    -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios/build -skipPackageUpdates \
+    TABLESIDE_SYNC_CONTAINER=
 for test in ${ONLY:-}; do set -- "$@" -only-testing:"TurnkeeperUITests/$test"; done
 
 LOG="$(mktemp)"

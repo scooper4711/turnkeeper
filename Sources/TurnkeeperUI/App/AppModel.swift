@@ -4,6 +4,7 @@ import TurnkeeperKit
 import CreatureArt
 import Foundation
 import Observation
+import TablesideSync
 import TablesideShared
 
 /// What the planner's detail column shows.
@@ -29,7 +30,10 @@ final class AppModel {
     }
     var selection: PlannerSelection?
     /// The fight on screen; the planner shows when nil.
-    var activeSessionID: UUID?
+    var activeSessionID: UUID? {
+        // Leaving a fight applies what other devices changed in it meanwhile.
+        didSet { if activeSessionID != oldValue { campaignSync?.releaseHeldRecords() } }
+    }
     var errorMessage: String?
     /// A Demiplane sheet the error says to open, offered as a button beside it.
     var errorSheetURL: URL?
@@ -61,6 +65,8 @@ final class AppModel {
     /// What the art library holds, and the creatures' art matched from it.
     var artCatalog = ArtCatalog()
     var artMatcher = LibraryArtMatcher()
+    /// The missing PDFs a creature needs for its art, which are the ones worth a warning.
+    var artSourcesNeeded: [ArtSourceSummary] = []
     /// What reading PDFs of art is doing, while it runs.
     var artProgress: String?
     @ObservationIgnored let file: LibraryFile?
@@ -68,6 +74,17 @@ final class AppModel {
     @ObservationIgnored lazy var pregens: PregenCatalog = BestiaryStore.locateGeneratedDirectory()
         .map { PregenCatalog(folder: $0.appendingPathComponent("Pregens")) } ?? PregenCatalog()
     @ObservationIgnored private var saveTask: Task<Void, Never>?
+    /// Syncing through iCloud, once started; nil on a build or device without it.
+    @ObservationIgnored var librarySync: LibrarySync?
+    @ObservationIgnored var campaignSync: CampaignSync?
+    @ObservationIgnored var cloudAccountObserver: (any NSObjectProtocol)?
+    @ObservationIgnored var isConnectingCloudSync = false
+    /// When the pictures of each piece of art were last asked of iCloud.
+    @ObservationIgnored var cloudPictureAttempts: [UUID: Date] = [:]
+    /// True while the app is in the background, when the shared database must be closed after each use.
+    @ObservationIgnored var isInBackground = false
+    /// Whether the library is syncing, for the menus.
+    var cloudSyncStatus = SyncStatus.withoutSync(containerIdentifier: LibrarySync.bundleContainer)
 
     init(library: Library = Library(), bestiary: BestiaryStore = BestiaryStore(), file: LibraryFile? = nil,
          artStore: ArtStore? = nil, creatureArt: CreatureArtStore? = nil,
@@ -103,6 +120,7 @@ final class AppModel {
                                  artStore: artStore, creatureArt: opening.art, sharedCreatures: opening.creatures)
             model.errorMessage = opening.failure
             model.startFollowingSharedLibrary()
+            model.startCloudSync()
             Task { await model.refreshCreatureArt(addingNew: true) }
             return model
         } catch {
@@ -174,6 +192,7 @@ final class AppModel {
         guard let file else { return }
         do {
             try saveLibrary(to: file)
+            tellCloudSyncOfChanges()
         } catch {
             errorMessage = "Saving the library failed: \(error.localizedDescription)"
         }

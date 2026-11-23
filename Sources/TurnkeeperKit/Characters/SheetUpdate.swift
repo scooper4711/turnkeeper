@@ -13,19 +13,38 @@ public enum SheetUpdate: Equatable, Sendable {
 
 extension Party {
     /// Puts an imported sheet on `memberID` (a quick PC being linked, or a refresh), else on the member linked to
-    /// the same character, else on a new member. The member keeps its name and the GM's max HP.
+    /// the same character, else on a new member. The member keeps the GM's max HP and any name the GM gave it; a
+    /// placeholder such as "Player 1" gives way to the character's name.
     public mutating func apply(_ sheet: Creature, link: CharacterLink, to memberID: UUID? = nil) -> SheetUpdate {
         let index = members.firstIndex { $0.id == memberID }
             ?? members.firstIndex { $0.link?.characterID == link.characterID }
         let previous = index.flatMap { members[$0].sheet }
         let target = index ?? members.endIndex
         if index == nil { members.append(PartyMember(name: sheet.name)) }
+        let isRenamed = members[target].adoptName(of: sheet)
         members[target].sheet = sheet
         members[target].link = link
         members[target].level = sheet.level
         guard index != nil else { return .added }
         guard let previous else { return .updated([]) }
-        return previous == sheet ? .unchanged : .updated(SheetComparison.changes(from: previous, to: sheet))
+        guard previous != sheet || isRenamed else { return .unchanged }
+        return .updated(SheetComparison.changes(from: previous, to: sheet))
+    }
+}
+
+extension PartyMember {
+    /// The name of a new member nobody has named yet.
+    public static func placeholderName(number: Int) -> String { "Player \(number)" }
+
+    var hasPlaceholderName: Bool {
+        name.hasPrefix("Player ") && Int(name.dropFirst("Player ".count)) != nil
+    }
+
+    /// Takes the sheet's name in place of a placeholder. True when the name changed.
+    fileprivate mutating func adoptName(of sheet: Creature) -> Bool {
+        guard hasPlaceholderName, !sheet.name.isEmpty else { return false }
+        name = sheet.name
+        return true
     }
 }
 

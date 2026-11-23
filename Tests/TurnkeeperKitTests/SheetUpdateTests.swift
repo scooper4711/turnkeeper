@@ -59,4 +59,28 @@ struct SheetUpdateTests {
         #expect(party.apply(sheet(), link: link, to: quick.id) == .updated([]))
         #expect(party.members.count == 1 && party.members[0].name == "Eagan" && party.members[0].sheet != nil)
     }
+
+    @Test("Linking a member still called Player 1 gives it the character's name")
+    func linkingPlaceholder() {
+        var party = Party(campaignID: UUID(), name: "Friday", level: 1)
+        let placeholder = PartyMember(name: PartyMember.placeholderName(number: 1))
+        party.members.append(placeholder)
+        #expect(party.apply(sheet(), link: link, to: placeholder.id) == .updated([]))
+        #expect(party.members[0].name == "Eagan Norr (v.2)")
+    }
+
+    @Test("Refreshing an unchanged sheet still replaces a placeholder left by an earlier import")
+    func refreshingPlaceholder() {
+        var (party, memberID) = linkedParty()
+        party.members[0].name = PartyMember.placeholderName(number: 1)
+        #expect(party.apply(sheet(), link: link, to: memberID) == .updated([]))
+        #expect(party.members[0].name == "Eagan Norr (v.2)")
+    }
+
+    @Test("Only the exact placeholder pattern counts as unnamed", arguments: [
+        ("Player 1", true), ("Player 12", true), ("Player One", false), ("Player", false), ("Player 1 Bob", false)
+    ])
+    func placeholderPattern(name: String, isPlaceholder: Bool) {
+        #expect(PartyMember(name: name).hasPlaceholderName == isPlaceholder)
+    }
 }

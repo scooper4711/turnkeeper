@@ -16,7 +16,8 @@ mkdir -p "$OUT"
 OUT="$(cd "$OUT" && pwd)"
 
 set -- -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
-    -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios/build -skipPackageUpdates
+    -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios/build -skipPackageUpdates \
+    TABLESIDE_SYNC_CONTAINER=
 for test in ${ONLY:-}; do set -- "$@" -only-testing:"TurnkeeperUITests/ScreenshotTour/$test"; done
 [ -n "${ONLY:-}" ] || set -- "$@" -only-testing:TurnkeeperUITests/ScreenshotTour
 

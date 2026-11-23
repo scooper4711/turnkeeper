@@ -73,8 +73,9 @@ requirements and design.
   turn it on. On each player's iPhone, iPad or Mac, More ▸ Follow a Table, pick your device and enter the
   code it shows. They see the order, health descriptions, handouts and the art of anyone they tap; a phone
   that was in another app catches up by itself when they come back. Everyone needs to be on the same network.
-- **Share:** export a campaign as a `.turnkeeper` file (AirDrop, Files, Finder) and open it on the other
-  device, or use Sync with Nearby Device on both. Edits made on both sides are kept as conflict copies.
+- **Your devices:** signed in to the same iCloud, your iPad, iPhone and Mac stay in step by themselves. Edits made on
+  two devices at once are kept as conflict copies.
+- **Share:** export a campaign as a `.turnkeeper` file (AirDrop, Files, Finder) and open it on the other device.
 - **Demo:** launch with `--demo planner`, `--demo setup`, `--demo board` or `--demo starfinder` for an
   in-memory sample that leaves the saved library alone. `--demo-art` adds drawn stand-in art.
 

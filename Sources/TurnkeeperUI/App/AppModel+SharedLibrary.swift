@@ -68,6 +68,8 @@ extension AppModel {
     /// Saves, and lets go of the shared database, which iOS would otherwise end the app for holding (R5.4).
     func saveAndCloseSharedLibrary() {
         saveNow()
+        isInBackground = true
+        if let librarySync { Task { await librarySync.close() } }
         sharedCreatures?.shared.close()
         if let creatureArt { Task { await creatureArt.close() } }
     }

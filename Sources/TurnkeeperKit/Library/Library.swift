@@ -146,7 +146,7 @@ public struct Library: Codable, Sendable, Hashable {
 
     /// Points `art.subject` at new art, retiring whatever it had before.
     public mutating func save(_ art: CustomArt) {
-        deleteCustomArt(for: art.subject)
+        mark(\.customArt, ChangeClock.now()) { $0.subject == art.subject && $0.id != art.id }
         upsert(art, into: \.customArt)
     }
 
@@ -197,7 +197,8 @@ public struct Library: Codable, Sendable, Hashable {
     }
 
     /// Saves a record stamped now, unless it's the same as the one stored: a save that changes nothing isn't an
-    /// edit, so it mustn't look like one to the other device.
+    /// edit, so it mustn't look like one to the other device. A deleted record stays deleted: a screen closing as
+    /// its record is deleted can still save the copy it holds, which would bring the record back on every device.
     private mutating func upsert<Record: LibraryRecord>(
         _ record: Record, into path: WritableKeyPath<Library, [Record]>
     ) {
@@ -207,6 +208,7 @@ public struct Library: Codable, Sendable, Hashable {
             self[keyPath: path].append(stamped)
             return
         }
+        guard !self[keyPath: path][index].isDeleted else { return }
         stamped.modifiedAt = self[keyPath: path][index].modifiedAt
         guard stamped != self[keyPath: path][index] else { return }
         stamped.modifiedAt = ChangeClock.now()

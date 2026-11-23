@@ -83,6 +83,8 @@ struct NumberRow: View {
     var body: some View {
         LabeledContent(title) {
             TextField(title, value: $value, format: signed ? .number.sign(strategy: .always()) : .number)
+                // The row already shows the title. Hidden, it still names the field for VoiceOver.
+                .labelsHidden()
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 80)
                 #if os(iOS)

@@ -27,7 +27,7 @@ wait_for() { while [ ! -f "$OUT/$1" ]; do sleep 1; done; }
 xcrun simctl boot "$PHONE" 2>/dev/null || true
 xcodebuild -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
     -destination "platform=iOS Simulator,id=$PHONE" -derivedDataPath ios/build -skipPackageUpdates \
-    CODE_SIGNING_ALLOWED=NO build | tail -n 1
+    CODE_SIGNING_ALLOWED=NO TABLESIDE_SYNC_CONTAINER= build | tail -n 1
 xcrun simctl install "$PHONE" ios/build/Build/Products/Debug-iphonesimulator/Turnkeeper.app
 
 SIMULATOR="$HOST_NAME" OUT="$OUT" ONLY=testSharingHost scripts/screenshot-tour.sh > "$OUT/host.log" 2>&1 &

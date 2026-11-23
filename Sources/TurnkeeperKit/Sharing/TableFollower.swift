@@ -88,7 +88,7 @@ public final class TableFollower: @unchecked Sendable {
         } catch let error as TableError {
             throw error
         } catch {
-            throw TableError.connectionLost((error as? NearbyError).map(Self.reason) ?? "\(error)")
+            throw TableError.connectionLost((error as? ChannelError).map(Self.reason) ?? "\(error)")
         }
     }
 
@@ -109,7 +109,7 @@ public final class TableFollower: @unchecked Sendable {
         }
     }
 
-    private static func reason(_ error: NearbyError) -> String {
+    private static func reason(_ error: ChannelError) -> String {
         if case let .connectionFailed(reason) = error { return reason }
         return "\(error)"
     }

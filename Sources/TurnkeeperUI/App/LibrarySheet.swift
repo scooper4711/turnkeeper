@@ -4,7 +4,6 @@ import SwiftUI
 /// A sheet about the whole library, opened from the campaign sidebar's toolbar or the File menu.
 enum LibrarySheet: String, Identifiable {
     case newCampaign
-    case nearbySync
     case creatureArt
     case shareWithPlayers
     case followTable
@@ -16,7 +15,6 @@ enum LibrarySheet: String, Identifiable {
     var content: some View {
         switch self {
         case .newCampaign: CampaignSheet(campaign: nil)
-        case .nearbySync: NearbySyncSheet()
         case .creatureArt: CreatureArtView()
         case .shareWithPlayers: TableShareSheet()
         case .followTable: FollowTableSheet()
@@ -54,7 +52,7 @@ struct LibraryCommands: Commands {
             }
             .disabled(model.selectedCampaignID == nil)
             Divider()
-            Button("Sync with Nearby Device…") { model.librarySheet = .nearbySync }
+            Button(model.cloudSyncStatusText) {}.disabled(true)
             Button("Creature Art…") { model.librarySheet = .creatureArt }
             Divider()
             Button("Share with Players…") { model.librarySheet = .shareWithPlayers }

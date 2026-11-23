@@ -2,9 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- The iCloud container the library syncs through; the app syncs only when this names one (tabletop-kit
+         library sync R6.1). Signing.xcconfig sets it, and the simulator scripts empty it: their builds have no iCloud
+         entitlement, and CloudKit stops an app that opens a container without one. -->
+    <key>TablesideSyncContainer</key>
+    <string>$(TABLESIDE_SYNC_CONTAINER)</string>
+    <key>TablesideSyncEnvironment</key>
+    <string>$(TABLESIDE_SYNC_ENVIRONMENT)</string>
+    <!-- CKSyncEngine's silent pushes, so another device's changes arrive while the app is in the background. -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
     <key>NSBonjourServices</key>
     <array>
-        <string>_turnkeeper._tcp</string>
         <string>_turnkeeper-table._tcp</string>
     </array>
     <key>UIAppFonts</key>

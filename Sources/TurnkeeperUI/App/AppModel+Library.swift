@@ -21,7 +21,7 @@ extension AppModel {
 
     func addParty(to campaignID: UUID) {
         let party = Party(campaignID: campaignID, name: "New party", level: 1,
-                          members: (1...4).map { PartyMember(name: "Player \($0)") })
+                          members: (1...4).map { PartyMember(name: PartyMember.placeholderName(number: $0)) })
         library.save(party)
         selection = .party(party.id)
     }

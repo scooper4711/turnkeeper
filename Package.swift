@@ -11,21 +11,24 @@ let package = Package(
         .executable(name: "BestiaryImport", targets: ["BestiaryImport"])
     ],
     dependencies: [
-        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "1.14.0")
+        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "1.15.1")
     ],
     targets: [
         .target(name: "TurnkeeperKit", dependencies: [
             .product(name: "Bestiary", package: "tabletop-kit"),
             .product(name: "CreatureArt", package: "tabletop-kit"),
             .product(name: "SharedLibraries", package: "tabletop-kit"),
-            .product(name: "TablesideShared", package: "tabletop-kit")
+            .product(name: "TablesideShared", package: "tabletop-kit"),
+            .product(name: "TablesideSync", package: "tabletop-kit")
         ]),
         .target(name: "TurnkeeperUI", dependencies: [
             "TurnkeeperKit", "CharacterImport", .product(name: "ArtExtraction", package: "tabletop-kit"),
             .product(name: "BattleCards", package: "tabletop-kit"),
             .product(name: "CreatureArt", package: "tabletop-kit"),
             .product(name: "AppNotices", package: "tabletop-kit"),
-            .product(name: "TablesideShared", package: "tabletop-kit")
+            .product(name: "SharedLibraries", package: "tabletop-kit"),
+            .product(name: "TablesideShared", package: "tabletop-kit"),
+            .product(name: "TablesideSync", package: "tabletop-kit")
         ]),
         .target(name: "CharacterImport", dependencies: ["TurnkeeperKit"]),
         .executableTarget(name: "Turnkeeper", dependencies: ["TurnkeeperUI"]),
@@ -36,7 +39,8 @@ let package = Package(
         .testTarget(
             name: "TurnkeeperKitTests",
             dependencies: ["TurnkeeperKit", .product(name: "TablesideShared", package: "tabletop-kit"),
-                           .product(name: "SharedLibraries", package: "tabletop-kit")]
+                           .product(name: "SharedLibraries", package: "tabletop-kit"),
+                           .product(name: "TablesideSync", package: "tabletop-kit")]
         ),
         .testTarget(
             name: "CharacterImportTests",

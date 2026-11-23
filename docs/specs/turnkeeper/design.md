@@ -36,7 +36,7 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
   notarytool keychain profile on a Mac) and staples the ticket to it. The team ID is kept only in the secrets and
   the keychain.
 - **App Sandbox** (R8). `scripts/build-app.sh` signs with `Resources/Turnkeeper.entitlements`: the App Sandbox,
-  network client (Demiplane, joining nearby sync) and server (hosting it), audio input (Hold to Say
+  network client (Demiplane, following a table) and server (sharing one), audio input (Hold to Say
   Initiative), read-write access to files the user picks, app-scoped bookmarks for the watched folders and
   PDFs, and the Tableside Toolkit's App Group (`TEAM_ID.io.github.scooper4711.tableside`, into which the script puts
   the team of the Developer ID certificate, or `TEAM_ID`, leaving the group out of an ad hoc build). It copies `Resources/container-migration.plist` into the bundle; on the first sandboxed launch macOS
@@ -111,7 +111,7 @@ Ported from the pf2e system, with tests.
 - **Records.** Every record has `id`, `modifiedAt`, `deletedAt` (a tombstone; records are never removed)
   and `sharedVersions`: the `modifiedAt` of each recent version it has sent to or received from another
   device, capped at 32. `Library.sending()` adds each record's current version whenever a package is built,
-  for nearby sync or a file. `sharedVersion`, the version last received, is still read from older libraries and
+  for a file. `sharedVersion`, the version last received, is still read from older libraries and
   devices. A save that changes nothing returns early, so it doesn't stamp `modifiedAt` and look like an edit.
 - **Custom creatures.** `CustomCreature` records hold a full `Creature` under the key `custom.<id>`;
   `AppModel.entry`/`creature` look them up before the bestiary. `CreatureDraft` is the editor's text form
@@ -169,9 +169,26 @@ Ported from the pf2e system, with tests.
   version, keeps members added on either side, and leaves out members removed after their last edit. The
   later-fetched Demiplane sheet wins when both versions are linked, so an unlink isn't undone.
   Members saved before stamping read as `.distantPast`.
-- **Sharing.** `LibraryPackage` is the `.turnkeeper` file (UTType
-  `io.github.scooper4711.turnkeeper.library`) and the nearby-sync payload. `NearbySync` uses
-  Network.framework with Bonjour `_turnkeeper._tcp` and a 4-digit pairing code.
+- **Files.** `LibraryPackage` is the `.turnkeeper` file (UTType `io.github.scooper4711.turnkeeper.library`).
+- **iCloud sync** (R1.3). `CampaignSync` is a `SyncZoneHandler` on tabletop-kit's `CKSyncEngine`, beside `LibrarySync`,
+  which syncs the shared library, in the suite's container `iCloud.io.github.scooper4711.tableside`, private database.
+  - *Records.* One zone, `Turnkeeper`, with one CloudKit record per library record, named `<kind>-<UUID>`, of the
+    types `TurnkeeperCampaign`, `TurnkeeperParty`, `TurnkeeperScenario`, `TurnkeeperEncounter`, `TurnkeeperSession`,
+    `TurnkeeperHandout` and `TurnkeeperCreatureNote`. Fields: `format` (Int64), `payload` (the record's JSON) or
+    `payloadAsset` past 512 KB, and for handouts `imageName` and `image`. Deletions are tombstones, saved like any
+    change. These types must be deployed to Production in the CloudKit Console before a release.
+  - *What to send.* `campaign-sync-state.json`, beside `library.json`, holds each record's system fields and the
+    digest of the last version both sides agreed on. The digest leaves out `modifiedAt` and the shared versions. A
+    record whose digest differs is sent, so receiving a record never echoes it.
+  - *Merging.* `LibraryMerger.mergeSynced` uses that version as the base, as `sharedVersions` caps at 32 and constant
+    syncing would pass it. Only one side moved: that side wins. Both moved: the rules above. Same content: no conflict
+    however it is stamped, because every device strips a deleted custom creature from its encounters on its own.
+    With no base, on a first sync, `sharedVersions` decides.
+  - *Held records.* The version of the fight on screen and a record in a later `format` are kept in the state and
+    not sent over; `releaseHeldRecords()` applies them when they can be.
+  - *Starting.* `AppModel.startCloudSync()` runs after the move to the shared library, and only when the build's
+    `Info.plist` names the container: CloudKit stops an app that opens a container without the entitlement. Simulator
+    scripts empty `TABLESIDE_SYNC_CONTAINER` for that reason, and demos have no library file, so they never sync.
 
 ## UI
 - **Themes.** `BoardTheme` defines a Pathfinder look (parchment and red) and a Starfinder look (teal,
@@ -251,7 +268,7 @@ Ported from the pf2e system, with tests.
   the rest. A row of toolbar buttons in a narrow sidebar is cut off without an overflow menu on the Mac, so
   only two items share the toolbar. The menu's label turns to `exclamationmark.circle` and carries a badge
   while art PDFs are missing.
-- **Library sheets and File menu** (R1.3b). The sheets for a new campaign, nearby sync, creature art and About
+- **Library sheets and File menu** (R1.3b). The sheets for a new campaign, creature art and About
   (`LibrarySheet`), the import picker and the campaign exporter are presented by `RootView`, from
   `AppModel.librarySheet`, `isImportingLibrary` and `campaignExport` (`beginExport(of:)`), so they open with the
   sidebar hidden or a fight on screen. The sidebar's buttons and context menu and `LibraryCommands` (the File
@@ -298,11 +315,9 @@ Ported from the pf2e system, with tests.
   shares the Player Core ancestries and feats); action text is replaced by the linked entry's rules text when there is one.
 
 ## Sharing the player screen (R9)
-- **Protocol** (TurnkeeperKit, tested over real loopback connections). The same transport as nearby sync:
-  Network.framework TCP, found by Bonjour, each message a 4-byte length and JSON (`NearbyFraming`), on a
-  `MessageChannel` now generic over its protocol's message type. It has a Bonjour type of its own,
-  `_turnkeeper-table._tcp`, so a follower lists tables and not devices waiting to sync. Where sync is one
-  exchange of two libraries, this is a stream from one device to many: `TableMessage` is `join(code, name)`,
+- **Protocol** (TurnkeeperKit, tested over real loopback connections). Network.framework TCP, found by Bonjour
+  (`_turnkeeper-table._tcp`), each message a 4-byte length and JSON (`MessageFraming`), on a `MessageChannel`, with
+  a 4-digit `PairingCode`. It is a stream from one device to many: `TableMessage` is `join(code, name)`,
   `welcome` or `refused`, then `snapshot` from the sharing device whenever the player screen changes, and
   `needArt(id)` answered by `art(id, image)`.
 - **What is sent.** A `TableSnapshot` is whole, never a change: `waiting`, a `handout` (name and art ID) or a
