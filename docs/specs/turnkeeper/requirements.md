@@ -44,6 +44,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 - R1.4a Players are synced one at a time. When both devices changed a party, each player keeps its latest
   edit, players added or removed on either device carry across, and a Demiplane sheet fetched later is
   kept even when the other device edited the same player.
+- R1.4b A change arriving from iCloud is saved to disk at once, even in the background, so an app iOS ends while
+  suspended can't send its older copy back over the change.
 - R1.5 Building and running the Mac app needs no paid Apple developer account; signing releases does, and so does
   iCloud sync, which a build without a provisioning profile leaves out. The iPad project asks for the iCloud
   entitlements, so another team removes them and empties `TABLESIDE_SYNC_CONTAINER` (`ios/Signing.xcconfig`).

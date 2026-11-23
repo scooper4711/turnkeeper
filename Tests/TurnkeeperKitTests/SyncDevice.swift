@@ -13,6 +13,9 @@ final class FakeSyncHost: CampaignSyncHost {
     var isCloudSyncPaused = false
     func pauseCloudSync() { isCloudSyncPaused = true }
     func finishCloudSyncWork() {}
+    /// The library as last written to disk, which is all a restarted app has.
+    private(set) var savedLibrary = Library()
+    func saveNow() { savedLibrary = library }
 }
 
 /// One device: a library, its syncing, and a folder of its own.

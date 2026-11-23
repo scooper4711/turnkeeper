@@ -15,6 +15,8 @@ public protocol CampaignSyncHost: AnyObject {
     func pauseCloudSync()
     /// Syncing is done for now: on the iPad in the background, the shared library must be closed again.
     func finishCloudSyncWork()
+    /// Writes the library to disk now: a suspended app wouldn't reach a save scheduled for later.
+    func saveNow()
 }
 
 /// Syncs campaigns, parties, scenarios, encounters, fights, handouts and creature notes through the zone `Turnkeeper`
@@ -208,7 +210,11 @@ public final class CampaignSync: SyncZoneHandler {
             }
         }
         if library.retireOrphans(keepingSession: host.activeSessionID) { digests = [:] }
-        if library != host.library { host.library = library }
+        if library != host.library {
+            host.library = library
+            // Before the state: a library older than its state would look like an edit, and overwrite the change.
+            host.saveNow()
+        }
         saveState()
     }
 

@@ -46,7 +46,9 @@ extension AppModel: CampaignSyncHost {
         }
     }
 
+    /// In the background this waits for the return to the foreground, as the shared library must stay closed.
     func tellCloudSyncOfChanges() {
+        guard !isInBackground else { return }
         campaignSync?.libraryChanged()
         if let librarySync { Task { await librarySync.libraryChanged() } }
     }
