@@ -26,7 +26,7 @@ struct CreatureArtView: View {
                         HStack { ProgressView().controlSize(.small); Text(progress).font(.callout) }
                     }
                 }
-                if !model.artCatalog.missingSources.isEmpty { missingSection }
+                if !model.artCatalog.sourcesWithLostArt.isEmpty { missingSection }
                 if !model.artCatalog.watchedFolders.isEmpty { foldersSection }
                 pdfsSection
             }
@@ -101,7 +101,7 @@ struct CreatureArtView: View {
 
     private var missingSection: some View {
         Section {
-            ForEach(model.artCatalog.missingSources) { source in
+            ForEach(model.artCatalog.sourcesWithLostArt) { source in
                 SourceRow(source: source)
             }
         } header: {
@@ -137,7 +137,7 @@ struct CreatureArtView: View {
             if model.artCatalog.sources.isEmpty {
                 Text("No PDFs yet.").foregroundStyle(.secondary)
             }
-            ForEach(model.artCatalog.sources.filter { !$0.isMissing }) { source in
+            ForEach(model.artCatalog.sources.filter { !$0.hasLostArt }) { source in
                 SourceRow(source: source)
             }
         }
