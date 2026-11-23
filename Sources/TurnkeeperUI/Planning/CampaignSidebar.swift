@@ -27,16 +27,13 @@ struct CampaignSidebar: View {
         .onChange(of: model.selectedCampaignID) { model.selection = nil }
     }
 
-    /// Importing, syncing, creature art and (on the iPad) About, in one menu that always fits the sidebar; the File
+    /// Importing, creature art and (on the iPad) About, in one menu that always fits the sidebar; the File
     /// menu has the same (`LibraryCommands`). Missing art PDFs are counted on the menu's button and its
     /// Creature Art item.
     private var moreMenu: some View {
         let missing = model.artCatalog.missingSources.count
         return Menu {
             Button("Import…", systemImage: "square.and.arrow.down") { model.isImportingLibrary = true }
-            Button("Sync with Nearby Device…", systemImage: "arrow.triangle.2.circlepath") {
-                model.librarySheet = .nearbySync
-            }
             Button(missing > 0 ? "Creature Art (\(missing) missing)…" : "Creature Art…",
                    systemImage: "photo.on.rectangle.angled") { model.librarySheet = .creatureArt }
             Divider()

@@ -117,8 +117,7 @@ final class ScreenshotTour: XCTestCase {
         save("planner-campaigns")
         tap(app.buttons["More"])
         save("planner-more-menu")
-        for (item, name) in [("Creature Art…", "creature-art"), ("Sync with Nearby Device…", "nearby-sync"),
-                             ("About", "about")] {
+        for (item, name) in [("Creature Art…", "creature-art"), ("About", "about")] {
             if !app.buttons[item].exists { tap(app.buttons["More"]) }
             tap(app.buttons[item])
             save("planner-\(name)")
