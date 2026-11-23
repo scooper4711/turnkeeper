@@ -86,6 +86,7 @@ extension AppModel: CampaignSyncHost {
         let folder = file.url.deletingLastPathComponent()
         let handler = campaignSync ?? CampaignSync(host: self, folder: folder)
         campaignSync = handler
+        handler.retireOrphans()
         Task {
             let started = await LibrarySync.start(app: .turnkeeper, fallback: shared.folder, handlers: [handler])
             isConnectingCloudSync = false

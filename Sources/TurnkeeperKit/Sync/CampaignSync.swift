@@ -56,6 +56,16 @@ public final class CampaignSync: SyncZoneHandler {
         isStorageFull = false
     }
 
+    /// Deletes what an earlier sync left alive inside a deleted campaign or scenario. A retired record can keep its
+    /// stamp, so the digests known by stamp are dropped.
+    public func retireOrphans() {
+        guard let host else { return }
+        var library = host.library
+        guard library.retireOrphans(keepingSession: host.activeSessionID) else { return }
+        digests = [:]
+        host.library = library
+    }
+
     /// Applies what was held back and can be applied now, such as changes to a fight the GM has left.
     public func releaseHeldRecords() {
         let activeSession = host?.activeSessionID
@@ -197,6 +207,7 @@ public final class CampaignSync: SyncZoneHandler {
                 problem = "Merging \(name) from iCloud failed: \(error.localizedDescription)"
             }
         }
+        if library.retireOrphans(keepingSession: host.activeSessionID) { digests = [:] }
         if library != host.library { host.library = library }
         saveState()
     }

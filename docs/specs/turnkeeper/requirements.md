@@ -39,7 +39,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
 - R1.4 Merging never loses edits silently. When both sides changed the same record, the newer one wins
   and the other is kept as a conflict copy, once. A record changed on only one device, however many times and
   across however many syncs, never makes a conflict copy. Opening, viewing or running something doesn't count
-  as a change.
+  as a change. Deleting a campaign or scenario deletes what's inside it on every device, including anything that
+  arrives after the delete, such as a conflict copy. The fight on screen stays until the GM leaves it.
 - R1.4a Players are synced one at a time. When both devices changed a party, each player keeps its latest
   edit, players added or removed on either device carry across, and a Demiplane sheet fetched later is
   kept even when the other device edited the same player.
