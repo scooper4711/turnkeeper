@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-24
+
+### Added
+- Explain voice initiative before it first listens
+- Replace hold-to-talk with the voice initiative screen
+- Add the listening meter and voice initiative rows
+- Measure frequency bands for a listening meter
+- Keep the party's seating order for voice initiative
+- Recognize natural rolls and spoken names
+- Sync the library through iCloud in the app
+- Add the iCloud sync handler for campaigns
+- Merge synced records against their last version
+
+### Fixed
+- Keep the voice screen listening through interruptions
+- Ignore table talk on the voice initiative screen
+- Save changes from iCloud before recording them
+- Name imported characters instead of keeping Player 1
+- Stop number fields repeating their row's title
+- Delete what arrives inside a deleted campaign
+- Warn only about PDFs a creature needs
+- Stop Creature Art's buttons filling the sheet
+- Keep deleted records deleted
+- Warn only about PDFs whose art can't be shown
+
+### Changed
+- Describe the always-listening voice screen in privacy texts
+- Remove the hold-to-talk initiative target
+- Specify the voice initiative screen
+- Add the shared App Store pipeline
+- Require tabletop-kit 1.15.0
+- Name the CloudKit environment in iPad builds
+- Sign builds for iCloud
+- Name the table transport for what it is
+- Drop the nearby sync Bonjour service
+- Remove Sync with Nearby Device
+- Specify syncing the library through iCloud
+
+[2.2.0]: https://github.com/scooper4711/turnkeeper/releases/tag/v2.2.0
+
 ## [2.1.0] - 2026-11-21
 
 ### Added
