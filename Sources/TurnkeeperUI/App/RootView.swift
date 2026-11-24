@@ -7,6 +7,7 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openURL) private var openURL
     @State private var following = TableFollowing.shared
+    @State private var isAskingForUpdate = false
 
     var body: some View {
         @Bindable var model = model
@@ -33,6 +34,15 @@ struct RootView: View {
             Button("OK") { clearError() }
         } message: {
             Text(model.errorMessage ?? "")
+        }
+        .onChange(of: model.needsUpdateToSync, initial: true) { isAskingForUpdate = model.needsUpdateToSync }
+        .alert("Update Turnkeeper", isPresented: $isAskingForUpdate) {
+            Button("OK") {}
+        } message: {
+            Text("""
+                Another of your devices has a newer version of Turnkeeper. Its changes won't show here, and some \
+                changes made here won't reach it, until Turnkeeper is updated on this device.
+                """)
         }
         .overlay(alignment: .bottom) { StatusToast() }
         // Over everything, and nothing under it is closed: a GM's device can follow another table and come back.

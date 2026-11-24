@@ -16,6 +16,7 @@ final class FakeSyncHost: CampaignSyncHost {
     /// The library as last written to disk, which is all a restarted app has.
     private(set) var savedLibrary = Library()
     func saveNow() { savedLibrary = library }
+    var needsUpdateToSync = false
 }
 
 /// One device: a library, its syncing, and a folder of its own.

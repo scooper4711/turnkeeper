@@ -173,7 +173,7 @@ struct CampaignSyncTests {
         #expect(ipad.host.library.sessions[0].name == "Renamed elsewhere")
     }
 
-    @Test("A record in a later format is held, and this device's copy isn't sent over it")
+    @Test("A record in a later format is held, this device's copy isn't sent over it, and the app asks for an update")
     func laterFormat() throws {
         let (mac, ipad) = SyncDevice.pair()
         mac.editNotes("From a newer app")
@@ -183,6 +183,17 @@ struct CampaignSyncTests {
         ipad.download([record])
         #expect(ipad.host.library.encounters[0].notes == "From this device")
         #expect(ipad.pendingCount == 0)
+        #expect(ipad.host.needsUpdateToSync && !mac.host.needsUpdateToSync)
+        let relaunched = FakeSyncHost()
+        _ = CampaignSync(host: relaunched, folder: ipad.folder)
+        #expect(relaunched.needsUpdateToSync)
+    }
+
+    @Test("Records go up in the format that holds them back on versions from before the Society setting")
+    func sendsFormat() throws {
+        let (mac, _) = SyncDevice.pair()
+        mac.editNotes("From this app")
+        #expect(try #require(mac.upload().first)["format"] as? Int64 == 2)
     }
 
     @Test("The sync state survives a relaunch")

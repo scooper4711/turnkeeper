@@ -17,6 +17,8 @@ public protocol CampaignSyncHost: AnyObject {
     func finishCloudSyncWork()
     /// Writes the library to disk now: a suspended app wouldn't reach a save scheduled for later.
     func saveNow()
+    /// Whether iCloud has changes from a newer version of the app, which wait here until this one is updated.
+    var needsUpdateToSync: Bool { get set }
 }
 
 /// Syncs campaigns, parties, scenarios, encounters, fights, handouts and creature notes through the zone `Turnkeeper`
@@ -44,6 +46,7 @@ public final class CampaignSync: SyncZoneHandler {
         state = CampaignSyncState.load(from: stateFile)
         coder.removeOutgoingFiles()
         releaseHeldRecords()
+        reportLaterFormat()
     }
 
     /// Tells syncing the user changed something: a full iCloud is tried again.
@@ -216,6 +219,12 @@ public final class CampaignSync: SyncZoneHandler {
             host.saveNow()
         }
         saveState()
+        reportLaterFormat()
+    }
+
+    private func reportLaterFormat() {
+        guard let host, host.needsUpdateToSync != state.holdsLaterFormat else { return }
+        host.needsUpdateToSync = state.holdsLaterFormat
     }
 
     private func canApply(_ record: RemoteCampaignRecord) -> Bool {

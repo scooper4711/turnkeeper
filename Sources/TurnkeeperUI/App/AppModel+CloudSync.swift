@@ -69,6 +69,10 @@ extension AppModel: CampaignSyncHost {
 
     /// One line for the menus.
     var cloudSyncStatusText: String {
+        needsUpdateToSync ? "iCloud: Update Turnkeeper" : cloudSyncStateText
+    }
+
+    private var cloudSyncStateText: String {
         switch cloudSyncStatus {
         case .unsupported: "iCloud: Not in This Build"
         case .unavailable: "iCloud: Signed Out"
