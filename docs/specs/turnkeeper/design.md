@@ -36,7 +36,7 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
   notarytool keychain profile on a Mac) and staples the ticket to it. The team ID is kept only in the secrets and
   the keychain.
 - **App Sandbox** (R8). `scripts/build-app.sh` signs with `Resources/Turnkeeper.entitlements`: the App Sandbox,
-  network client (Demiplane, following a table) and server (sharing one), audio input (Hold to Say
+  network client (Demiplane, following a table) and server (sharing one), audio input (Voice
   Initiative), read-write access to files the user picks, app-scoped bookmarks for the watched folders and
   PDFs, and the Tableside Toolkit's App Group (`TEAM_ID.io.github.scooper4711.tableside`, into which the script puts
   the team of the Developer ID certificate, or `TEAM_ID`, leaving the group out of an ad hoc build). It copies `Resources/container-migration.plist` into the bundle; on the first sandboxed launch macOS

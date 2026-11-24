@@ -267,8 +267,8 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Turnkeeper shares the player screen with the players\' devices on this network, and follows a table shared by another device.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Turnkeeper scans the QR code on a Demiplane character sheet to add the character to a party.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Turnkeeper listens while you hold Hold to Say Initiative, so you can say the initiative total.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Turnkeeper turns the initiative you say into a number, on this device when it can.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "While the Voice Initiative screen is open, Turnkeeper listens for players' names and initiative totals.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Turnkeeper turns the names and initiative totals you say into text, on this device when it can.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIFileSharingEnabled = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,8 +303,8 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Turnkeeper shares the player screen with the players\' devices on this network, and follows a table shared by another device.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Turnkeeper scans the QR code on a Demiplane character sheet to add the character to a party.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Turnkeeper listens while you hold Hold to Say Initiative, so you can say the initiative total.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Turnkeeper turns the initiative you say into a number, on this device when it can.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "While the Voice Initiative screen is open, Turnkeeper listens for players' names and initiative totals.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Turnkeeper turns the names and initiative totals you say into text, on this device when it can.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIFileSharingEnabled = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
