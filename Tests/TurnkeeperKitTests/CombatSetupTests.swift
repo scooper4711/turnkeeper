@@ -82,6 +82,8 @@ struct CombatSetupTests {
         variant.slots = [EncounterSlot(creatureKey: "goblin")]
         let state = CombatSetup.state(for: variant, party: party) { bestiary[$0] }
         #expect(state.combatants.map(\.playerName) == ["Sam", ""])
+        #expect(state.combatants.map(\.memberID) == [kyra.id, nil])
+        #expect(state.combatants[0].linkedMemberID == kyra.id)
     }
 
     @Test("Player names and notes round-trip, and members saved before them read as blank")
@@ -96,16 +98,18 @@ struct CombatSetupTests {
         #expect(old.playerName.isEmpty && old.notes.isEmpty)
     }
 
-    @Test("Strips saved before player names read as having none")
+    @Test("Strips saved before player names and member links read as having none")
     func oldCombatant() throws {
         var pc = Combatant(kind: .playerCharacter, name: "Kyra")
         pc.playerName = "Sam"
+        pc.memberID = UUID()
         let copy = try JSONDecoder().decode(Combatant.self, from: JSONEncoder().encode(pc))
-        #expect(copy.playerName == "Sam")
+        #expect(copy.playerName == "Sam" && copy.memberID == pc.memberID)
         var json = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(pc)) as? [String: Any])
         json["playerName"] = nil
+        json["memberID"] = nil
         let old = try JSONDecoder().decode(Combatant.self, from: JSONSerialization.data(withJSONObject: json))
-        #expect(old.playerName.isEmpty && old.name == "Kyra")
+        #expect(old.playerName.isEmpty && old.name == "Kyra" && old.memberID == nil)
     }
 
     @Test("A variant's XP uses template-adjusted levels and leaves out allies")

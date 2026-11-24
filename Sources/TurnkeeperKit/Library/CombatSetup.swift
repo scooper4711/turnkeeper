@@ -12,6 +12,7 @@ public enum CombatSetup {
             let key = member.sheet == nil ? "" : PlayerCharacter.key(for: member)
             var pc = Combatant(kind: .playerCharacter, name: member.name, creatureKey: key)
             pc.playerName = member.playerName
+            pc.memberID = member.id
             if member.isAway { pc.place = .bench }  // A late arrival is brought in from the bench.
             return pc
         }

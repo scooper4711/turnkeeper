@@ -46,6 +46,9 @@ public struct Party: LibraryRecord, Hashable {
     public var members: [PartyMember]
     /// Members taken out, so the removal carries across a sync.
     public var removedMembers: [RemovedMember] = []
+    /// Member IDs in the order the players sit around the table, for the voice initiative screen. Members not in
+    /// it come after the seated ones.
+    public var seating: [UUID] = []
     public var modifiedAt = Date()
     public var deletedAt: Date?
     public var sharedVersion: Date?
@@ -59,10 +62,11 @@ public struct Party: LibraryRecord, Hashable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, campaignID, name, level, members, removedMembers, modifiedAt, deletedAt, sharedVersion, sharedVersions
+        case id, campaignID, name, level, members, removedMembers, seating, modifiedAt, deletedAt, sharedVersion
+        case sharedVersions
     }
 
-    /// Libraries saved before removals were recorded have none.
+    /// Libraries saved before removals were recorded have none, and ones saved before seating have no one seated.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
@@ -71,6 +75,7 @@ public struct Party: LibraryRecord, Hashable {
         level = try container.decode(Int.self, forKey: .level)
         members = try container.decode([PartyMember].self, forKey: .members)
         removedMembers = try container.decodeIfPresent([RemovedMember].self, forKey: .removedMembers) ?? []
+        seating = try container.decodeIfPresent([UUID].self, forKey: .seating) ?? []
         modifiedAt = try container.decode(Date.self, forKey: .modifiedAt)
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         sharedVersion = try container.decodeIfPresent(Date.self, forKey: .sharedVersion)
