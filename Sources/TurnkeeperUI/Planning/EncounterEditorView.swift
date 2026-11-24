@@ -55,7 +55,9 @@ struct EncounterEditorView: View {
 
     @ViewBuilder
     private func variantControls(labels: [String]) -> some View {
-        if labels.count > 1 {
+        let campaign = model.campaign(model.scenario(encounter.scenarioID)?.campaignID)
+        let hasVariants = campaign?.allowsDifficultyVariants != false
+        if hasVariants && labels.count > 1 {
             Picker("Difficulty", selection: $label) {
                 ForEach(labels, id: \.self) { Text($0).tag($0) }
             }
@@ -72,7 +74,9 @@ struct EncounterEditorView: View {
             }
         }
         PartyPicker(campaignID: model.scenario(encounter.scenarioID)?.campaignID ?? UUID(), partyID: $partyID)
-        ChallengePointsLine(scenario: model.scenario(encounter.scenarioID), party: model.party(partyID))
+        if hasVariants {
+            ChallengePointsLine(scenario: model.scenario(encounter.scenarioID), party: model.party(partyID))
+        }
     }
 
     private func budget(for variant: EncounterVariant, party: Party) -> some View {

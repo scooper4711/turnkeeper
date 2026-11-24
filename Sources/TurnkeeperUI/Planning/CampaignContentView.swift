@@ -3,21 +3,24 @@ import SwiftUI
 
 /// A campaign's scenarios (with their encounters), parties and saved fights.
 struct CampaignContentView: View {
-    let campaign: Campaign
+    let campaignID: UUID
     @Environment(AppModel.self) private var model
     @State private var isAddingScenario = false
+
+    /// The live campaign, so editing it in the sheet redraws this list.
+    private var campaign: Campaign { model.campaign(campaignID) ?? Campaign(name: "", game: .pathfinder) }
 
     var body: some View {
         @Bindable var model = model
         List(selection: $model.selection) {
-            Section("Scenarios") {
+            Section("\(campaign.scenarioTitle)s") {
                 ForEach(model.library.scenarios(in: campaign.id)) { scenario in
-                    ScenarioRows(scenario: scenario)
+                    ScenarioRows(scenario: scenario, scenarioTitle: campaign.scenarioTitle)
                 }
-                Button("Add Scenario", systemImage: "plus") { isAddingScenario = true }
+                Button("Add \(campaign.scenarioTitle)", systemImage: "plus") { isAddingScenario = true }
             }
-            Section("Parties") {
-                ForEach(model.library.parties(in: campaign.id)) { party in
+            Section(campaign.allowsMultipleParties ? "Parties" : "Party") {
+                ForEach(shownParties) { party in
                     Label("\(party.name) · level \(party.level)", systemImage: "person.3")
                         .tag(PlannerSelection.party(party.id))
                         .contextMenu {
@@ -26,13 +29,18 @@ struct CampaignContentView: View {
                             }
                         }
                 }
-                Button("Add Party", systemImage: "plus") { model.addParty(to: campaign.id) }
+                if campaign.allowsMultipleParties || shownParties.isEmpty {
+                    Button("Add Party", systemImage: "plus") { model.addParty(to: campaign.id) }
+                }
             }
             SavedFightsSection(campaignID: campaign.id)
         }
         .renamableTitle(campaign.name, rename: rename)
         .sheet(isPresented: $isAddingScenario) { NewScenarioSheet(campaign: campaign) }
     }
+
+    /// Outside Society play only the first party shows; any others are kept, not deleted.
+    private var shownParties: [Party] { model.shownParties(in: campaign.id) }
 
     private func rename(_ name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
@@ -59,6 +67,7 @@ private extension View {
 /// A scenario and its encounters, indented under it.
 private struct ScenarioRows: View {
     let scenario: Scenario
+    let scenarioTitle: String
     @Environment(AppModel.self) private var model
     /// Collapsed scenarios on this device, as comma-separated IDs. New scenarios start expanded.
     @AppStorage("collapsedScenarios") private var collapsed = ""
@@ -84,7 +93,7 @@ private struct ScenarioRows: View {
         .contextMenu {
             Button("Add Encounter", systemImage: "plus") { model.addEncounter(to: scenario.id) }
             Button("Add Handout", systemImage: "doc.richtext") { model.addHandout(to: scenario.id) }
-            Button("Delete Scenario", systemImage: "trash", role: .destructive) {
+            Button("Delete \(scenarioTitle)", systemImage: "trash", role: .destructive) {
                 model.library.deleteScenario(scenario.id)
             }
         }
@@ -161,45 +170,5 @@ private struct SavedFightsSection: View {
         .contextMenu {
             Button("Delete", systemImage: "trash", role: .destructive) { model.library.deleteSession(session.id) }
         }
-    }
-}
-
-/// Asks for a scenario's name and difficulty scheme.
-private struct NewScenarioSheet: View {
-    let campaign: Campaign
-    @Environment(AppModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var scheme = VariantScheme.single
-    @State private var labels = ""
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Name", text: $name, prompt: Text("#7-03: The Sunken Vault")).titleEntry()
-                Picker("Difficulty variants", selection: $scheme) {
-                    ForEach(VariantScheme.allCases, id: \.self) { Text($0.title).tag($0) }
-                }
-                TextField("Variant labels, comma separated", text: $labels)
-                Text("The labels can be edited to match the scenario being run.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .formStyle(.grouped)
-            .navigationTitle("New Scenario")
-            .onAppear { scheme = .easierBaseHarder }
-            .onChange(of: scheme, initial: true) { labels = scheme.labels.joined(separator: ", ") }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Add", action: add) }
-            }
-        }
-        .sheetFrame(minWidth: 420, minHeight: 280)
-    }
-
-    private func add() {
-        let parsed = labels.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-        model.addScenario(to: campaign.id, name: name.isEmpty ? "New scenario" : name, labels: parsed)
-        dismiss()
     }
 }

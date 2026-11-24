@@ -56,21 +56,25 @@ struct CampaignSidebar: View {
 
     @ViewBuilder
     private func menu(for campaign: Campaign) -> some View {
-        Button("Rename…", systemImage: "pencil") { renaming = campaign }
+        Button("Edit…", systemImage: "pencil") { renaming = campaign }
         Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: campaign.id) }
         Button("Delete", systemImage: "trash", role: .destructive) { model.deleteCampaign(campaign.id) }
     }
 
 }
 
-/// Asks for a campaign's name and game, for a new campaign or to rename one.
+/// Asks for a campaign's name, game and whether it is Society play, for a new campaign or to edit one.
 struct CampaignSheet: View {
-    /// The campaign being renamed, or nil to add one.
+    /// The campaign being edited, or nil to add one.
     let campaign: Campaign?
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var game = Game.pathfinder
+    @State private var isSociety = false
+    @State private var eventID = ""
+    /// The last choice made when adding a campaign, so a Society GM gets the box checked and a home GM doesn't.
+    @AppStorage("lastCampaignWasSociety") private var lastWasSociety = false
 
     var body: some View {
         NavigationStack {
@@ -82,12 +86,19 @@ struct CampaignSheet: View {
                     Text("Starfinder").tag(Game.starfinder)
                 }
                 .pickerStyle(.segmented)
+                Toggle("Society play (PFS or SFS)", isOn: $isSociety)
+                if isSociety {
+                    TextField("Event ID", text: $eventID)
+                    Text("Information only for now.").font(.footnote).foregroundStyle(.secondary)
+                }
             }
             .formStyle(.grouped)
-            .navigationTitle(campaign == nil ? "New Campaign" : "Rename Campaign")
+            .navigationTitle("\(campaign == nil ? "New" : "Edit") \(isSociety ? "Event" : "Campaign")")
             .onAppear {
                 name = campaign?.name ?? ""
                 game = campaign?.game ?? .pathfinder
+                isSociety = campaign?.isSociety ?? lastWasSociety
+                eventID = campaign?.eventID ?? ""
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -97,18 +108,24 @@ struct CampaignSheet: View {
                 }
             }
         }
-        .sheetFrame(minWidth: 360, minHeight: 200)
+        .sheetFrame(minWidth: 360, minHeight: 260)
     }
 
     private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+
+    private var trimmedEventID: String { isSociety ? eventID.trimmingCharacters(in: .whitespaces) : "" }
 
     private func save() {
         if var campaign {
             campaign.name = trimmedName
             campaign.game = game
+            campaign.isSociety = isSociety
+            campaign.eventID = trimmedEventID
             model.library.save(campaign)
         } else {
-            model.addCampaign(name: trimmedName, game: game)
+            lastWasSociety = isSociety
+            model.addCampaign(NewCampaign(name: trimmedName, game: game, isSociety: isSociety,
+                                          eventID: trimmedEventID))
         }
         dismiss()
     }

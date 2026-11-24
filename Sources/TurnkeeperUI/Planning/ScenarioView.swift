@@ -12,20 +12,14 @@ struct ScenarioView: View {
             Section {
                 TextField("Name", text: binding(\.name)).titleEntry()
                 TextField("Levels", text: binding(\.levelRange), prompt: Text("1–4"))
-                HStack {
-                    TextField("Variants, comma separated", text: labelsBinding)
-                    Menu("Presets") {
-                        ForEach(VariantScheme.allCases, id: \.self) { scheme in
-                            Button(scheme.title) { update { $0.variantLabels = scheme.labels } }
-                        }
-                    }
-                    .fixedSize()
-                }
+                if campaign?.allowsDifficultyVariants != false { variantsRow }
                 TextField("Notes", text: binding(\.notes), axis: .vertical).lineLimit(3...8)
             }
             Section {
                 PartyPicker(campaignID: scenario.campaignID, partyID: $partyID)
-                ChallengePointsLine(scenario: scenario, party: model.party(partyID))
+                if campaign?.allowsDifficultyVariants != false {
+                    ChallengePointsLine(scenario: scenario, party: model.party(partyID))
+                }
                 ScenarioGrid(scenario: scenario, party: model.party(partyID))
             } header: {
                 Text("Encounters by difficulty")
@@ -37,6 +31,20 @@ struct ScenarioView: View {
             Button("Add Encounter", systemImage: "plus") { model.addEncounter(to: scenario.id) }
         }
         .onAppear { partyID = partyID ?? model.defaultParty(for: scenario.campaignID)?.id }
+    }
+
+    private var campaign: Campaign? { model.campaign(scenario.campaignID) }
+
+    private var variantsRow: some View {
+        HStack {
+            TextField("Variants, comma separated", text: labelsBinding)
+            Menu("Presets") {
+                ForEach(VariantScheme.choices(society: true), id: \.self) { scheme in
+                    Button(scheme.title) { update { $0.variantLabels = scheme.labels } }
+                }
+            }
+            .fixedSize()
+        }
     }
 
     private func update(_ change: (inout Scenario) -> Void) {
@@ -68,7 +76,7 @@ struct PartyPicker: View {
     var body: some View {
         Picker("Party", selection: $partyID) {
             Text("None").tag(UUID?.none)
-            ForEach(model.library.parties(in: campaignID)) { party in
+            ForEach(model.shownParties(in: campaignID)) { party in
                 Text("\(party.name) (level \(party.level), \(party.presentMembers.count) PCs)")
                     .tag(UUID?.some(party.id))
             }

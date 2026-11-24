@@ -47,6 +47,10 @@ struct PartyEditorView: View {
                         }
                         MemberPlayerRow(playerName: memberBinding(member.id, \.playerName),
                                         notes: memberBinding(member.id, \.notes))
+                        if isSociety {
+                            MemberSocietyRow(societyID: memberBinding(member.id, \.societyID),
+                                             characterNumber: memberBinding(member.id, \.characterNumber))
+                        }
                         MemberLinkRow(member: member, partyID: party.id) {
                             demiplaneTarget = DemiplaneTarget(memberID: member.id)
                         }
@@ -118,6 +122,8 @@ struct PartyEditorView: View {
                 } })
     }
 
+    private var isSociety: Bool { model.campaign(party.campaignID)?.isSociety ?? true }
+
     private func memberBinding(_ id: UUID, _ path: WritableKeyPath<PartyMember, String>) -> Binding<String> {
         Binding(get: { party.members.first { $0.id == id }?[keyPath: path] ?? "" },
                 set: { value in update { party in
@@ -138,6 +144,19 @@ private struct MemberPlayerRow: View {
             TextField("Player", text: $playerName, prompt: Text("Player's name")).nameEntry()
             TextField("Notes", text: $notes, prompt: Text("Notes, such as their Discord handle"), axis: .vertical)
                 .lineLimit(1...4)
+        }
+    }
+}
+
+/// The player's Organized Play Society ID and the character's number under it.
+private struct MemberSocietyRow: View {
+    @Binding var societyID: String
+    @Binding var characterNumber: String
+
+    var body: some View {
+        HStack {
+            TextField("Society ID", text: $societyID, prompt: Text("Society ID"))
+            TextField("Character #", text: $characterNumber, prompt: Text("Character #"))
         }
     }
 }
