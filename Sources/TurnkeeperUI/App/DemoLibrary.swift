@@ -11,6 +11,8 @@ enum DemoLibrary {
     static func model(mode: String, bestiary: BestiaryStore) -> AppModel {
         // Demos (and the UI tests that drive them) start from the default card and notes split.
         UserDefaults.standard.removeObject(forKey: "cardNotesSplit")
+        // And with the voice initiative help showing, as on a first run.
+        UserDefaults.standard.removeObject(forKey: VoiceInitiativeHelp.hiddenKey)
         let artFolder = FileManager.default.temporaryDirectory.appendingPathComponent("TurnkeeperDemoArt")
         let model = AppModel(bestiary: bestiary, artStore: ArtStore(directory: artFolder))
         if mode == "starfinder" { return starfinder(model: model, bestiary: bestiary) }

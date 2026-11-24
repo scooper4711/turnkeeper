@@ -172,6 +172,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
     Saying a number for a row that has one replaces it, and every number can be undone.
   - What was heard and what was recorded ("Heard 17 for Valeros") show at the bottom; a missed number says so
     and never opens the keypad.
+  - Before it listens, a short help explains all this, each time until the GM chooses Don't Show Again (a setting
+    on the device). The screen's help button opens it any time, without stopping the listening.
   After Begin Combat nothing listens, and strips are dragged to reorder.
 - R4.3a The seating order is kept on the party, so it syncs. On the voice screen PC rows are dragged to change
   it; that never changes the initiative order. PCs not yet seated come after the seated ones.

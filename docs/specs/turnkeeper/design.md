@@ -100,7 +100,8 @@ Ported from the pf2e system, with tests.
   splits speech into utterances: one ends when the transcript stays the same for 0.7 s or the recognizer calls
   it final. After each utterance, after an error and before Apple's one-minute limit it starts a new
   recognition task. Its tap also feeds `SpectrumAnalyzer` and publishes about 20 sets of levels a second for
-  `ListeningMeter`. `--fake-voice a,b,c` plays each scripted utterance half a second apart, for UI tests.
+  `ListeningMeter`. `--fake-voice a,b,c` plays each scripted utterance half a second apart, for UI tests. `VoiceInitiativeHelp` opens
+  before listening starts until the `hidesVoiceInitiativeHelp` default is set; demos clear it.
   `SpokenNameMatcher` finds the names in a partial transcript, and `InitiativeRoster` builds the rows (R4.3a,
   R4.3b) and picks among several matches. `Party.seating` holds the member IDs in seating order; a PC finds its
   member through `Combatant.memberID`, or its `pc.` key in sessions saved before it.

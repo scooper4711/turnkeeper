@@ -26,6 +26,9 @@ final class InitiativeUITests: XCTestCase {
         let open = app.buttons["Voice Initiative"]
         XCTAssertTrue(open.waitForExistence(timeout: 10))
         open.tap()
+        let start = app.buttons["Start Listening"]
+        XCTAssertTrue(start.waitForExistence(timeout: 5), "the help explains the screen before it listens")
+        start.tap()
         let status = app.staticTexts["voiceStatus"]
         XCTAssertTrue(status.waitForExistence(timeout: 5))
         XCTAssertTrue(waitUntil(timeout: 10) { status.label == "Heard 20 for Ezren" }, "status is \(status.label)")
@@ -43,6 +46,36 @@ final class InitiativeUITests: XCTestCase {
         app.buttons["voiceDone"].tap()
         XCTAssertTrue(open.waitForExistence(timeout: 5))
         XCTAssertFalse(status.exists)
+    }
+
+    /// The help opens before listening each time until Don't Show Again; after that only the help button opens it,
+    /// and closing it from there leaves the screen listening.
+    func testVoiceInitiativeHelp() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--demo", "setup", "--fake-voice", "mumble"]
+        app.launch()
+        let open = app.buttons["Voice Initiative"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        open.tap()
+        XCTAssertTrue(app.buttons["Start Listening"].waitForExistence(timeout: 5))
+        app.buttons["Start Listening"].tap()
+        app.buttons["voiceDone"].tap()
+
+        open.tap()
+        XCTAssertTrue(app.buttons["Don't Show Again"].waitForExistence(timeout: 5), "it shows again")
+        app.buttons["Don't Show Again"].tap()
+        app.buttons["voiceDone"].tap()
+
+        open.tap()
+        XCTAssertTrue(app.buttons["voiceDone"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Start Listening"].exists, "Don't Show Again stops it opening by itself")
+        app.buttons["How It Works"].tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Start Listening"].exists)
+        app.buttons["Done"].firstMatch.tap()
+        // The prompt shows only while listening.
+        let prompt = app.staticTexts["voiceTranscript"]
+        XCTAssertTrue(waitUntil { prompt.label == "Say a name or a number…" }, "not listening: \(prompt.label)")
     }
 
     private func row(_ name: String, in app: XCUIApplication) -> XCUIElement {

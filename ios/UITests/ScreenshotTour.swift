@@ -60,6 +60,8 @@ final class ScreenshotTour: XCTestCase {
         save("setup-initiative-pad")
         closeSheet()
         tap(app.buttons["Voice Initiative"])
+        save("setup-voice-help")
+        tap(app.buttons["Start Listening"])
         sleep(1)
         save("setup-voice-initiative")
         tap(app.buttons["voiceDone"])

@@ -3,7 +3,8 @@ import SwiftUI
 
 /// Setup's voice initiative screen (R4.3): it listens the whole time it's open. Saying a name selects that row,
 /// and a number said for the selected row records it and moves on to the next row without one. PC rows are
-/// dragged to change the seating order. Only Done closes it, so a wrong number can be said again.
+/// dragged to change the seating order. Only Done closes it, so a wrong number can be said again. Until the GM
+/// turns it off, `VoiceInitiativeHelp` explains all this before listening starts.
 struct VoiceInitiativeScreen: View {
     let controller: BoardController
     @Environment(\.dismiss) private var dismiss
@@ -12,6 +13,10 @@ struct VoiceInitiativeScreen: View {
     @State private var selectedID: UUID?
     @State private var sparklingID: UUID?
     @State private var status = ""
+    @State private var showsHelp = false
+    /// The help opened by itself, so listening starts once it closes.
+    @State private var isIntroducing = false
+    @AppStorage(VoiceInitiativeHelp.hiddenKey) private var hidesHelp = false
 
     var body: some View {
         NavigationStack {
@@ -29,12 +34,18 @@ struct VoiceInitiativeScreen: View {
             .safeAreaInset(edge: .bottom) { footer }
             .navigationTitle("Voice Initiative")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) { Toggle("Show All", isOn: $showsAll) }
+                ToolbarItemGroup(placement: .primaryAction) {
+                    Button("How It Works", systemImage: "questionmark.circle") { showsHelp = true }
+                    Toggle("Show All", isOn: $showsAll)
+                }
             }
         }
         .sheetFrame(minWidth: 520, minHeight: 640)
         .interactiveDismissDisabled()
-        .task { await start() }
+        .task { await open() }
+        .sheet(isPresented: $showsHelp, onDismiss: startAfterIntroduction) {
+            VoiceInitiativeHelp(isIntroduction: isIntroducing)
+        }
         .onDisappear { voice.stop() }
         .onChange(of: showsAll) {
             if !roster.rows.contains(where: { $0.id == selectedID }) { selectedID = firstSelection }
@@ -83,8 +94,24 @@ struct VoiceInitiativeScreen: View {
 
     // MARK: Listening
 
-    private func start() async {
+    /// Selects the first row and starts listening, or first explains how, until the GM turns that off.
+    private func open() async {
         selectedID = firstSelection
+        guard hidesHelp else {
+            isIntroducing = true
+            showsHelp = true
+            return
+        }
+        await start()
+    }
+
+    private func startAfterIntroduction() {
+        guard isIntroducing else { return }
+        isIntroducing = false
+        Task { await start() }
+    }
+
+    private func start() async {
         await voice.requestPermission()
         let names = controller.state.ladder.flatMap { [$0.name, $0.playerName] }.filter { !$0.isEmpty }
         voice.start(names: names, onPartial: { selectName(in: $0) }, onUtterance: { record($0) })
