@@ -43,9 +43,19 @@ struct SocietyCampaignTests {
 
     @Test("Society scenarios are not offered One version")
     func schemeChoices() {
-        #expect(!VariantScheme.choices(society: true).contains(.single))
-        #expect(VariantScheme.choices(society: false).contains(.single))
-        #expect(VariantScheme.choices(society: true).count == VariantScheme.allCases.count - 1)
+        #expect(!VariantScheme.societyChoices.contains(.single))
+        #expect(VariantScheme.societyChoices.count == VariantScheme.allCases.count - 1)
+    }
+
+    @Test("The base difficulty is Base when the scenario has one, else the first")
+    func baseVariant() {
+        let campaignID = UUID()
+        let three = Scenario(campaignID: campaignID, name: "x", variantLabels: VariantScheme.easierBaseHarder.labels)
+        let tiers = Scenario(campaignID: campaignID, name: "x",
+                             variantLabels: VariantScheme.challengePointsLowTier.labels)
+        #expect(three.baseVariantLabel == "Base")
+        #expect(tiers.baseVariantLabel == "8–9 CP")
+        #expect(Scenario(campaignID: campaignID, name: "x").baseVariantLabel == "Standard")
     }
 
     @Test("Members saved before Society numbers read as blank, and the numbers round-trip")

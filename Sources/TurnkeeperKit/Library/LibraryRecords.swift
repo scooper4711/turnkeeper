@@ -201,10 +201,14 @@ public struct Scenario: LibraryRecord, Hashable {
     /// The difficulty an encounter opens at, when the party's challenge points pick none: Base for a new
     /// encounter (nothing planned yet), else `lastRun`, else Base, else the first.
     public func startingVariantLabel(for encounter: Encounter, lastRun: String) -> String {
-        let base = variantLabels.contains(VariantScheme.baseLabel) ? VariantScheme.baseLabel : variantLabels[0]
         let isNew = encounter.variants.allSatisfy { $0.slots.isEmpty && $0.events.isEmpty }
-        guard !isNew, variantLabels.contains(lastRun) else { return base }
+        guard !isNew, variantLabels.contains(lastRun) else { return baseVariantLabel }
         return lastRun
+    }
+
+    /// The one difficulty a campaign outside Society play plans and runs: Base, else the first.
+    public var baseVariantLabel: String {
+        variantLabels.contains(VariantScheme.baseLabel) ? VariantScheme.baseLabel : variantLabels[0]
     }
 }
 
@@ -227,10 +231,8 @@ public enum VariantScheme: String, CaseIterable, Sendable {
         }
     }
 
-    /// The schemes to offer: society scenarios always have difficulties, so they get no "One version".
-    public static func choices(society: Bool) -> [VariantScheme] {
-        society ? allCases.filter { $0 != .single } : allCases
-    }
+    /// The schemes a Society scenario is offered: it always has difficulties, so there is no "One version".
+    public static var societyChoices: [VariantScheme] { allCases.filter { $0 != .single } }
 
     public var labels: [String] {
         switch self {
