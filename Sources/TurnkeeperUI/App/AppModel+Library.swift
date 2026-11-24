@@ -73,14 +73,12 @@ extension AppModel {
 
     /// The parties a campaign shows: all in Society play, else the first. Hidden ones are kept, not deleted.
     func shownParties(in campaignID: UUID) -> [Party] {
-        let parties = library.parties(in: campaignID)
-        return isSociety(campaignID) ? parties : Array(parties.prefix(1))
+        library.shownParties(in: campaignID)
     }
 
-    /// Whether a campaign is Society play. One that can't be found counts as it, as libraries from before the
-    /// setting do.
+    /// Whether a campaign is Society play; one that can't be found counts as it.
     func isSociety(_ campaignID: UUID?) -> Bool {
-        campaign(campaignID)?.isSociety ?? true
+        library.isSociety(campaignID)
     }
 
     /// The difficulties a scenario shows: all of them in Society play, else its base one. The rest are kept.
