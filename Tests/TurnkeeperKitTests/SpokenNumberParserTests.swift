@@ -29,4 +29,26 @@ struct SpokenNumberParserTests {
         #expect(SpokenNumberParser.initiative(from: "hmm what") == nil)
         #expect(SpokenNumberParser.initiative(from: "") == nil)
     }
+
+    @Test("Natural rolls are told apart", arguments: [
+        ("nat 20", 20.0, true), ("natural twenty", 20, true), ("natty seventeen", 17, true),
+        ("Nat 1", 1, true), ("Matt 20", 20, false), ("twenty", 20, false), ("nat 12 no 14", 14, false)
+    ])
+    func naturals(transcript: String, value: Double, isNatural: Bool) {
+        #expect(SpokenNumberParser.spokenInitiative(from: transcript)
+                == SpokenInitiative(value: value, isNatural: isNatural))
+    }
+
+    @Test("Without a number there is no spoken initiative")
+    func noNatural() {
+        #expect(SpokenNumberParser.spokenInitiative(from: "natural") == nil)
+    }
+
+    @Test("Number words are recognized for name matching")
+    func numberWords() {
+        #expect(SpokenNumberParser.isNumberWord("Twenty"))
+        #expect(SpokenNumberParser.isNumberWord("17"))
+        #expect(SpokenNumberParser.isNumberWord("minus"))
+        #expect(!SpokenNumberParser.isNumberWord("Sam"))
+    }
 }

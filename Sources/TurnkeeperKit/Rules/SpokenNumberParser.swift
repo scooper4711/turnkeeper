@@ -5,7 +5,23 @@ import Foundation
 public enum SpokenNumberParser {
     /// The last number in the transcript, or nil when there is none.
     public static func initiative(from transcript: String) -> Double? {
-        numbers(in: words(transcript)).last?.value
+        spokenInitiative(from: transcript)?.value
+    }
+
+    /// The last number in the transcript, and whether "nat", "natural" or "natty" came just before it, as in
+    /// "nat 17". Nil when there is no number.
+    public static func spokenInitiative(from transcript: String) -> SpokenInitiative? {
+        let words = words(transcript)
+        guard let last = numbers(in: words).last else { return nil }
+        let start = last.range.lowerBound
+        let isNatural = start > 0 && naturals.contains(words[start - 1])
+        return SpokenInitiative(value: last.value, isNatural: isNatural)
+    }
+
+    /// Whether a word is part of a number, such as "twenty" or "17", so name matching can skip it.
+    public static func isNumberWord(_ word: String) -> Bool {
+        let word = word.lowercased()
+        return Double(word) != nil || units[word] != nil || tens[word] != nil || negatives.contains(word)
     }
 
     private static let units = [
@@ -17,6 +33,7 @@ public enum SpokenNumberParser {
         "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90
     ]
     private static let negatives: Set<String> = ["minus", "negative"]
+    private static let naturals: Set<String> = ["nat", "natural", "natty"]
 
     private struct SpokenNumber {
         var value: Double
@@ -67,5 +84,16 @@ public enum SpokenNumberParser {
         if rest.starts(with: ["and", "a", "half"]) { return (0.5, index + 3) }
         if rest.starts(with: ["point", "five"]) || rest.starts(with: ["point", "5"]) { return (0.5, index + 2) }
         return (0, index)
+    }
+}
+
+/// A spoken initiative: the number, and whether it was a natural roll ("nat 17") that needs the modifier added.
+public struct SpokenInitiative: Sendable, Hashable {
+    public var value: Double
+    public var isNatural: Bool
+
+    public init(value: Double, isNatural: Bool) {
+        self.value = value
+        self.isNatural = isNatural
     }
 }
