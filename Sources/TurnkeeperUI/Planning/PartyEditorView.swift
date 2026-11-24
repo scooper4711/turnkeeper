@@ -20,16 +20,20 @@ struct PartyEditorView: View {
                     // One row per member, so the form's dividers fall between characters.
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            if isSociety {
-                                MemberSocietyNumber(societyID: memberBinding(member.id, \.societyID),
-                                                    characterNumber: memberBinding(member.id, \.characterNumber))
+                            VStack(alignment: .leading, spacing: 2) {
+                                TextField("Name", text: memberBinding(member.id, \.name),
+                                          prompt: Text("Character name"))
+                                    .labelsHidden()
+                                    .textFieldStyle(.plain)
+                                    .nameEntry()
+                                    .font(.title3.bold())
+                                    .foregroundStyle(member.isAway ? .secondary : .primary)
+                                if isSociety {
+                                    MemberSocietyNumber(
+                                        societyID: memberBinding(member.id, \.societyID),
+                                        characterNumber: memberBinding(member.id, \.characterNumber))
+                                }
                             }
-                            TextField("Name", text: memberBinding(member.id, \.name), prompt: Text("Character name"))
-                                .labelsHidden()
-                                .textFieldStyle(.plain)
-                                .nameEntry()
-                                .font(.title3.bold())
-                                .foregroundStyle(member.isAway ? .secondary : .primary)
                             // Named, not just an icon, so it reads as the way to bench a player.
                             Toggle(isOn: awayBinding(member.id)) {
                                 Label(member.isAway ? "Away" : "At Table",

@@ -1,23 +1,23 @@
 import TurnkeeperKit
 import SwiftUI
 
-/// A member's Organized Play ID and character number, as "123456 - 2001".
+/// A member's Organized Play ID and character number, as "123456 - 2001", small and faded under the name.
 struct MemberSocietyNumber: View {
     @Binding var societyID: String
     @Binding var characterNumber: String
-    @ScaledMetric private var idWidth = 92.0
-    @ScaledMetric private var numberWidth = 52.0
 
     var body: some View {
+        // Each field is as wide as what it holds, so a one-digit ID sits as close to the dash as an eight-digit one.
         HStack(spacing: 4) {
             DigitsField(prompt: "Org Play ID", limit: SocietyNumber.organizedPlayIDLength, value: $societyID)
-                .multilineTextAlignment(.trailing)
-                .frame(width: idWidth)
-            Text("-").foregroundStyle(.secondary)
+                .fixedSize()
+            Text("-")
             DigitsField(prompt: "Char #", limit: SocietyNumber.characterNumberLength, value: $characterNumber)
-                .frame(width: numberWidth)
+                .fixedSize()
         }
+        .font(.caption)
         .monospacedDigit()
+        .foregroundStyle(.secondary)
     }
 }
 
