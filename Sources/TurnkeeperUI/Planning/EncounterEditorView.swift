@@ -22,7 +22,7 @@ struct EncounterEditorView: View {
                 TextField("Notes", text: textBinding(\.notes), axis: .vertical).lineLimit(2...10)
             }
             Section {
-                variantControls(labels: scenario?.variantLabels ?? [])
+                variantControls(labels: scenario.map(model.shownVariantLabels) ?? [])
                 if let party = model.party(partyID) { budget(for: current.variant(label), party: party) }
             }
             SlotsSection(encounter: current, label: label, party: model.party(partyID),
@@ -35,6 +35,7 @@ struct EncounterEditorView: View {
         .toolbar { runButton(current) }
         .onAppear { setUp(scenario) }
         .onChange(of: encounter.id) { setUp(scenario) }
+        .onChange(of: model.isSociety(scenario?.campaignID)) { setUp(scenario) }
         .onChange(of: partyID) { if let label = pickedLabel(scenario) { self.label = label } }
         .sheet(isPresented: $isBrowsing) {
             BestiaryBrowser(game: model.game, partyLevel: model.party(partyID)?.level,
@@ -72,7 +73,9 @@ struct EncounterEditorView: View {
             }
         }
         PartyPicker(campaignID: model.scenario(encounter.scenarioID)?.campaignID ?? UUID(), partyID: $partyID)
-        ChallengePointsLine(scenario: model.scenario(encounter.scenarioID), party: model.party(partyID))
+        if model.isSociety(model.scenario(encounter.scenarioID)?.campaignID) {
+            ChallengePointsLine(scenario: model.scenario(encounter.scenarioID), party: model.party(partyID))
+        }
     }
 
     private func budget(for variant: EncounterVariant, party: Party) -> some View {
@@ -111,18 +114,21 @@ struct EncounterEditorView: View {
         }
     }
 
-    /// Picks the difficulty: the one the party's points call for, else the last one run.
+    /// Picks the difficulty: the one the party's points call for, else the last one run. Outside Society play it
+    /// is always the scenario's base one, so what is planned can't end up at a difficulty nobody can see.
     private func setUp(_ scenario: Scenario?) {
         partyID = partyID ?? model.defaultParty(for: scenario?.campaignID)?.id
         label = pickedLabel(scenario) ?? scenario.map(startingLabel) ?? VariantScheme.single.labels[0]
     }
 
     private func startingLabel(_ scenario: Scenario) -> String {
-        scenario.startingVariantLabel(for: encounter, lastRun: model.library.lastRunVariantLabel(in: scenario))
+        guard model.isSociety(scenario.campaignID) else { return scenario.baseVariantLabel }
+        return scenario.startingVariantLabel(for: encounter, lastRun: model.library.lastRunVariantLabel(in: scenario))
     }
 
     private func pickedLabel(_ scenario: Scenario?) -> String? {
-        guard let scenario, let party = model.party(partyID) else { return nil }
+        guard let scenario, model.isSociety(scenario.campaignID), let party = model.party(partyID)
+        else { return nil }
         return scenario.difficulty(for: party)?.label
     }
 

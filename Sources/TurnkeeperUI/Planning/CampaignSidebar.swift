@@ -12,7 +12,7 @@ struct CampaignSidebar: View {
         @Bindable var model = model
         List(selection: $model.selectedCampaignID) {
             ForEach(model.library.activeCampaigns) { campaign in
-                Label(campaign.name, systemImage: campaign.game == .starfinder ? "sparkles" : "shield")
+                CampaignRow(campaign: campaign)
                     .tag(campaign.id)
                     .contextMenu { menu(for: campaign) }
             }
@@ -56,38 +56,63 @@ struct CampaignSidebar: View {
 
     @ViewBuilder
     private func menu(for campaign: Campaign) -> some View {
-        Button("Rename…", systemImage: "pencil") { renaming = campaign }
+        Button("Edit…", systemImage: "pencil") { renaming = campaign }
         Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: campaign.id) }
         Button("Delete", systemImage: "trash", role: .destructive) { model.deleteCampaign(campaign.id) }
     }
 
 }
 
-/// Asks for a campaign's name and game, for a new campaign or to rename one.
+/// A campaign's name, with a Society event's ID under it.
+private struct CampaignRow: View {
+    let campaign: Campaign
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(campaign.name)
+                if campaign.isSociety && !campaign.eventID.isEmpty {
+                    Text(campaign.eventID).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        } icon: {
+            Image(systemName: campaign.game == .starfinder ? "sparkles" : "shield")
+        }
+    }
+}
+
+/// Asks for a campaign's name, game and whether it is Society play, for a new campaign or to edit one.
 struct CampaignSheet: View {
-    /// The campaign being renamed, or nil to add one.
+    /// The campaign being edited, or nil to add one.
     let campaign: Campaign?
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var game = Game.pathfinder
+    /// What the sheet edits: a copy of the campaign, or the new one.
+    @State private var draft = Campaign(name: "", game: .pathfinder, isSociety: false)
+    /// The last choice made when adding a campaign, so a Society GM gets the box checked and a home GM doesn't.
+    @AppStorage("lastCampaignWasSociety") private var lastWasSociety = false
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name, prompt: Text("PFS Season 7"))
+                TextField("Name", text: $draft.name, prompt: Text("PFS Season 7"))
                     .nameEntry()
-                Picker("Game", selection: $game) {
+                Picker("Game", selection: $draft.game) {
                     Text("Pathfinder").tag(Game.pathfinder)
                     Text("Starfinder").tag(Game.starfinder)
                 }
                 .pickerStyle(.segmented)
+                Toggle("Society play (PFS or SFS)", isOn: $draft.isSociety)
+                if !switchOffEffects.isEmpty { switchOffWarning }
+                if draft.isSociety {
+                    TextField("Event ID", text: $draft.eventID)
+                    Text("Information only for now.").font(.footnote).foregroundStyle(.secondary)
+                }
             }
             .formStyle(.grouped)
-            .navigationTitle(campaign == nil ? "New Campaign" : "Rename Campaign")
+            .navigationTitle("\(campaign == nil ? "New" : "Edit") \(draft.kindTitle)")
             .onAppear {
-                name = campaign?.name ?? ""
-                game = campaign?.game ?? .pathfinder
+                if let campaign { draft = campaign } else { draft.isSociety = lastWasSociety }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -97,18 +122,39 @@ struct CampaignSheet: View {
                 }
             }
         }
-        .sheetFrame(minWidth: 360, minHeight: 200)
+        .sheetFrame(minWidth: 360, minHeight: 260)
     }
 
-    private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+    /// What switching Society play off would hide, while the box is off on a campaign saved with it on.
+    private var switchOffEffects: [String] {
+        guard let campaign, campaign.isSociety, !draft.isSociety else { return [] }
+        return model.library.effectsOfLeavingSociety(campaign.id)
+    }
 
+    private var switchOffWarning: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Turning off Society play:")
+                ForEach(switchOffEffects, id: \.self) { Text("• \($0)") }
+                Text("Nothing is deleted. Turning it back on shows it all again.")
+            }
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+        }
+        .font(.footnote)
+    }
+
+    private var trimmedName: String { draft.name.trimmingCharacters(in: .whitespaces) }
+
+    /// The Event ID is kept when Society play is switched off, so switching it back on brings it back.
     private func save() {
-        if var campaign {
-            campaign.name = trimmedName
-            campaign.game = game
-            model.library.save(campaign)
+        draft.name = trimmedName
+        draft.eventID = draft.eventID.trimmingCharacters(in: .whitespaces)
+        if campaign == nil {
+            lastWasSociety = draft.isSociety
+            model.addCampaign(draft)
         } else {
-            model.addCampaign(name: trimmedName, game: game)
+            model.library.save(draft)
         }
         dismiss()
     }

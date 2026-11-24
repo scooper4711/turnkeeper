@@ -22,6 +22,9 @@ struct CampaignSyncState: Codable, Equatable {
     var entries: [String: CampaignSyncEntry] = [:]
     var held: [String: HeldCampaignRecord] = [:]
 
+    /// Whether a newer version of the app wrote any of the held records, so only an update can apply them.
+    var holdsLaterFormat: Bool { held.values.contains { $0.format > CampaignRecordCoder.format } }
+
     /// The saved state, or an empty one, which sends everything and merges what the server holds.
     static func load(from url: URL) -> CampaignSyncState {
         (try? Data(contentsOf: url)).flatMap { try? JSONDecoder().decode(CampaignSyncState.self, from: $0) }

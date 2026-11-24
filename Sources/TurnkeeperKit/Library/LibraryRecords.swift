@@ -25,15 +25,47 @@ public struct Campaign: LibraryRecord, Hashable {
     public var id = UUID()
     public var name: String
     public var game: Game
+    /// Organized play (PFS or SFS): several parties, difficulty variants and Society numbers. Off for a home
+    /// campaign or adventure path, which has one party and one version of each adventure.
+    public var isSociety: Bool
+    /// The Organized Play event's ID. Information only for now.
+    public var eventID = ""
     public var modifiedAt = Date()
     public var deletedAt: Date?
     public var sharedVersion: Date?
     public var sharedVersions: [Date]?
 
-    public init(name: String, game: Game) {
+    public init(name: String, game: Game, isSociety: Bool = true) {
         self.name = name
         self.game = game
+        self.isSociety = isSociety
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, game, isSociety, eventID, modifiedAt, deletedAt, sharedVersion, sharedVersions
+    }
+
+    /// Libraries saved before the Society setting were all organized play, so they read as society with no
+    /// Event ID.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        game = try container.decode(Game.self, forKey: .game)
+        isSociety = try container.decodeIfPresent(Bool.self, forKey: .isSociety) ?? true
+        eventID = try container.decodeIfPresent(String.self, forKey: .eventID) ?? ""
+        modifiedAt = try container.decode(Date.self, forKey: .modifiedAt)
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        sharedVersion = try container.decodeIfPresent(Date.self, forKey: .sharedVersion)
+        sharedVersions = try container.decodeIfPresent([Date].self, forKey: .sharedVersions)
+    }
+
+    /// What the app calls it: an Event in organized play, else a Campaign.
+    public var kindTitle: String { isSociety ? "Event" : "Campaign" }
+    /// What its sessions are called.
+    public var scenarioTitle: String { isSociety ? "Scenario" : "Adventure" }
+    public var allowsMultipleParties: Bool { isSociety }
+    public var allowsDifficultyVariants: Bool { isSociety }
 }
 
 /// The player characters. Players track their own HP, so a member is a name and level, with a character
@@ -106,6 +138,10 @@ public struct PartyMember: Codable, Sendable, Hashable, Identifiable {
     public var playerName = ""
     /// The GM's notes about the player, such as their Discord handle.
     public var notes = ""
+    /// The player's Organized Play Society ID, shown in society events only.
+    public var societyID = ""
+    /// The character's number under that Society ID.
+    public var characterNumber = ""
     /// When this member last changed, so a sync keeps each member's latest edit. Stamped by `Library.save`.
     public var modifiedAt = Date.distantPast
 
@@ -114,12 +150,13 @@ public struct PartyMember: Codable, Sendable, Hashable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, isAway, level, sheet, link, maxHitPoints, playerName, notes, modifiedAt
+        case id, name, isAway, level, sheet, link, maxHitPoints, playerName, notes, societyID, characterNumber
+        case modifiedAt
     }
 
     /// Libraries saved before players could be away have no `isAway`, and read as present; ones saved before
     /// player names and notes have neither, and read as blank; ones saved before members were stamped read as
-    /// never changed.
+    /// never changed; ones saved before Society numbers have none.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
@@ -131,6 +168,8 @@ public struct PartyMember: Codable, Sendable, Hashable, Identifiable {
         maxHitPoints = try container.decodeIfPresent(Int.self, forKey: .maxHitPoints)
         playerName = try container.decodeIfPresent(String.self, forKey: .playerName) ?? ""
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        societyID = try container.decodeIfPresent(String.self, forKey: .societyID) ?? ""
+        characterNumber = try container.decodeIfPresent(String.self, forKey: .characterNumber) ?? ""
         modifiedAt = try container.decodeIfPresent(Date.self, forKey: .modifiedAt) ?? .distantPast
     }
 }
@@ -162,10 +201,14 @@ public struct Scenario: LibraryRecord, Hashable {
     /// The difficulty an encounter opens at, when the party's challenge points pick none: Base for a new
     /// encounter (nothing planned yet), else `lastRun`, else Base, else the first.
     public func startingVariantLabel(for encounter: Encounter, lastRun: String) -> String {
-        let base = variantLabels.contains(VariantScheme.baseLabel) ? VariantScheme.baseLabel : variantLabels[0]
         let isNew = encounter.variants.allSatisfy { $0.slots.isEmpty && $0.events.isEmpty }
-        guard !isNew, variantLabels.contains(lastRun) else { return base }
+        guard !isNew, variantLabels.contains(lastRun) else { return baseVariantLabel }
         return lastRun
+    }
+
+    /// The one difficulty a campaign outside Society play plans and runs: Base, else the first.
+    public var baseVariantLabel: String {
+        variantLabels.contains(VariantScheme.baseLabel) ? VariantScheme.baseLabel : variantLabels[0]
     }
 }
 
@@ -187,6 +230,9 @@ public enum VariantScheme: String, CaseIterable, Sendable {
         case .single: return "One version"
         }
     }
+
+    /// The schemes a Society scenario is offered: it always has difficulties, so there is no "One version".
+    public static var societyChoices: [VariantScheme] { allCases.filter { $0 != .single } }
 
     public var labels: [String] {
         switch self {

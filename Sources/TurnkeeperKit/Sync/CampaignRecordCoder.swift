@@ -27,7 +27,9 @@ struct CampaignRecordCoder {
     static let zoneName = "Turnkeeper"
     static let zone = CKRecordZone.ID(zoneName: zoneName, ownerName: CKCurrentUserDefaultName)
     /// The layout of a record's fields. A record in a later layout is held, and its record here isn't sent over it.
-    static let format: Int64 = 1
+    /// 2 came with the Society setting and Society numbers: a version from before them would save a record
+    /// without them, and so undo them on every device.
+    static let format: Int64 = 2
     /// Larger payloads go up as an asset: a CloudKit record holds 1 MB, and a party's sheets can pass that.
     static let inlinePayloadLimit = 512 * 1024
 

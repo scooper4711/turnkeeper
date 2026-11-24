@@ -83,6 +83,8 @@ final class AppModel {
     @ObservationIgnored var cloudPictureAttempts: [UUID: Date] = [:]
     /// True while the app is in the background, when the shared database must be closed after each use.
     @ObservationIgnored var isInBackground = false
+    /// Whether iCloud has changes from a newer version of the app, which wait until this one is updated.
+    var needsUpdateToSync = false
     /// Whether the library is syncing, for the menus.
     var cloudSyncStatus = SyncStatus.withoutSync(containerIdentifier: LibrarySync.bundleContainer)
 

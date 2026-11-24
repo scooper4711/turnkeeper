@@ -20,12 +20,20 @@ struct PartyEditorView: View {
                     // One row per member, so the form's dividers fall between characters.
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            TextField("Name", text: memberBinding(member.id, \.name), prompt: Text("Character name"))
-                                .labelsHidden()
-                                .textFieldStyle(.plain)
-                                .nameEntry()
-                                .font(.title3.bold())
-                                .foregroundStyle(member.isAway ? .secondary : .primary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                TextField("Name", text: memberBinding(member.id, \.name),
+                                          prompt: Text("Character name"))
+                                    .labelsHidden()
+                                    .textFieldStyle(.plain)
+                                    .nameEntry()
+                                    .font(.title3.bold())
+                                    .foregroundStyle(member.isAway ? .secondary : .primary)
+                                if isSociety {
+                                    MemberSocietyNumber(
+                                        societyID: memberBinding(member.id, \.societyID),
+                                        characterNumber: memberBinding(member.id, \.characterNumber))
+                                }
+                            }
                             // Named, not just an icon, so it reads as the way to bench a player.
                             Toggle(isOn: awayBinding(member.id)) {
                                 Label(member.isAway ? "Away" : "At Table",
@@ -117,6 +125,8 @@ struct PartyEditorView: View {
                     party.members[index].isAway = away
                 } })
     }
+
+    private var isSociety: Bool { model.isSociety(party.campaignID) }
 
     private func memberBinding(_ id: UUID, _ path: WritableKeyPath<PartyMember, String>) -> Binding<String> {
         Binding(get: { party.members.first { $0.id == id }?[keyPath: path] ?? "" },
