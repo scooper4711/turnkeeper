@@ -4,13 +4,12 @@ import TurnkeeperKit
 import SwiftUI
 
 /// One combatant's magnet: initiative, token, name, HP and condition chips, in the
-/// magnet's color. Tap to show its card (and, in setup, to choose it for voice entry), long-press for its menu, drag
+/// magnet's color. Tap to show its card (and, in setup, to enter its initiative), long-press for its menu, drag
 /// to reorder once combat has begun.
 struct MagnetTile: View {
     let controller: BoardController
     let combatant: Combatant
     @Binding var sheet: BoardSheet?
-    @State private var voice = VoiceInitiative.shared
     @AppStorage(PlayerNamesToggle.key) private var showsPlayerNames = true
     /// With the ladder alone, a tap on a strip opens its card in a sheet.
     @Environment(\.isCompactBoard) private var isCompact
@@ -50,12 +49,6 @@ struct MagnetTile: View {
         .padding(.horizontal, 10)
         .foregroundStyle(.white)
         .background(background)
-        .overlay { if isListening { RoundedRectangle(cornerRadius: 10).stroke(.yellow, lineWidth: 4) } }
-        .overlay {
-            if isVoiceTarget && !isListening {
-                RoundedRectangle(cornerRadius: 10).stroke(.yellow, style: StrokeStyle(lineWidth: 3, dash: [10, 4]))
-            }
-        }
         .overlay {
             if isMissingInitiative { RoundedRectangle(cornerRadius: 10).stroke(.orange, style: missingStyle) }
         }
@@ -63,7 +56,7 @@ struct MagnetTile: View {
         .onTapGesture {
             controller.pinnedID = combatant.id
             if isSetup {
-                controller.chosenForInitiative = combatant.id
+                sheet = .initiative(combatant.id)
             } else if isCompact {
                 sheet = .card
             }
@@ -76,10 +69,9 @@ struct MagnetTile: View {
     }
 
     /// What VoiceOver reads after the strip's name: its conditions, such as "Dying 1, Unconscious", which the
-    /// strip's chips show as a button of their own, and whether voice entry fills it next.
+    /// strip's chips show as a button of their own.
     private var accessibilityValue: String {
-        let conditions = combatant.conditions.map(ConditionLabel.short)
-        return (conditions + (isVoiceTarget ? ["next for voice entry"] : [])).joined(separator: ", ")
+        combatant.conditions.map(ConditionLabel.short).joined(separator: ", ")
     }
 
     /// The mark at the strip's left: dead, delaying, or the arrow of the current turn.
@@ -97,13 +89,6 @@ struct MagnetTile: View {
     /// PC strips stay plain, even when a linked sheet has a portrait.
     private var tileArt: String {
         combatant.kind == .playerCharacter ? "" : controller.entry(for: combatant)?.art.thumbnail ?? ""
-    }
-
-    private var isListening: Bool { voice.listeningFor == combatant.id }
-
-    /// Next for the hold-to-talk button, while voice entry is on.
-    private var isVoiceTarget: Bool {
-        isSetup && voice.isAvailable && controller.initiativeTargetID == combatant.id
     }
 
     /// Outlined after Begin Combat's "Go Back", or while a creature that joined mid-fight still needs one.
@@ -198,5 +183,3 @@ private struct DraggableUnlessSetup: ViewModifier {
         if isSetup { content } else { content.draggable(id.uuidString) }
     }
 }
-
-/// A microphone that listens while it is held down, and glows while listening.

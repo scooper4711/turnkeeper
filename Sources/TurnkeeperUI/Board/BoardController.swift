@@ -8,15 +8,13 @@ import Observation
 @MainActor
 final class BoardController {
     let sessionID: UUID
-    private let model: AppModel
+    let model: AppModel
     /// Reminders waiting to be dismissed, first one showing. Next is blocked until they're all gone.
     private(set) var reminders: [Reminder] = []
     /// The combatant whose card is pinned; nil follows the current turn.
     var pinnedID: UUID?
     /// After "Go Back" from Begin Combat: strips still missing an initiative are outlined.
     var highlightsMissingInitiative = false
-    /// The strip the GM tapped to enter its initiative by voice; otherwise entry walks down the ladder.
-    var chosenForInitiative: UUID?
     /// The GM chose Keep Going after every enemy fell; cleared once an enemy is up again.
     private var victoryAcknowledged = false
     /// End-of-combat events shown before the fight closes; empty until the GM ends a fight that has some.

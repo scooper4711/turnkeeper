@@ -13,6 +13,8 @@ enum BoardSheet: Identifiable, Hashable {
     case creature
     /// The battle card of the pinned strip, or of whoever is acting: a sheet where the board shows the ladder alone.
     case card
+    /// Setup's voice initiative screen, which listens while it's open.
+    case voiceInitiative
 
     var id: String { String(describing: self) }
 }
@@ -59,7 +61,7 @@ struct BoardTopBar: View {
 
     private var roundText: String {
         controller.state.phase == .setup
-            ? "Roll for initiative: hold the button below and say the total, or tap a number"
+            ? "Roll for initiative: open Voice Initiative below and say the totals, or tap a strip"
             : controller.turnText
     }
 }
