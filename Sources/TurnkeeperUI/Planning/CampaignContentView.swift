@@ -20,6 +20,7 @@ struct CampaignContentView: View {
             Section(campaign.allowsMultipleParties ? "Parties" : "Party") {
                 ForEach(shownParties) { party in
                     Label("\(party.name) · level \(party.level)", systemImage: "person.3")
+                        .partyIconInset()
                         .tag(PlannerSelection.party(party.id))
                         .contextMenu {
                             Button("Delete", systemImage: "trash", role: .destructive) {
@@ -50,6 +51,17 @@ struct CampaignContentView: View {
 }
 
 private extension View {
+    /// The party icon is wider than most, and on the iPad it reaches past the rounded end of the row's selection
+    /// highlight; a little room on the left keeps it inside.
+    @ViewBuilder
+    func partyIconInset() -> some View {
+        #if os(iOS)
+        padding(.leading, 6)
+        #else
+        self
+        #endif
+    }
+
     /// On the iPad the title can be tapped to rename; on the Mac, Rename… is in the sidebar's menu.
     @ViewBuilder
     func renamableTitle(_ title: String, rename: @escaping (String) -> Void) -> some View {
