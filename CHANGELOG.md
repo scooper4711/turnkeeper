@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-11-24
+
+### Added
+- Hold Society records back from older versions
+- Warn before leaving Society play and tighten Society numbers
+- Work out what leaving Society play hides
+- Show Society features only in Society events
+- Add a Society setting to campaigns and Society numbers to members
+
+### Fixed
+- Keep the party icon inside the row's highlight on the iPad
+- Show one difficulty and keep the Event ID outside Society play
+- Pin campaigns outside Society play to the base difficulty
+
+### Changed
+- Update tabletop-kit to 1.19.1
+- Put a member's Society number under the name, small and faded
+- Require tabletop-kit 1.19.0
+- Require tabletop-kit 1.18.0
+- Pin the App Store tools to tabletop-kit 1.17.0
+- Require tabletop-kit 1.17.0
+- Require tabletop-kit 1.16.0
+- Update the Artwork submodule to 457740e
+
+[2.3.0]: https://github.com/scooper4711/turnkeeper/releases/tag/v2.3.0
+
 ## [2.2.0] - 2026-11-24
 
 ### Added
