@@ -51,4 +51,25 @@ struct SpokenNumberParserTests {
         #expect(SpokenNumberParser.isNumberWord("minus"))
         #expect(!SpokenNumberParser.isNumberWord("Sam"))
     }
+
+    @Test("Table talk isn't a number", arguments: [
+        "Oh, that's bad", "which one?", "that one", "one more thing", "nan", "Infinity", "inf"
+    ])
+    func chatter(transcript: String) {
+        #expect(SpokenNumberParser.spokenInitiative(from: transcript) == nil)
+    }
+
+    @Test("One is still a number on its own, after a name, or with a half", arguments: [
+        ("one", 1.0), ("Sam one", 1), ("nat one", 1), ("one and a half", 1.5), ("twenty one", 21), ("1", 1)
+    ])
+    func one(transcript: String, expected: Double) {
+        #expect(SpokenNumberParser.initiative(from: transcript) == expected)
+    }
+
+    @Test("Only digits are numbers, not other words Double reads")
+    func digitsOnly() {
+        #expect(!SpokenNumberParser.isNumberWord("nan"))
+        #expect(!SpokenNumberParser.isNumberWord("inf"))
+        #expect(SpokenNumberParser.isNumberWord("17.5"))
+    }
 }

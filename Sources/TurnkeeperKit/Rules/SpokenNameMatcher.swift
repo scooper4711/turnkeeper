@@ -37,9 +37,17 @@ public struct SpokenNameMatcher: Sendable {
     public func matches(in transcript: String) -> [UUID] {
         let words = Self.words(transcript)
         let found = phrases.flatMap { Self.matches(of: $0, in: words) }
+            .filter { !Self.marksNaturalRoll($0, in: words) }
         guard let best = found.max(by: { ($0.end, $0.length) < ($1.end, $1.length) }) else { return [] }
         let ids = Set(found.filter { $0.end == best.end && $0.length == best.length }.map(\.id))
         return order.filter(ids.contains)
+    }
+
+    /// "Nat" right before a number is a natural roll ("nat 20"), not a player called Nat.
+    private static func marksNaturalRoll(_ match: Match, in words: [String]) -> Bool {
+        let next = match.end + 1
+        return match.length == 1 && SpokenNumberParser.isNaturalWord(words[match.end])
+            && next < words.count && SpokenNumberParser.isNumberWord(words[next])
     }
 
     private static func phrases(for name: String, id: UUID) -> [Phrase] {

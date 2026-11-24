@@ -59,4 +59,14 @@ struct SpokenNameMatcherTests {
         #expect(SpokenNameMatcher(candidates: [(UUID(), ["Al"])]).matches(in: "Al") == [])
         #expect(matcher.matches(in: "") == [])
     }
+
+    @Test("Nat before a number is a natural roll, not a player called Nat")
+    func natIsNotAName() {
+        let nat = UUID()
+        let matcher = SpokenNameMatcher(candidates: [(nat, ["Nat"]), (UUID(), ["Nan"])])
+        #expect(matcher.matches(in: "nat 20") == [])
+        #expect(matcher.matches(in: "natural twenty") == [])
+        #expect(matcher.matches(in: "Nat") == [nat])
+        #expect(matcher.matches(in: "Nan").count == 1, "Nan is a name, not a number")
+    }
 }
