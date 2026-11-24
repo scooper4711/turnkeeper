@@ -52,7 +52,8 @@ struct VoiceInitiativeHelp: View {
     @ToolbarContentBuilder
     private var buttons: some ToolbarContent {
         if isIntroduction {
-            ToolbarItem(placement: .cancellationAction) {
+            // Not the cancellation slot: on the Mac, Escape presses that, and Escape mustn't hide this for good.
+            ToolbarItem(placement: .navigation) {
                 Button("Don't Show Again") {
                     isHidden = true
                     dismiss()

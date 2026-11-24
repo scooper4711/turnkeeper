@@ -18,9 +18,12 @@ struct InitiativeRosterTests {
         return creature
     }
 
-    private func roster(_ state: CombatState, seating: [UUID] = [], showsAll: Bool = false,
-                        ranks: [String: Int] = [:]) -> InitiativeRoster {
-        InitiativeRoster(state: state, seating: seating, showsAll: showsAll) { ranks[$0.name] ?? 0 }
+    private func roster(_ state: CombatState, seating: [UUID] = [], ranks: [String: Int] = [:]) -> InitiativeRoster {
+        InitiativeRoster(state: state, seating: seating) { ranks[$0.name] ?? 0 }.withoutCreatures()
+    }
+
+    private func everyone(_ state: CombatState, ranks: [String: Int]) -> InitiativeRoster {
+        InitiativeRoster(state: state, seating: []) { ranks[$0.name] ?? 0 }
     }
 
     @Test("PCs follow the seating order; unseated ones come last, in setup order")
@@ -56,7 +59,7 @@ struct InitiativeRosterTests {
         ])
         let ranks = ["Goblin 1": 5, "Goblin 2": 5, "Goblin 3": 5, "Dog": 7, "Pit": 2]
         #expect(roster(state, ranks: ranks).rows.map(\.name) == ["Kyra"])
-        #expect(roster(state, showsAll: true, ranks: ranks).rows.map(\.name)
+        #expect(everyone(state, ranks: ranks).rows.map(\.name)
                 == ["Kyra", "Dog", "Goblin 2", "Goblin 1", "Goblin 3", "Pit"])
     }
 

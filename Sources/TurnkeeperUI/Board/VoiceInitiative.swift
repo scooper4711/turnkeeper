@@ -33,6 +33,7 @@ final class VoiceInitiative {
     @ObservationIgnored private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     @ObservationIgnored private let engine = AVAudioEngine()
     @ObservationIgnored private let feed = VoiceAudioFeed()
+    @ObservationIgnored private let interruptions = VoiceInterruptions()
     @ObservationIgnored private var request: SFSpeechAudioBufferRecognitionRequest?
     @ObservationIgnored private var task: SFSpeechRecognitionTask?
     /// Counts recognition tasks, so results from one already replaced are ignored.
@@ -85,18 +86,15 @@ final class VoiceInitiative {
             playScript()
             return
         }
-        do {
-            try startAudio()
-            startRecognition()
-        } catch {
-            unavailableReason = "The microphone couldn't start."
-            stop()
-        }
+        resumeAudio()
+        interruptions.watch(engine, pause: { [weak self] in self?.pauseAudio() },
+                            resume: { [weak self] in self?.resumeAudio() })
     }
 
     /// Stops listening and forgets the current utterance.
     func stop() {
         isListening = false
+        interruptions.stop()
         script?.cancel()
         endRecognition()
         stopAudio()
@@ -108,14 +106,18 @@ final class VoiceInitiative {
 
     // MARK: Utterances
 
-    private func receive(_ text: String, isFinal: Bool, generation: Int) {
+    private func receive(_ text: String, generation: Int) {
+        guard isListening, generation == self.generation, text != transcript else { return }
+        transcript = text
+        onPartial(text)
+        restartPauseTimer()
+    }
+
+    /// The recognizer called the utterance final.
+    private func receiveFinal(_ text: String, generation: Int) {
+        receive(text, generation: generation)
         guard isListening, generation == self.generation else { return }
-        if text != transcript {
-            transcript = text
-            onPartial(text)
-            restartPauseTimer()
-        }
-        if isFinal { endUtterance() }
+        endUtterance()
     }
 
     /// The recognizer gave up, such as after a long silence: what was heard counts, and listening goes on. With
@@ -157,7 +159,7 @@ final class VoiceInitiative {
                 guard !Task.isCancelled else { return }
                 self.scripted?.removeFirst()
                 self.levels = VoiceAudioFeed.fakeLevels()
-                self.receive(next, isFinal: false, generation: self.generation)
+                self.receive(next, generation: self.generation)
                 self.endUtterance()
             }
             self?.levels = Self.silence
@@ -192,6 +194,31 @@ final class VoiceInitiative {
         task?.cancel()
         request = nil
         task = nil
+    }
+
+    /// Starts, or after an interruption or a change of microphone restarts, the audio and recognition. When the
+    /// microphone can't start, listening stops and the screen says why.
+    private func resumeAudio() {
+        guard isListening, scripted == nil else { return }
+        endRecognition()
+        stopAudio()
+        do {
+            try startAudio()
+            startRecognition()
+        } catch {
+            stop()
+            isAvailable = false
+            unavailableReason = "The microphone couldn't start. Close this screen and open it again."
+        }
+    }
+
+    /// A call or Siri took the microphone: listening waits until the interruption ends.
+    private func pauseAudio() {
+        guard isListening, scripted == nil else { return }
+        endRecognition()
+        stopAudio()
+        transcript = ""
+        levels = Self.silence
     }
 
     private func startAudio() throws {
@@ -246,8 +273,11 @@ final class VoiceInitiative {
                 return
             }
             let text = result.bestTranscription.formattedString
-            let isFinal = result.isFinal
-            Task { @MainActor in voice?.receive(text, isFinal: isFinal, generation: generation) }
+            if result.isFinal {
+                Task { @MainActor in voice?.receiveFinal(text, generation: generation) }
+            } else {
+                Task { @MainActor in voice?.receive(text, generation: generation) }
+            }
         }
     }
 }

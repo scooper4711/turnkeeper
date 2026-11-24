@@ -8,9 +8,9 @@ extension BoardController {
     /// The party the fight was started with.
     var party: Party? { model.party(session?.partyID) }
 
-    /// The screen's rows: PCs in seating order, then with `showsAll` the creatures, by Perception.
-    func voiceRoster(showsAll: Bool) -> InitiativeRoster {
-        InitiativeRoster(state: state, seating: party?.seating ?? [], showsAll: showsAll) { rank(of: $0) }
+    /// The screen's rows: PCs in seating order, then the creatures, by Perception.
+    var voiceRoster: InitiativeRoster {
+        InitiativeRoster(state: state, seating: party?.seating ?? []) { rank(of: $0) }
     }
 
     /// The names that select each row: the character's and the player's.
@@ -21,7 +21,7 @@ extension BoardController {
     /// Saves the party's seating after PC rows are dragged. The initiative order doesn't change.
     func moveSeat(from source: IndexSet, to destination: Int) {
         guard var party else { return }
-        party.seating = voiceRoster(showsAll: false).seating(afterMoving: source, to: destination, in: party.seating)
+        party.seating = voiceRoster.seating(afterMoving: source, to: destination, in: party.seating)
         model.library.save(party)
     }
 

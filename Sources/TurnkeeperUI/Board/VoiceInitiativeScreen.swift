@@ -16,6 +16,8 @@ struct VoiceInitiativeScreen: View {
     @State private var showsHelp = false
     /// The help opened by itself, so listening starts once it closes.
     @State private var isIntroducing = false
+    /// Set once the screen closes, so a permission prompt answered afterward doesn't start the microphone.
+    @State private var isClosed = false
     @AppStorage(VoiceInitiativeHelp.hiddenKey) private var hidesHelp = false
 
     var body: some View {
@@ -31,7 +33,12 @@ struct VoiceInitiativeScreen: View {
                     Section("Creatures") { ForEach(roster.creatures) { row($0) } }
                 }
             }
-            .safeAreaInset(edge: .bottom) { footer }
+            .safeAreaInset(edge: .bottom) {
+                VoiceInitiativeFooter(voice: voice, status: status) {
+                    voice.stop()
+                    dismiss()
+                }
+            }
             .navigationTitle("Voice Initiative")
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -46,13 +53,19 @@ struct VoiceInitiativeScreen: View {
         .sheet(isPresented: $showsHelp, onDismiss: startAfterIntroduction) {
             VoiceInitiativeHelp(isIntroduction: isIntroducing)
         }
-        .onDisappear { voice.stop() }
+        .onDisappear {
+            isClosed = true
+            voice.stop()
+        }
         .onChange(of: showsAll) {
             if !roster.rows.contains(where: { $0.id == selectedID }) { selectedID = firstSelection }
         }
     }
 
-    private var roster: InitiativeRoster { controller.voiceRoster(showsAll: showsAll) }
+    private var roster: InitiativeRoster {
+        let everyone = controller.voiceRoster
+        return showsAll ? everyone : everyone.withoutCreatures()
+    }
 
     private var firstSelection: UUID? { roster.firstOpen ?? roster.rows.first?.id }
 
@@ -63,31 +76,6 @@ struct VoiceInitiativeScreen: View {
             skills: isSelected ? controller.initiativeSkills(for: combatant) : []
         )
         .onTapGesture { selectedID = combatant.id }
-    }
-
-    private var footer: some View {
-        VStack(spacing: 10) {
-            ListeningMeter(levels: voice.levels)
-            Text(voice.transcript.isEmpty ? prompt : voice.transcript)
-                .font(.title3.monospacedDigit())
-                .lineLimit(2)
-                .accessibilityIdentifier("voiceTranscript")
-            Text(voice.isAvailable ? status : voice.unavailableReason)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .accessibilityIdentifier("voiceStatus")
-            PulsingStopButton(isListening: voice.isListening) {
-                voice.stop()
-                dismiss()
-            }
-        }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(.bar)
-    }
-
-    private var prompt: String {
-        voice.isListening ? "Say a name or a number…" : ""
     }
 
     private var selectedName: String { selectedID.flatMap { controller.state[$0]?.name } ?? "" }
@@ -106,13 +94,15 @@ struct VoiceInitiativeScreen: View {
     }
 
     private func startAfterIntroduction() {
-        guard isIntroducing else { return }
+        guard isIntroducing, !isClosed else { return }
         isIntroducing = false
         Task { await start() }
     }
 
     private func start() async {
         await voice.requestPermission()
+        // The GM may have closed the screen while the permission prompt was up.
+        guard !isClosed, !Task.isCancelled else { return }
         let names = controller.state.ladder.flatMap { [$0.name, $0.playerName] }.filter { !$0.isEmpty }
         voice.start(names: names, onPartial: { selectName(in: $0) }, onUtterance: { record($0) })
         if voice.isListening { status = "Listening for \(selectedName)" }
@@ -151,5 +141,35 @@ struct VoiceInitiativeScreen: View {
             try? await Task.sleep(for: .seconds(1.5))
             if sparklingID == id { withAnimation { sparklingID = nil } }
         }
+    }
+}
+
+/// The screen's footer: the listening meter, what's heard, the status, and Done. It is a view of its own so the
+/// levels, which change about 20 times a second, redraw only the footer and not the rows.
+private struct VoiceInitiativeFooter: View {
+    let voice: VoiceInitiative
+    let status: String
+    let done: () -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            ListeningMeter(levels: voice.levels)
+            Text(voice.transcript.isEmpty ? prompt : voice.transcript)
+                .font(.title3.monospacedDigit())
+                .lineLimit(2)
+                .accessibilityIdentifier("voiceTranscript")
+            Text(voice.isAvailable ? status : voice.unavailableReason)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("voiceStatus")
+            PulsingStopButton(isListening: voice.isListening, action: done)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(.bar)
+    }
+
+    private var prompt: String {
+        voice.isListening ? "Say a name or a number…" : ""
     }
 }

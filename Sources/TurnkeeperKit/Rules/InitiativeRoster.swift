@@ -1,24 +1,34 @@
 import Foundation
 
-/// The rows of the voice initiative screen: the PCs in the table's seating order, then, with Show all, the
-/// creatures, sorted for doing the math. Only ladder combatants; the bench stays out.
+/// The rows of the voice initiative screen: the PCs in the table's seating order, then the creatures, sorted for
+/// doing the math (see `withoutCreatures()`). Only ladder combatants; the bench stays out.
 ///
 /// Ties keep the order the fight was set up in, not the ladder's: in setup the ladder re-sorts with each number,
 /// which would make the rows jump while the GM enters them.
 public struct InitiativeRoster: Sendable {
     /// The PCs: seated members in seating order, then the rest in setup order.
     public let pcs: [Combatant]
-    /// With Show all, the creatures and hazards by rank, highest first, the same kind and template together.
+    /// The creatures and hazards by rank, highest first, the same kind and template together.
     public let creatures: [Combatant]
 
     /// - Parameters:
     ///   - seating: party member IDs in seating order.
     ///   - rank: what a creature sorts by, highest first: its Perception, or a hazard's Stealth.
-    public init(state: CombatState, seating: [UUID], showsAll: Bool, rank: (Combatant) -> Int) {
+    public init(state: CombatState, seating: [UUID], rank: (Combatant) -> Int) {
         let onLadder = Set(state.order)
         let ladder = state.combatants.filter { onLadder.contains($0.id) }
         pcs = Self.seated(ladder.filter { $0.kind == .playerCharacter }, seating: seating)
-        creatures = showsAll ? Self.ranked(ladder.filter { $0.kind != .playerCharacter }, rank: rank) : []
+        creatures = Self.ranked(ladder.filter { $0.kind != .playerCharacter }, rank: rank)
+    }
+
+    private init(pcs: [Combatant], creatures: [Combatant]) {
+        self.pcs = pcs
+        self.creatures = creatures
+    }
+
+    /// The PCs alone, as the screen shows them until Show All.
+    public func withoutCreatures() -> InitiativeRoster {
+        InitiativeRoster(pcs: pcs, creatures: [])
     }
 
     /// Every row, top to bottom.
