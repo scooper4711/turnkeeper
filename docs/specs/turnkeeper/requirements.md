@@ -15,7 +15,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
     it. On an iPhone on its side they join the top bar, and the voice button and the bench sit beside the strips.
   - In combat a tap on a strip opens its battle card in a sheet, with a Card page and a Notes page (the
     creature's notes and the encounter's); Card opens the acting combatant's. Closing the sheet goes back to
-    following the turn. In setup a tap still chooses the strip for its initiative, and Show Card is in its menu.
+    following the turn. In setup a tap opens the strip's initiative keypad, and Show Card is in its menu.
 - R1.1b On an iPhone every sheet fits the screen's width. A number pad, a reminder and the victory and
   end-of-combat sheets are as tall as their content, with the board in view above; the pads have a close
   button. Rows too wide for the screen stack instead of squeezing their text: an encounter's creature rows (the
@@ -160,13 +160,25 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   join later get their number entered the same way.
 - R4.2a Begin Combat warns, naming them, when anyone on the ladder has no initiative; Go Back outlines
   them, Begin Anyway puts them last.
-- R4.3 In Setup only, one large Hold to Say Initiative button sits below the ladder (and on the Mac,
-  holding I does the same). It sets the highlighted strip: the first without an initiative, or the one
-  the GM tapped. Letting go sets the spoken total and moves the highlight to the next strip without one.
-  A missed number shows a short message to try again; it never opens the keypad. Only numbers are
-  recognized, never names, on the device where it can (else Apple's recognizer). While listening, the
-  creature's modifiers are shown large. After Begin combat, nothing listens and strips are dragged to
-  reorder.
+- R4.3 In Setup only, a Voice Initiative button sits below the ladder (and on the Mac, I does the same). It
+  opens a screen that listens the whole time it is open, on the device where it can (else Apple's recognizer),
+  and closes only with Done, a pulsing red stop button. A live frequency display shows that it hears the room.
+  - Its rows are the PCs in the table's seating order (R4.3a); the selected row is larger and outlined in
+    yellow. It starts on the first row without an initiative. Tapping a row selects it.
+  - Saying a player's or a character's name (whole words, any case or accents) selects that row at once. When
+    two share a name, the first in seating order without an initiative is chosen.
+  - A number is recorded when the utterance ends, so "twenty" is not taken before "twenty-three". "Sam
+    seventeen" records 17 for Sam. Then the next row without an initiative is selected, wrapping around.
+    Saying a number for a row that has one replaces it, and every number can be undone.
+  - What was heard and what was recorded ("Heard 17 for Valeros") show at the bottom; a missed number says so
+    and never opens the keypad.
+  After Begin Combat nothing listens, and strips are dragged to reorder.
+- R4.3a The seating order is kept on the party, so it syncs. On the voice screen PC rows are dragged to change
+  it; that never changes the initiative order. PCs not yet seated come after the seated ones.
+- R4.3b Show all adds the creatures after the PCs, one row each, sorted by Perception (hazards by Stealth),
+  highest first, with creatures of the same kind and template next to each other. A selected creature shows
+  its initiative modifiers. "Nat 17" or "natural 17" adds the higher of Perception and Stealth for a creature
+  or a PC with a linked sheet; a quick PC gets 17. A natural 20 makes the row sparkle for a moment.
 - R4.4 Tiles show the name, initiative, HP and conditions, and a creature's or hazard's AC with its template
   and conditions applied (in yellow when they change it). Tiles are colored like magnets: red for
   enemies, blue for PCs, green for NPCs, gray for hazards.
