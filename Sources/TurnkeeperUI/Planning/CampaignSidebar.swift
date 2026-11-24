@@ -12,7 +12,7 @@ struct CampaignSidebar: View {
         @Bindable var model = model
         List(selection: $model.selectedCampaignID) {
             ForEach(model.library.activeCampaigns) { campaign in
-                Label(campaign.name, systemImage: campaign.game == .starfinder ? "sparkles" : "shield")
+                CampaignRow(campaign: campaign)
                     .tag(campaign.id)
                     .contextMenu { menu(for: campaign) }
             }
@@ -63,6 +63,24 @@ struct CampaignSidebar: View {
 
 }
 
+/// A campaign's name, with a Society event's ID under it.
+private struct CampaignRow: View {
+    let campaign: Campaign
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(campaign.name)
+                if campaign.isSociety && !campaign.eventID.isEmpty {
+                    Text(campaign.eventID).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        } icon: {
+            Image(systemName: campaign.game == .starfinder ? "sparkles" : "shield")
+        }
+    }
+}
+
 /// Asks for a campaign's name, game and whether it is Society play, for a new campaign or to edit one.
 struct CampaignSheet: View {
     /// The campaign being edited, or nil to add one.
@@ -85,6 +103,7 @@ struct CampaignSheet: View {
                 }
                 .pickerStyle(.segmented)
                 Toggle("Society play (PFS or SFS)", isOn: $draft.isSociety)
+                if !switchOffEffects.isEmpty { switchOffWarning }
                 if draft.isSociety {
                     TextField("Event ID", text: $draft.eventID)
                     Text("Information only for now.").font(.footnote).foregroundStyle(.secondary)
@@ -104,6 +123,25 @@ struct CampaignSheet: View {
             }
         }
         .sheetFrame(minWidth: 360, minHeight: 260)
+    }
+
+    /// What switching Society play off would hide, while the box is off on a campaign saved with it on.
+    private var switchOffEffects: [String] {
+        guard let campaign, campaign.isSociety, !draft.isSociety else { return [] }
+        return model.library.effectsOfLeavingSociety(campaign.id)
+    }
+
+    private var switchOffWarning: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Turning off Society play:")
+                ForEach(switchOffEffects, id: \.self) { Text("• \($0)") }
+                Text("Nothing is deleted. Turning it back on shows it all again.")
+            }
+        } icon: {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+        }
+        .font(.footnote)
     }
 
     private var trimmedName: String { draft.name.trimmingCharacters(in: .whitespaces) }
