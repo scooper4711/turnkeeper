@@ -62,6 +62,22 @@ struct PartySyncTests {
         #expect(mac.parties == ipad.parties)
     }
 
+    @Test("A Society ID edited on one device survives a merge with another member's edit")
+    func societyIDMerges() throws {
+        var (mac, ipad) = try synced()
+        edit(&ipad) {
+            $0.members[0].societyID = "123456"
+            $0.members[0].characterNumber = "2001"
+        }
+        edit(&mac) { $0.members[1].isAway = true }
+        sync(&mac, &ipad)
+        for library in [mac, ipad] {
+            #expect(member("Varielle", in: library)?.societyID == "123456")
+            #expect(member("Varielle", in: library)?.characterNumber == "2001")
+            #expect(member("Eti", in: library)?.isAway == true)
+        }
+    }
+
     @Test("The seating order round-trips, and the newer device's seating wins a sync")
     func seating() throws {
         var (mac, ipad) = try synced()
