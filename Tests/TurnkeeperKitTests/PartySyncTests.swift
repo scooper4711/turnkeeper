@@ -62,6 +62,18 @@ struct PartySyncTests {
         #expect(mac.parties == ipad.parties)
     }
 
+    @Test("The seating order round-trips, and the newer device's seating wins a sync")
+    func seating() throws {
+        var (mac, ipad) = try synced()
+        let ids = mac.parties[0].members.map(\.id)
+        edit(&mac) { $0.seating = [ids[2], ids[0]] }
+        edit(&ipad) { $0.seating = [ids[1], ids[2], ids[0]] }
+        sync(&mac, &ipad)
+        for library in [mac, ipad] { #expect(library.parties[0].seating == [ids[1], ids[2], ids[0]]) }
+        let copy = try JSONDecoder().decode(Party.self, from: JSONEncoder().encode(mac.parties[0]))
+        #expect(copy.seating == [ids[1], ids[2], ids[0]])
+    }
+
     @Test("A member removed on one device stays removed; one added on the other is kept")
     func addedAndRemoved() throws {
         var (mac, ipad) = try synced()
@@ -130,6 +142,7 @@ struct PartySyncTests {
             """#
         let party = try JSONDecoder().decode(Party.self, from: Data(saved.utf8))
         #expect(party.removedMembers.isEmpty && party.members[0].modifiedAt == .distantPast)
+        #expect(party.seating.isEmpty)
         let copy = try JSONDecoder().decode(Party.self, from: JSONEncoder().encode(party))
         #expect(copy == party)
     }

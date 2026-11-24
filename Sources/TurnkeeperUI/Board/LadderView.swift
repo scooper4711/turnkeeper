@@ -59,7 +59,7 @@ struct LadderView: View {
     /// Setup's voice button, and the bench.
     @ViewBuilder
     private var extras: some View {
-        if controller.state.phase == .setup { HoldToTalkButton(controller: controller) }
+        if controller.state.phase == .setup { VoiceInitiativeButton(controller: controller, sheet: $sheet) }
         BenchTray(controller: controller) { id in
             controller.bringInFromBench(id)
             sheet = .initiative(id)

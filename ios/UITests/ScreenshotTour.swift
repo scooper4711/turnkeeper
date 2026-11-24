@@ -59,9 +59,12 @@ final class ScreenshotTour: XCTestCase {
         tap(app.buttons["Initiative…"])
         save("setup-initiative-pad")
         closeSheet()
-        let talk = app.otherElements["Hold to Say Initiative"].firstMatch
-        let held = talk.exists ? talk : app.descendants(matching: .any)["Hold to Say Initiative"].firstMatch
-        if held.waitForExistence(timeout: 3) { held.press(forDuration: 1.5) }
+        tap(app.buttons["Voice Initiative"])
+        save("setup-voice-help")
+        tap(app.buttons["Start Listening"])
+        sleep(1)
+        save("setup-voice-initiative")
+        tap(app.buttons["voiceDone"])
         save("setup-after-voice")
         tap(app.buttons["Begin Combat"])
         save("setup-begin-warning")

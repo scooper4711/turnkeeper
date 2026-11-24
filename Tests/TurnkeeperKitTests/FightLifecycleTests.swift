@@ -75,23 +75,6 @@ struct FightLifecycleTests {
     }
 }
 
-@Suite("Voice entry target")
-struct InitiativeTargetTests {
-    @Test("Entry walks down the ladder, unless the GM chose a strip")
-    func target() {
-        var state = CombatState(combatants: ["Kyra", "Goblin", "Ezren"].map { Combatant(kind: .creature, name: $0) })
-        let ids = state.ladder.map(\.id)
-        #expect(state.initiativeTarget(chosen: nil) == ids[0])
-        state.setInitiative(18, for: ids[0])
-        #expect(state.initiativeTarget(chosen: nil) == ids[1])
-        #expect(state.initiativeTarget(chosen: ids[0]) == ids[0])
-        #expect(state.initiativeTarget(chosen: UUID()) == ids[1])
-        state.setInitiative(12, for: ids[1])
-        state.setInitiative(9, for: ids[2])
-        #expect(state.initiativeTarget(chosen: nil) == nil)
-    }
-}
-
 @Suite("Adding a creature during a fight")
 struct AddingCreatureTests {
     private func entry(_ name: String, kind: CreatureKind = .creature) -> BestiaryIndexEntry {

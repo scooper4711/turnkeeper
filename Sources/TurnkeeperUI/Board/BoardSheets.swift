@@ -16,6 +16,7 @@ struct BoardSheetContent: View {
         case .duration: DurationEditor(controller: controller)
         case .card: CompactCardSheet(controller: controller)
         case .creature: AddCreatureSheet(controller: controller)
+        case .voiceInitiative: VoiceInitiativeScreen(controller: controller)
         case .event:
             EventEditor(event: EncounterEvent(label: "", trigger: .initiative(20)), slots: []) { event in
                 controller.change { $0.addEvent(event) }

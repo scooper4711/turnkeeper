@@ -36,7 +36,7 @@ checkout for development. `scripts/latest-pf2e-release.sh` finds the newest `pf2
   notarytool keychain profile on a Mac) and staples the ticket to it. The team ID is kept only in the secrets and
   the keychain.
 - **App Sandbox** (R8). `scripts/build-app.sh` signs with `Resources/Turnkeeper.entitlements`: the App Sandbox,
-  network client (Demiplane, following a table) and server (sharing one), audio input (Hold to Say
+  network client (Demiplane, following a table) and server (sharing one), audio input (Voice
   Initiative), read-write access to files the user picks, app-scoped bookmarks for the watched folders and
   PDFs, and the Tableside Toolkit's App Group (`TEAM_ID.io.github.scooper4711.tableside`, into which the script puts
   the team of the Developer ID certificate, or `TEAM_ID`, leaving the group out of an ad hoc build). It copies `Resources/container-migration.plist` into the bundle; on the first sandboxed launch macOS
@@ -95,12 +95,23 @@ Ported from the pf2e system, with tests.
   queue. The order is end-of-turn, end-of-round, start-of-round, initiative-count events, expiring
   durations, then start-of-turn.
 - **`ReminderRules`.** Condition reminders by timing, with their actions.
-- **Voice entry.** `CombatState.initiativeTarget(chosen:)` picks whose initiative is next.
-  `HoldToTalkButton` tracks the hold with a zero-distance drag gesture; a zero-duration long press ends as
-  soon as it begins, which made the old per-strip buttons stop listening at once. `--fake-voice a,b,c`
-  scripts what each hold hears, for UI tests.
+- **Voice entry** (R4.3). `VoiceInitiativeScreen` opens from `VoiceInitiativeButton` or the I key as
+  `BoardSheet.voiceInitiative`. `VoiceInitiative` keeps the audio engine running while the screen is open and
+  splits speech into utterances: one ends when the transcript stays the same for 0.7 s or the recognizer calls
+  it final. After each utterance, after an error and before Apple's one-minute limit it starts a new
+  recognition task. Its tap also feeds `SpectrumAnalyzer` and publishes about 20 sets of levels a second for
+  `ListeningMeter`. `VoiceInterruptions` pauses it for a call or Siri and restarts the microphone afterward or
+  when the input device changes. `--fake-voice a,b,c` plays each scripted utterance half a second apart, for UI tests. `VoiceInitiativeHelp` opens
+  before listening starts until the `hidesVoiceInitiativeHelp` default is set; demos clear it.
+  `SpokenNameMatcher` finds the names in a partial transcript, and `InitiativeRoster` builds the rows (R4.3a,
+  R4.3b) and picks among several matches. `Party.seating` holds the member IDs in seating order; a PC finds its
+  member through `Combatant.memberID`, or its `pc.` key in sessions saved before it.
 - **`SpokenNumberParser`.** Turns a transcript into an initiative number. Number words, digits and
-  ties are supported, and the last number heard wins.
+  ties are supported, and the last number heard wins. `spokenInitiative(from:)` also says whether "nat",
+  "natural" or "natty" came just before it. The screen hears table talk, so "oh" isn't zero, "one" isn't a
+  number where it is the pronoun ("which one", "one more"), and only digits count as digits (not "nan").
+- **`SpectrumAnalyzer`.** A Hann window and a real FFT (vDSP), with the bins grouped logarithmically from 80 Hz
+  to 8 kHz into levels from 0 to 1 (a −60 dB floor).
 
 ## Library
 - **Storage.** A Codable `Library` value holds campaigns, parties, scenarios, encounters and saved combat
@@ -209,7 +220,7 @@ Ported from the pf2e system, with tests.
   `sideBySide`, or `ladderOnly` below 760 pt of width or 480 pt of height, and whether the turn buttons get a
   bar of their own (`hasTurnBar`). `BoardContent` then shows `CompactTopBar`, the ladder and
   `CompactTurnButtons`, and sets the `isCompactBoard` environment value, which `MagnetTile` (a tap opens
-  `BoardSheet.card`), `TileMenu` (Show Card), `BeginCombatButton` and the listening overlay read.
+  `BoardSheet.card`), `TileMenu` (Show Card) and `BeginCombatButton` read.
   `CompactCardSheet` shows `BoardCard` and the notes, which `CardPanel` shows too; `BoardNotes` gives both
   their bindings. Closing the sheet clears `pinnedID`. `LadderView` puts the voice button and the bench beside
   the strips when the vertical size class is compact.

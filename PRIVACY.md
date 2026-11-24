@@ -9,9 +9,11 @@ third-party code that reports anything. Nothing you do in the app is sent to the
 
 - **Your campaigns, parties, encounters and notes** are saved on your device, and in the files you export.
 - **Your settings** and the last campaign you had open are saved on your device.
-- **Voice initiative.** When you hold Hold to Say Initiative, Turnkeeper listens through the microphone and turns
-  what you say into a number with Apple's speech recognition, on your device when it can. Apple's privacy policy
-  covers speech recognition that Apple performs; Turnkeeper keeps no recording.
+- **Voice initiative.** While the Voice Initiative screen is open, and only then, Turnkeeper listens through the
+  microphone and turns what is said at the table into text with Apple's speech recognition, to pick out players'
+  names and initiative totals. It runs on your device when it can; otherwise the audio goes to Apple's speech
+  servers for as long as the screen is open. Apple's privacy policy covers speech recognition that Apple performs.
+  Turnkeeper keeps no recording and no transcript: it keeps only the initiative numbers.
 
 Deleting the app from an iPad or an iPhone deletes all of this from that device. On a Mac, macOS keeps an app's saved data in the
 Containers folder of your Library folder until you delete the folder named Turnkeeper there.

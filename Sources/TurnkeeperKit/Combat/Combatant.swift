@@ -55,6 +55,9 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
     public var notes: String
     /// The real person playing a PC, from the party; blank for creatures.
     public var playerName: String
+    /// The party member a PC is, quick PCs included; nil for creatures and in sessions saved before it was kept
+    /// (see `linkedMemberID`).
+    public var memberID: UUID?
 
     public init(kind: CombatantKind, name: String, side: Side = .enemy, creatureKey: String = "") {
         id = UUID()
@@ -78,7 +81,7 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
 
     private enum CodingKeys: String, CodingKey {
         case id, kind, side, name, creatureKey, slotID, template, damageTaken, temporaryHitPoints, initiative
-        case place, isDelaying, delayedMidTurn, isDead, conditions, notes, playerName
+        case place, isDelaying, delayedMidTurn, isDead, conditions, notes, playerName, memberID
     }
 
     /// Sessions saved before delayed strips stayed on the ladder have no `isDelaying`, and keep delayed
@@ -103,6 +106,7 @@ public struct Combatant: Codable, Sendable, Identifiable, Hashable {
         conditions = try container.decode([AppliedCondition].self, forKey: .conditions)
         notes = try container.decode(String.self, forKey: .notes)
         playerName = try container.decodeIfPresent(String.self, forKey: .playerName) ?? ""
+        memberID = try container.decodeIfPresent(UUID.self, forKey: .memberID)
     }
 
     public var tracksHitPoints: Bool { kind != .playerCharacter }

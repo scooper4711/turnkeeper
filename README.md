@@ -63,8 +63,8 @@ requirements and design.
   difficulty variants (PFS challenge-point brackets, SFS easier/base/harder). Plan each encounter per
   variant, with creatures, a bench and events, and watch the budget bar. The scenario page shows every
   encounter at every difficulty.
-- **Run:** press Run (or a cell in the scenario grid). In setup, creatures roll initiative. Hold a PC's
-  strip and say the number, tap it to type, or use Listen for All. Then Begin Combat. During the fight,
+- **Run:** press Run (or a cell in the scenario grid). In setup, open Voice Initiative and say each player's
+  total (or their name, then the total), or tap a strip to type it. Then Begin Combat. During the fight,
   drag strips to reorder, tap one to pin its card, long-press for actions, and press Next (or space).
   Reminders block Next until dismissed.
 - **Show players:** the eye button shows the creature's card back, with its art, on an external display or

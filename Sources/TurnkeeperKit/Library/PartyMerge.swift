@@ -30,7 +30,7 @@ extension Party {
         return party
     }
 
-    /// Two devices' edits of the same party: `newer`'s name, level and order, each member's latest version,
+    /// Two devices' edits of the same party: `newer`'s name, level, order and seating, each member's latest version,
     /// members added on either side, and members removed on either side after their last edit left out.
     static func merging(newer: Party, older: Party) -> Party {
         var party = newer

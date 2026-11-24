@@ -47,7 +47,6 @@ private struct BoardContent: View {
             }
         }
         .background(PadBackground())
-        .overlay { ListeningOverlay(controller: controller) }
         .sheet(item: $sheet) { sheet in BoardSheetContent(sheet: sheet, controller: controller) }
         .sheet(isPresented: reminderBinding) { ReminderStack(controller: controller) }
         .delayedChoice(controller: controller)
@@ -61,10 +60,9 @@ private struct BoardContent: View {
         .boardKeyboardShortcuts(controller: controller)
         .onChange(of: controller.playerScreen, initial: true) { PlayerDisplay.shared.fight = $1 }
         .onDisappear { PlayerDisplay.shared.fight = nil }
-        .task { if controller.state.phase == .setup { await VoiceInitiative.shared.requestPermission() } }
         .focusable()
         .focusEffectDisabled()
-        .onKeyPress(KeyEquivalent("i"), phases: [.down, .up]) { press in holdToSpeak(press) }
+        .onKeyPress(KeyEquivalent("i")) { openVoiceInitiative() }
     }
 
     /// The top bar over the ladder and the card.
@@ -95,15 +93,10 @@ private struct BoardContent: View {
         }
     }
 
-    /// On the Mac, holding I works like the hold-to-talk button: it listens for the highlighted strip.
-    private func holdToSpeak(_ press: KeyPress) -> KeyPress.Result {
-        guard controller.state.phase == .setup, let id = controller.initiativeTargetID else { return .ignored }
-        let voice = VoiceInitiative.shared
-        if press.phase == .down, voice.listeningFor == nil {
-            voice.listen(for: id)
-        } else if press.phase == .up, voice.listeningFor == id {
-            Task { _ = controller.recordSpokenInitiative(await voice.finish()) }
-        }
+    /// On the Mac, I opens the voice initiative screen, as its button does.
+    private func openVoiceInitiative() -> KeyPress.Result {
+        guard controller.state.phase == .setup, sheet == nil else { return .ignored }
+        sheet = .voiceInitiative
         return .handled
     }
 
@@ -219,34 +212,6 @@ private struct FinishedBanner: View {
         .padding(.vertical, 8)
         .background(.orange.opacity(0.85))
         .foregroundStyle(.white)
-    }
-}
-
-/// While a microphone is held: who is being listened for, what is heard, and the creature's modifiers to
-/// add to the die, large enough to read at arm's length.
-private struct ListeningOverlay: View {
-    let controller: BoardController
-    @State private var voice = VoiceInitiative.shared
-    @Environment(\.isCompactBoard) private var isCompact
-
-    var body: some View {
-        if let id = voice.listeningFor, let combatant = controller.state[id] {
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Listening for \(combatant.name)…", systemImage: "waveform").font(.title2.bold())
-                Text(voice.transcript.isEmpty ? "Say the total" : voice.transcript)
-                    .font(.largeTitle.monospacedDigit())
-                InitiativeSkillsView(skills: controller.initiativeSkills(for: combatant), size: 22)
-            }
-            .padding(24)
-            .frame(maxWidth: 460, alignment: .leading)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
-            .shadow(radius: 20)
-            // With the ladder alone, at the top: the held button is at the bottom, under the thumb.
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: isCompact ? .top : .trailing)
-            .padding(isCompact ? 16 : 32)
-            .allowsHitTesting(false)
-            .transition(.opacity)
-        }
     }
 }
 

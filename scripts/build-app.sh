@@ -83,9 +83,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Turnkeeper listens while you hold Hold to Say Initiative, so you can say the initiative total.</string>
+    <string>While the Voice Initiative screen is open, Turnkeeper listens for players' names and initiative totals.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Turnkeeper turns the initiative you say into a number, on this device when it can.</string>
+    <string>Turnkeeper turns the names and initiative totals you say into text, on this device when it can.</string>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Turnkeeper shares the player screen with the players' devices on this network, and follows a table shared by another device.</string>
     <key>NSBonjourServices</key>
