@@ -7,7 +7,7 @@ struct NewScenarioSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
-    @State private var scheme = VariantScheme.single
+    @State private var scheme = VariantScheme.easierBaseHarder
     @State private var labels = ""
 
     var body: some View {
@@ -18,7 +18,6 @@ struct NewScenarioSheet: View {
             }
             .formStyle(.grouped)
             .navigationTitle("New \(campaign.scenarioTitle)")
-            .onAppear { scheme = .easierBaseHarder }
             .onChange(of: scheme, initial: true) { labels = scheme.labels.joined(separator: ", ") }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -33,7 +32,7 @@ struct NewScenarioSheet: View {
     @ViewBuilder
     private var variantFields: some View {
         Picker("Difficulty variants", selection: $scheme) {
-            ForEach(VariantScheme.choices(society: true), id: \.self) { Text($0.title).tag($0) }
+            ForEach(VariantScheme.societyChoices, id: \.self) { Text($0.title).tag($0) }
         }
         TextField("Variant labels, comma separated", text: $labels)
         Text("The labels can be edited to match the scenario being run.")

@@ -12,12 +12,12 @@ struct ScenarioView: View {
             Section {
                 TextField("Name", text: binding(\.name)).titleEntry()
                 TextField("Levels", text: binding(\.levelRange), prompt: Text("1–4"))
-                if campaign?.allowsDifficultyVariants != false { variantsRow }
+                if isSociety { variantsRow }
                 TextField("Notes", text: binding(\.notes), axis: .vertical).lineLimit(3...8)
             }
             Section {
                 PartyPicker(campaignID: scenario.campaignID, partyID: $partyID)
-                if campaign?.allowsDifficultyVariants != false {
+                if isSociety {
                     ChallengePointsLine(scenario: scenario, party: model.party(partyID))
                 }
                 ScenarioGrid(scenario: scenario, party: model.party(partyID))
@@ -33,13 +33,13 @@ struct ScenarioView: View {
         .onAppear { partyID = partyID ?? model.defaultParty(for: scenario.campaignID)?.id }
     }
 
-    private var campaign: Campaign? { model.campaign(scenario.campaignID) }
+    private var isSociety: Bool { model.isSociety(scenario.campaignID) }
 
     private var variantsRow: some View {
         HStack {
             TextField("Variants, comma separated", text: labelsBinding)
             Menu("Presets") {
-                ForEach(VariantScheme.choices(society: true), id: \.self) { scheme in
+                ForEach(VariantScheme.societyChoices, id: \.self) { scheme in
                     Button(scheme.title) { update { $0.variantLabels = scheme.labels } }
                 }
             }
@@ -92,16 +92,17 @@ private struct ScenarioGrid: View {
 
     var body: some View {
         let encounters = model.library.encounters(in: scenario.id)
+        let labels = model.shownVariantLabels(of: scenario)
         Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 10) {
             GridRow {
                 Text("")
-                ForEach(scenario.variantLabels, id: \.self) { Text($0).font(.caption.bold()) }
+                ForEach(labels, id: \.self) { Text($0).font(.caption.bold()) }
             }
             ForEach(encounters) { encounter in
                 GridRow {
                     Button(encounter.name) { model.selection = .encounter(encounter.id) }
                         .buttonStyle(.borderless)
-                    ForEach(scenario.variantLabels, id: \.self) { label in
+                    ForEach(labels, id: \.self) { label in
                         cell(encounter, label)
                     }
                 }

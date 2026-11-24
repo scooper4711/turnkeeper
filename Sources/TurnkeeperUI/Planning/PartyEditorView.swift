@@ -122,7 +122,7 @@ struct PartyEditorView: View {
                 } })
     }
 
-    private var isSociety: Bool { model.campaign(party.campaignID)?.isSociety ?? true }
+    private var isSociety: Bool { model.isSociety(party.campaignID) }
 
     private func memberBinding(_ id: UUID, _ path: WritableKeyPath<PartyMember, String>) -> Binding<String> {
         Binding(get: { party.members.first { $0.id == id }?[keyPath: path] ?? "" },

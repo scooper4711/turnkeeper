@@ -69,36 +69,31 @@ struct CampaignSheet: View {
     let campaign: Campaign?
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var game = Game.pathfinder
-    @State private var isSociety = false
-    @State private var eventID = ""
+    /// What the sheet edits: a copy of the campaign, or the new one.
+    @State private var draft = Campaign(name: "", game: .pathfinder, isSociety: false)
     /// The last choice made when adding a campaign, so a Society GM gets the box checked and a home GM doesn't.
     @AppStorage("lastCampaignWasSociety") private var lastWasSociety = false
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name, prompt: Text("PFS Season 7"))
+                TextField("Name", text: $draft.name, prompt: Text("PFS Season 7"))
                     .nameEntry()
-                Picker("Game", selection: $game) {
+                Picker("Game", selection: $draft.game) {
                     Text("Pathfinder").tag(Game.pathfinder)
                     Text("Starfinder").tag(Game.starfinder)
                 }
                 .pickerStyle(.segmented)
-                Toggle("Society play (PFS or SFS)", isOn: $isSociety)
-                if isSociety {
-                    TextField("Event ID", text: $eventID)
+                Toggle("Society play (PFS or SFS)", isOn: $draft.isSociety)
+                if draft.isSociety {
+                    TextField("Event ID", text: $draft.eventID)
                     Text("Information only for now.").font(.footnote).foregroundStyle(.secondary)
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle("\(campaign == nil ? "New" : "Edit") \(isSociety ? "Event" : "Campaign")")
+            .navigationTitle("\(campaign == nil ? "New" : "Edit") \(draft.kindTitle)")
             .onAppear {
-                name = campaign?.name ?? ""
-                game = campaign?.game ?? .pathfinder
-                isSociety = campaign?.isSociety ?? lastWasSociety
-                eventID = campaign?.eventID ?? ""
+                if let campaign { draft = campaign } else { draft.isSociety = lastWasSociety }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -111,21 +106,17 @@ struct CampaignSheet: View {
         .sheetFrame(minWidth: 360, minHeight: 260)
     }
 
-    private var trimmedName: String { name.trimmingCharacters(in: .whitespaces) }
+    private var trimmedName: String { draft.name.trimmingCharacters(in: .whitespaces) }
 
-    private var trimmedEventID: String { isSociety ? eventID.trimmingCharacters(in: .whitespaces) : "" }
-
+    /// The Event ID is kept when Society play is switched off, so switching it back on brings it back.
     private func save() {
-        if var campaign {
-            campaign.name = trimmedName
-            campaign.game = game
-            campaign.isSociety = isSociety
-            campaign.eventID = trimmedEventID
-            model.library.save(campaign)
+        draft.name = trimmedName
+        draft.eventID = draft.eventID.trimmingCharacters(in: .whitespaces)
+        if campaign == nil {
+            lastWasSociety = draft.isSociety
+            model.addCampaign(draft)
         } else {
-            lastWasSociety = isSociety
-            model.addCampaign(NewCampaign(name: trimmedName, game: game, isSociety: isSociety,
-                                          eventID: trimmedEventID))
+            model.library.save(draft)
         }
         dismiss()
     }

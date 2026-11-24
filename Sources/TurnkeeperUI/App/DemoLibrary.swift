@@ -16,7 +16,7 @@ enum DemoLibrary {
         let artFolder = FileManager.default.temporaryDirectory.appendingPathComponent("TurnkeeperDemoArt")
         let model = AppModel(bestiary: bestiary, artStore: ArtStore(directory: artFolder))
         if mode == "starfinder" { return starfinder(model: model, bestiary: bestiary) }
-        let campaign = model.addCampaign(NewCampaign(name: "Demo: PFS Season 7", game: .pathfinder, isSociety: true))
+        let campaign = model.addCampaign(Campaign(name: "Demo: PFS Season 7", game: .pathfinder))
         // Valeros is linked to a character sheet; the others are quick PCs.
         let party = Party(campaignID: campaign.id, name: "Friday table", level: 3,
                           members: [DemoCharacters.valeros(bestiary: bestiary)]
@@ -41,7 +41,7 @@ enum DemoLibrary {
 
     @MainActor
     private static func starfinder(model: AppModel, bestiary: BestiaryStore) -> AppModel {
-        let campaign = model.addCampaign(NewCampaign(name: "Demo: SFS Season 1", game: .starfinder, isSociety: true))
+        let campaign = model.addCampaign(Campaign(name: "Demo: SFS Season 1", game: .starfinder))
         let party = Party(campaignID: campaign.id, name: "Crew", level: 7,
                           members: ["Navasi", "Obozaya", "Keskodai", "Iseph"].map(PartyMember.init))
         model.library.save(party)

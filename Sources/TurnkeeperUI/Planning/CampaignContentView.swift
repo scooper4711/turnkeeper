@@ -3,12 +3,10 @@ import SwiftUI
 
 /// A campaign's scenarios (with their encounters), parties and saved fights.
 struct CampaignContentView: View {
-    let campaignID: UUID
+    /// The planner passes the library's current copy, so editing the campaign redraws this list.
+    let campaign: Campaign
     @Environment(AppModel.self) private var model
     @State private var isAddingScenario = false
-
-    /// The live campaign, so editing it in the sheet redraws this list.
-    private var campaign: Campaign { model.campaign(campaignID) ?? Campaign(name: "", game: .pathfinder) }
 
     var body: some View {
         @Bindable var model = model

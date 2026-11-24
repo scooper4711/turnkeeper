@@ -12,7 +12,7 @@ struct PlannerView: View {
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240)
         } content: {
             if let campaign = model.selectedCampaign {
-                CampaignContentView(campaignID: campaign.id)
+                CampaignContentView(campaign: campaign)
                     .navigationSplitViewColumnWidth(min: 260, ideal: 320)
             } else {
                 ContentUnavailableView("No campaign", systemImage: "book.closed",

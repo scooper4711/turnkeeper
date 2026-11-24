@@ -2,23 +2,13 @@ import Bestiary
 import TurnkeeperKit
 import Foundation
 
-/// What the campaign sheet collects for a new campaign.
-struct NewCampaign {
-    var name: String
-    var game: Game
-    var isSociety: Bool
-    var eventID = ""
-}
-
 /// Planning changes: campaigns, parties, scenarios and encounters.
 extension AppModel {
     @discardableResult
-    func addCampaign(_ new: NewCampaign) -> Campaign {
-        var campaign = Campaign(name: new.name, game: new.game, isSociety: new.isSociety)
-        campaign.eventID = new.eventID
+    func addCampaign(_ campaign: Campaign) -> Campaign {
         library.save(campaign)
         // A campaign outside organized play has exactly one party, so it starts with it.
-        if !new.isSociety { makeParty(in: campaign.id) }
+        if !campaign.allowsMultipleParties { makeParty(in: campaign.id) }
         selectedCampaignID = campaign.id
         selection = nil
         return campaign
@@ -44,9 +34,8 @@ extension AppModel {
 
     func addScenario(to campaignID: UUID, name: String, labels: [String]) {
         // Outside organized play there is one version of each adventure, whatever labels came in.
-        let isSociety = campaign(campaignID)?.isSociety ?? true
         var scenario = Scenario(campaignID: campaignID, name: name,
-                                variantLabels: isSociety ? labels : VariantScheme.single.labels)
+                                variantLabels: isSociety(campaignID) ? labels : VariantScheme.single.labels)
         scenario.sortIndex = (library.scenarios(in: campaignID).map(\.sortIndex).max() ?? 0) + 1
         library.save(scenario)
         selection = .scenario(scenario.id)
@@ -85,7 +74,18 @@ extension AppModel {
     /// The parties a campaign shows: all in Society play, else the first. Hidden ones are kept, not deleted.
     func shownParties(in campaignID: UUID) -> [Party] {
         let parties = library.parties(in: campaignID)
-        return campaign(campaignID)?.allowsMultipleParties == false ? Array(parties.prefix(1)) : parties
+        return isSociety(campaignID) ? parties : Array(parties.prefix(1))
+    }
+
+    /// Whether a campaign is Society play. One that can't be found counts as it, as libraries from before the
+    /// setting do.
+    func isSociety(_ campaignID: UUID?) -> Bool {
+        campaign(campaignID)?.isSociety ?? true
+    }
+
+    /// The difficulties a scenario shows: all of them in Society play, else its base one. The rest are kept.
+    func shownVariantLabels(of scenario: Scenario) -> [String] {
+        isSociety(scenario.campaignID) ? scenario.variantLabels : [scenario.baseVariantLabel]
     }
 
     /// The party used for budgets: the campaign's first party, if any.
