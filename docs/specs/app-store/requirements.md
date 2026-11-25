@@ -7,9 +7,9 @@ packaging steps are tabletop-kit's `scripts/package-appstore.sh` (its `appstore-
 - R1.1 `CHANNEL=appstore scripts/build-app.sh` (or `make appstore`) builds `build/appstore/Turnkeeper.pkg` from the
   same sources as the disk image, compiled with `-DAPP_STORE`. Turnkeeper has no updater or payment link to leave
   out.
-- R1.2 The build number (`BUILD_NUMBER`) is apart from the version, which is 2.0.0 on the Mac and the iPad: it
-  is the number of commits on main (scripts/version.sh), so it increases with every merge and every upload. The
-  bundle declares `ITSAppUsesNonExemptEncryption` as false and a copyright line on both.
+- R1.2 The build number (`BUILD_NUMBER`) is apart from the version, which is the one in the `VERSION` file on the
+  Mac and the iPad: it is the number of commits on main (scripts/version.sh), so it increases with every merge and
+  every upload. The bundle declares `ITSAppUsesNonExemptEncryption` as false and a copyright line on both.
 
 ## R2 Privacy
 - R2.1 A privacy manifest ships in both bundles: no tracking, no data collected, user defaults (CA92.1) and file
