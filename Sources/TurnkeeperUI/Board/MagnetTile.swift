@@ -127,9 +127,17 @@ struct MagnetTile: View {
         return Button { sheet = .hitPoints(combatant.id) } label: {
             VStack(alignment: .trailing, spacing: 3) {
                 let temporary = combatant.temporaryHitPoints > 0 ? " +\(combatant.temporaryHitPoints)" : ""
-                HStack(spacing: 8) {
-                    if let armorClass { ArmorClassText(value: armorClass) }
-                    Text("\(current)/\(maximum)\(temporary)")
+                let fraction = Text("\(current)/\(maximum)\(temporary)").lineLimit(1).fixedSize()
+                // Numbers never break; on a narrow strip AC sits above the hit points instead (#101).
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        if let armorClass { ArmorClassText(value: armorClass) }
+                        fraction
+                    }
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if let armorClass { ArmorClassText(value: armorClass) }
+                        fraction
+                    }
                 }
                 .font(.callout.monospacedDigit().bold())
                 ProgressView(value: Double(current), total: Double(maximum))
@@ -170,6 +178,8 @@ private struct ArmorClassText: View {
         (Text("AC ").font(.caption.bold()) + Text("\(value.value)"))
             .font(.callout.monospacedDigit().bold())
             .foregroundStyle(value.isChanged ? .yellow : .white)
+            .lineLimit(1)
+            .fixedSize()
             .accessibilityLabel("Armor Class \(value.value)")
     }
 }
