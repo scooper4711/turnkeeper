@@ -1,5 +1,6 @@
 import TurnkeeperKit
 import Foundation
+import SharedLibraries
 import UniformTypeIdentifiers
 
 /// Pasted artwork: stored as files in the art store, pointed to by `CustomArt` records.
@@ -13,6 +14,7 @@ extension AppModel {
         do {
             let art = try await Task.detached { try pastedArtStore.add(image, for: key) }.value
             library.save(art)
+            labelArtSubjects()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -36,6 +38,16 @@ extension AppModel {
 
     func hasPastedArtwork(_ key: String) -> Bool {
         library.customArt(for: key) != nil
+    }
+
+    /// Saves the name and size of each bestiary creature with its pasted art, where they are missing (R3.5c1):
+    /// Pawn Shop prints the art as a pawn under them.
+    func labelArtSubjects() {
+        var labeled = library
+        labeled.labelArtSubjects { key in
+            bestiary.entry(key).map { ArtSubjectLabel(name: $0.name, size: CreatureSize(trait: $0.traits.size)) }
+        }
+        if labeled != library { library = labeled }
     }
 }
 

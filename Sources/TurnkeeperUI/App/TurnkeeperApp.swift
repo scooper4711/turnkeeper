@@ -25,6 +25,12 @@ public struct TurnkeeperApp: App {
             RootView()
                 .environment(model)
                 .onOpenURL { url in model.importLibraryFile(url) }
+                #if os(macOS)
+                // At launch and each time the app comes forward, so installing Pawn Shop shows its menu item (R3.9).
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                    model.lookForPawnShop()
+                }
+                #endif
                 .onChange(of: scenePhase) { old, phase in
                     if phase != .active { model.saveAndCloseSharedLibrary() }
                     if phase == .active { model.resumeCloudSync() }

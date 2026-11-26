@@ -53,6 +53,8 @@ final class AppModel {
     var demiplaneProgress: String?
     /// The party member whose sheet is being refreshed, for the progress on its row.
     var refreshingMemberID: UUID?
+    /// True when a Pawn Shop that takes pawn sheet requests is installed (R3.9); only the Mac looks.
+    var canOpenInPawnShop = false
 
     /// Where handouts' images are kept, and pasted artwork until the app moves into the shared library.
     @ObservationIgnored let artStore: ArtStore?
