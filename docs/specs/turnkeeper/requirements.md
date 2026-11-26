@@ -129,6 +129,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   anywhere), Choose Image…, or a drop onto its card or encounter row, plus ⌘V on the Mac. It replaces the bundled art
   everywhere, including the player view, travels with exports and iCloud sync, and can be removed to go back
   to the bundled art.
+- R3.5c1 Art pasted onto a bestiary creature carries the creature's name and size, so that Pawn Shop, which has
+  no bestiary, can print it as a pawn (Tabletop Kit shared libraries R4.11). Art pasted before this, here or in
+  Field Guide, gets them when Turnkeeper next reads the library. Custom creatures' and characters' art needs none.
 - R3.5d Each scenario can have handouts: a name and one image (pasted, chosen or dropped), listed under its
   encounters. Show Players shows the image full screen with its name as a caption, on the second screen
   when there is one.
@@ -161,9 +164,10 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   - R3.9.2 Where the scenario shows several difficulties (Society play), the item is a submenu: All Difficulties,
     then each difficulty. Elsewhere it is one item, for the base difficulty. It is disabled when nothing is
     planned.
-  - R3.9.3 A bestiary creature's pawn is the art the library matches to its name for a portrait (R2.3), even when
-    it shows pasted art here; a custom creature's pawn is its own. Two creatures matched to the same art share a
-    pawn. A creature with no pawn is sent by name, and Pawn Shop shows a placeholder for it.
+  - R3.9.3 A creature's pawn is the art it shows here: its pasted art (R3.5c1), under the creature's pawn ID
+    (shared libraries R4.12), which is also a custom creature's; else the art the library matches to its name for
+    a portrait (R2.3). Two creatures matched to the same art share a pawn. A creature with no pawn is sent by
+    name, and Pawn Shop shows a placeholder for it.
   - R3.9.4 The sheet is named after the scenario, or the scenario and the encounter, with the difficulty when one
     of several was chosen. Pawns are listed in the order the encounters plan them.
   - R3.9.5 Not on the iPad or iPhone yet.

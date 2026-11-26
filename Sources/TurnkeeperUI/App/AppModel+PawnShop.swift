@@ -1,6 +1,7 @@
 #if os(macOS)
 import Bestiary
 import Foundation
+import SharedLibraries
 import TablesideShared
 import TurnkeeperKit
 
@@ -18,13 +19,18 @@ extension AppModel {
         WorkspaceLauncher().openInForeground(request.url)
     }
 
-    /// A custom creature's pawn is its own, under its ID. A bestiary creature's is the art the library matches to
-    /// its name, even when it shows pasted art here: Pawn Shop has no pawn of that. Nil for a creature that is gone.
+    /// A creature's pawn is the art it shows here (R3.9.3): a custom creature's own and a bestiary creature's
+    /// pasted art, both under the creature's pawn ID, else the art the library matches to its name. Nil for a
+    /// creature that is gone.
     private func creaturePawn(for key: String) -> CreaturePawn? {
         if CustomCreature.isCustomKey(key) {
             return library.customCreature(key: key).map { CreaturePawn(name: $0.creature.name, pawnID: $0.id) }
         }
-        return bestiary.entry(key).map { CreaturePawn(name: $0.name, pawnID: matchedArt(for: $0).portrait) }
+        return bestiary.entry(key).map { entry in
+            let hasPastedArt = library.customArt(for: key) != nil
+            return CreaturePawn(name: entry.name, pawnID: hasPastedArt ? SharedLibrary.pawnID(forSubject: key)
+                                                                       : matchedArt(for: entry).portrait)
+        }
     }
 }
 #endif

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Open an encounter's or a scenario's pawns in Pawn Shop, ready to print, from its context menu on the Mac
+- Art pasted onto a bestiary creature prints as a pawn in Pawn Shop
 
 ### Fixed
 - Hit points stay on one line on narrow strips, such as on an iPhone

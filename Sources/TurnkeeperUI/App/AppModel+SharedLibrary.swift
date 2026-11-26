@@ -79,6 +79,8 @@ extension AppModel {
         do {
             try sharedCreatures.push(library)
             try pullSharedChanges(from: sharedCreatures)
+            // Art pasted before names were saved with it, or in Field Guide, gets its creature's name (R3.5c1).
+            labelArtSubjects()
         } catch {
             errorMessage = "Reading the shared library failed: \(error.localizedDescription)"
         }
