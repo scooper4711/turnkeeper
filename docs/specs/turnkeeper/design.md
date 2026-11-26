@@ -284,6 +284,14 @@ Ported from the pf2e system, with tests.
   `AppModel.librarySheet`, `isImportingLibrary` and `campaignExport` (`beginExport(of:)`), so they open with the
   sidebar hidden or a fight on screen. The sidebar's buttons and context menu and `LibraryCommands` (the File
   menu, on both platforms) set those. Renaming stays in the sidebar, from a campaign's context menu.
+- **Open in Pawn Shop** (R3.9, Mac only). `PawnTally` (`TurnkeeperKit/Library`) builds Tabletop Kit's
+  `PawnSheetRequest` from encounters, the difficulty labels and a resolver from a creature key to its name and pawn
+  ID: it sums a fight's slots by pawn (the pawn ID, else the creature key), keeps the largest count across fights
+  and the order of first appearance. `AppModel+PawnShop` gives the resolver (`matchedArt(for:).portrait` for a
+  bestiary creature, the creature's own ID for a custom one) and opens the request's link with
+  `WorkspaceLauncher`. `canOpenInPawnShop` is stored, asked of `WorkspaceLauncher.canOpen` at launch and whenever
+  the app becomes active, so rows don't ask Launch Services as they draw. `OpenInPawnShopMenu` is the item in
+  `ScenarioRows`' context menus: a submenu when `shownVariantLabels(of:)` has several labels.
 
 ## Character import
 - **Sheet.** A PC's sheet is a `Creature` of kind `character`, with `PlayerDetails` (ancestry, heritage,
