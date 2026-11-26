@@ -289,8 +289,9 @@ Ported from the pf2e system, with tests.
   ID: it sums a fight's slots by pawn (the pawn ID, else the creature key), keeps the largest count across fights
   and the order of first appearance. `AppModel+PawnShop` gives the resolver (`matchedArt(for:).portrait` for a
   bestiary creature, the creature's own ID for a custom one) and opens the request's link with
-  `WorkspaceLauncher`. `canOpenInPawnShop` is stored, asked of `WorkspaceLauncher.canOpen` at launch and whenever
-  the app becomes active, so rows don't ask Launch Services as they draw. `OpenInPawnShopMenu` is the item in
+  `WorkspaceLauncher`. `canOpenInPawnShop` is stored, asked of `WorkspaceLauncher.canOpen` whenever the app becomes
+  active (`NSApplication.didBecomeActiveNotification`, which also follows launch), so rows don't ask Launch Services
+  as they draw. `OpenInPawnShopMenu` is the item in
   `ScenarioRows`' context menus: a submenu when `shownVariantLabels(of:)` has several labels.
 
 ## Character import

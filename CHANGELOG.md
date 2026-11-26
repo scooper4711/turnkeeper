@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Open an encounter's or a scenario's pawns in Pawn Shop, ready to print, from its context menu on the Mac
+
 ### Fixed
 - Hit points stay on one line on narrow strips, such as on an iPhone
 
