@@ -75,6 +75,10 @@ final class SharingUITests: XCTestCase {
         let join = app.buttons["Follow"]
         XCTAssertTrue(waitUntil { join.isEnabled }, "No table was found to follow")
         join.tap()
+        // With the on-screen keyboard up (a fresh Simulator has no hardware keyboard), the first tap on the toolbar
+        // can go to ending the field's editing instead; the sheet then stays.
+        if !waitUntil(timeout: 2, { !field.exists }) { join.tap() }
+        XCTAssertTrue(waitUntil { !field.exists }, "Follow didn't close the sheet")
     }
 
     private func waitUntil(timeout: TimeInterval = 5, _ condition: () -> Bool) -> Bool {
