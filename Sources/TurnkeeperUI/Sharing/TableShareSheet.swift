@@ -65,6 +65,7 @@ struct FollowTableSheet: View {
     @State private var tables: [TablePeer] = []
     @State private var selected: TablePeer?
     @State private var code = ""
+    @FocusState private var isTypingCode: Bool
 
     var body: some View {
         NavigationStack {
@@ -86,6 +87,9 @@ struct FollowTableSheet: View {
                         #if os(iOS)
                         .keyboardType(.numberPad)
                         #endif
+                        .focused($isTypingCode)
+                        .onChange(of: code) { followOnceTyped() }
+                        .onSubmit(follow)
                 } footer: {
                     Text("The four digits on the GM's device.")
                 }
@@ -96,7 +100,7 @@ struct FollowTableSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Follow", action: follow)
-                        .disabled(selected == nil || code.filter(\.isNumber).count < 4)
+                        .disabled(!canFollow)
                 }
             }
             .task { browse() }
@@ -123,8 +127,18 @@ struct FollowTableSheet: View {
         }
     }
 
+    private var canFollow: Bool {
+        selected != nil && code.filter(\.isNumber).count >= 4
+    }
+
+    /// Follows as the fourth digit is typed: on an iPad without a keyboard, a tap on Follow would first only put the
+    /// on-screen keyboard away. A code filled in from the table followed last waits for Follow.
+    private func followOnceTyped() {
+        if isTypingCode && canFollow { follow() }
+    }
+
     private func follow() {
-        guard let selected else { return }
+        guard canFollow, let selected else { return }
         TableFollowing.shared.join(selected, code: code)
         dismiss()
     }

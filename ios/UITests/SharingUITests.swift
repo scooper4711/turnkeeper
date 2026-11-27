@@ -67,18 +67,15 @@ final class SharingUITests: XCTestCase {
         app.buttons["Follow a Table…"].tap()
         let field = app.textFields["Code"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
+        let looking = app.staticTexts["Looking for a GM sharing the player screen…"]
+        XCTAssertTrue(waitUntil(timeout: 10) { !looking.exists }, "No table was found to follow")
         field.tap()
         // The code of the table joined last is filled in; start from an empty field.
         let filled = (field.value as? String) ?? ""
         if filled != "Code" { field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: filled.count)) }
         field.typeText(code)
-        let join = app.buttons["Follow"]
-        XCTAssertTrue(waitUntil { join.isEnabled }, "No table was found to follow")
-        join.tap()
-        // With the on-screen keyboard up (a fresh Simulator has no hardware keyboard), the first tap on the toolbar
-        // can go to ending the field's editing instead; the sheet then stays.
-        if !waitUntil(timeout: 2, { !field.exists }) { join.tap() }
-        XCTAssertTrue(waitUntil { !field.exists }, "Follow didn't close the sheet")
+        // Typing the fourth digit follows; no tap on Follow, which the on-screen keyboard would take first.
+        XCTAssertTrue(waitUntil { !field.exists }, "Typing the code didn't follow")
     }
 
     private func waitUntil(timeout: TimeInterval = 5, _ condition: () -> Bool) -> Bool {
