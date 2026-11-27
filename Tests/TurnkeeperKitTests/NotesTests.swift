@@ -20,7 +20,7 @@ struct CreatureNoteTests {
         #expect(library.creatureNote(scenarioID: docks.id, subject: "goblin").text == "Carries the vault key")
         #expect(library.creatureNote(scenarioID: other.id, subject: "goblin").text.isEmpty)
 
-        let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
+        let package = LibraryPackage(library: library, bestiaryRevision: "")
         var ipad = Library()
         _ = LibraryMerger.merge(try LibraryPackage.decode(package.encoded()).library, into: &ipad)
         var edited = ipad.creatureNote(scenarioID: docks.id, subject: "goblin")

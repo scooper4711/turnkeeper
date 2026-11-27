@@ -125,6 +125,36 @@ final class PlanningUITests: XCTestCase {
         XCTAssertTrue(waitUntil { show.isHittable })
     }
 
+    /// Export… on an encounter opens the dialog with that encounter and its scenario checked, and nothing else
+    /// (R1.2a). Checking a scenario checks what's in it, and with nothing checked there is nothing to export.
+    func testExportStartsFromTheEncounterItWasChosenOn() {
+        app.launchArguments = ["--demo", "planner"]
+        app.launch()
+        app.showCampaignList()
+        // The row in the campaign's list, not the encounter's title beside it.
+        let row = app.cells.staticTexts["A: Ambush on the Docks"].firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        row.press(forDuration: 1.2)
+        let menuItem = app.buttons["Export…"]
+        XCTAssertTrue(menuItem.waitForExistence(timeout: 5), "The encounter's menu has no Export…")
+        menuItem.tap()
+
+        let export = app.navigationBars.buttons["Export…"]
+        XCTAssertTrue(export.waitForExistence(timeout: 5), "The export dialog didn't open")
+        let encounter = app.buttons["A: Ambush on the Docks"]
+        let scenario = app.buttons["#7-99: The Goblin Docks"]
+        let party = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Friday table'")).firstMatch
+        XCTAssertTrue(encounter.isSelected && scenario.isSelected)
+        XCTAssertFalse(party.isSelected)
+
+        app.buttons["Select None"].tap()
+        XCTAssertTrue(waitUntil { !encounter.isSelected && !export.isEnabled })
+        scenario.tap()
+        XCTAssertTrue(waitUntil { encounter.isSelected && export.isEnabled })
+        party.tap()
+        XCTAssertTrue(waitUntil { party.isSelected })
+    }
+
     /// Swiping a creature row right to left offers Delete.
     func testRemovingACreatureFromTheEncounter() {
         app.launchArguments = ["--demo", "planner"]

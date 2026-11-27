@@ -40,6 +40,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BINARY" "$APP/Contents/MacOS/$EXECUTABLE"
 [ -f Resources/AppIcon.icns ] && cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
+cp Resources/DocumentIcon.icns "$APP/Contents/Resources/DocumentIcon.icns"
 cp Resources/container-migration.plist "$APP/Contents/Resources/container-migration.plist"
 # The imported bestiary and art (see "make bestiary"), bundled as a folder like on the iPad.
 if [ -d Generated ]; then
@@ -105,6 +106,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
             <array>
                 <string>io.github.scooper4711.turnkeeper.library</string>
             </array>
+            <key>CFBundleTypeIconFile</key>
+            <string>DocumentIcon</string>
         </dict>
     </array>
     <key>UTExportedTypeDeclarations</key>
@@ -114,9 +117,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
             <string>io.github.scooper4711.turnkeeper.library</string>
             <key>UTTypeDescription</key>
             <string>Turnkeeper Library</string>
+            <key>UTTypeIconFile</key>
+            <string>DocumentIcon</string>
             <key>UTTypeConformsTo</key>
             <array>
-                <string>public.json</string>
+                <string>public.data</string>
+                <string>public.content</string>
             </array>
             <key>UTTypeTagSpecification</key>
             <dict>

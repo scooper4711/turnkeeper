@@ -181,6 +181,29 @@ Ported from the pf2e system, with tests.
   later-fetched Demiplane sheet wins when both versions are linked, so an unlink isn't undone.
   Members saved before stamping read as `.distantPast`.
 - **Files.** `LibraryPackage` is the `.turnkeeper` file (UTType `io.github.scooper4711.turnkeeper.library`).
+  The type conforms to `public.data` and `public.content`, not to JSON (R1.2c): a type that is text gets a thumbnail
+  of its first lines from Finder and Files in place of its icon. The Mac app declares
+  `Resources/DocumentIcon.icns` for it (`CFBundleTypeIconFile`, `UTTypeIconFile`), drawn by `make icon`
+  (`scripts/icon`), which also draws the app icons.
+- **Export picker** (R1.2a). `ExportSelection` is what's checked in one campaign: the IDs of scenarios,
+  encounters, handouts and parties. `include` and `exclude` keep it whole (a scenario with its contents, an
+  encounter or handout with its scenario), so the dialog only draws it. `Library.exporting(_:)` builds the part
+  of the library it names, live records only, with the custom creatures, art and notes they use, and no fights.
+  `ExportSheet` shows the lines, and presents the file exporter itself, over the sheet: the sheet closes when the
+  file is saved and stays when the save is canceled.
+- **Art carried in a file** (R1.2b). `AppModel.exportDocument(for:)` asks the art library for the portrait of each
+  creature in the package that has no pasted art (`Library.creatureKeysWithoutPastedArt`), encodes it
+  (`PreparedImage(picture:)`) and adds it with `LibraryPackage.add(_:image:)` as a `CustomArt` record made by
+  `CustomArt.carried`. The record exists only in the file. Its ID comes from the art's ID in the art library and
+  the creature's key, and its `modifiedAt` is a fixed time long ago (`carriedDate`), so the merger's ordinary
+  rules give R1.2b's three promises with no rule of their own. Drawing is asynchronous, so the dialog shows a
+  spinner in place of Export… until the file is ready.
+  On import, `Library.replaceArt(withThatOf:)` runs after the merge and marks deleted every other live art record
+  of each creature the file brought art for, which is what `Library.save(_:)` does for a paste; the shared library
+  deletes the picture with its record. It skips a creature whose art from the file is deleted on this device.
+  `LibraryPackage.compressingImages()` then stores every PNG in the package as HEIC (ImageIO writes HEIC with
+  alpha, and can't write WebP) and renames it in the package's art and handout records; the library's own records
+  keep their PNG. It runs off the main actor. In one real export 11 MB of PNG became 1.7 MB.
 - **iCloud sync** (R1.3). `CampaignSync` is a `SyncZoneHandler` on tabletop-kit's `CKSyncEngine`, beside `LibrarySync`,
   which syncs the shared library, in the suite's container `iCloud.io.github.scooper4711.tableside`, private database.
   - *Records.* One zone, `Turnkeeper`, with one CloudKit record per library record, named `<kind>-<UUID>`, of the
@@ -280,10 +303,10 @@ Ported from the pf2e system, with tests.
   only two items share the toolbar. The menu's label turns to `exclamationmark.circle` and carries a badge
   while art PDFs are missing.
 - **Library sheets and File menu** (R1.3b). The sheets for a new campaign, creature art and About
-  (`LibrarySheet`), the import picker and the campaign exporter are presented by `RootView`, from
-  `AppModel.librarySheet`, `isImportingLibrary` and `campaignExport` (`beginExport(of:)`), so they open with the
-  sidebar hidden or a fight on screen. The sidebar's buttons and context menu and `LibraryCommands` (the File
-  menu, on both platforms) set those. Renaming stays in the sidebar, from a campaign's context menu.
+  (`LibrarySheet`), the import picker and the export picker are presented by `RootView`, from
+  `AppModel.librarySheet`, `isImportingLibrary` and `exportSelection` (`beginExport(of:in:)`), so they open with
+  the sidebar hidden or a fight on screen. The planner's context menus and `LibraryCommands` (the File menu, on
+  both platforms) set those. Renaming stays in the sidebar, from a campaign's context menu.
 - **Names with pasted art** (R3.5c1). `CustomArt` has `subjectName` and `subjectSize`, the keys Tabletop Kit's
   `ArtSubjectLabel` reads from the shared library's record. `Library.labelArtSubjects(_:)` fills them for live art
   whose subject is neither a custom creature nor a character, from a lookup the app gives (the bestiary), and

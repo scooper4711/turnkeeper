@@ -1,9 +1,5 @@
-// Draws the app icon and writes Resources/AppIcon.icns for the Mac and the full-bleed
-// ios/App/Assets.xcassets/AppIcon.appiconset/icon-1024.png for the iPad.
-// Usage: swift scripts/make-icon.swift
-//
-// The artwork is original: initiative magnets on a board, a turn arrow and a twenty-sided die.
-// It uses no Paizo logos, lettering or artwork.
+// The app icon's artwork, drawn on a 1024 canvas: initiative magnets on a board, a turn arrow and a twenty-sided
+// die. It is original and uses no Paizo logos, lettering or artwork. `main.swift` writes the icon files.
 import AppKit
 
 let canvas: CGFloat = 1024
@@ -216,49 +212,3 @@ func drawIcon(_ context: CGContext, padRect: CGRect, corner: CGFloat) {
     drawDie(context, center: CGPoint(x: 790, y: 250), radius: 190)
     context.restoreGState()
 }
-
-func render(size: CGFloat, padRect: CGRect, corner: CGFloat) -> NSBitmapImageRep {
-    guard let bitmap = NSBitmapImageRep(
-        bitmapDataPlanes: nil, pixelsWide: Int(size), pixelsHigh: Int(size), bitsPerSample: 8, samplesPerPixel: 4,
-        hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
-    ), let context = NSGraphicsContext(bitmapImageRep: bitmap)?.cgContext else {
-        fatalError("Drawing the icon failed: no bitmap context")
-    }
-    context.scaleBy(x: size / canvas, y: size / canvas)
-    drawIcon(context, padRect: padRect, corner: corner)
-    return bitmap
-}
-
-func write(_ bitmap: NSBitmapImageRep, to path: String) throws {
-    guard let data = bitmap.representation(using: .png, properties: [:]) else {
-        throw CocoaError(.fileWriteUnknown)
-    }
-    try data.write(to: URL(fileURLWithPath: path))
-}
-
-let fileManager = FileManager.default
-try fileManager.createDirectory(atPath: "Resources", withIntermediateDirectories: true)
-
-// iPad: full bleed; the system applies the rounded mask.
-try write(render(size: 1024, padRect: CGRect(x: 0, y: 0, width: canvas, height: canvas), corner: 0),
-          to: "ios/App/Assets.xcassets/AppIcon.appiconset/icon-1024.png")
-
-// Mac: the rounded square sits inside the standard 1024 grid with margins for the shadow.
-let iconset = "tmp/AppIcon.iconset"
-try? fileManager.removeItem(atPath: iconset)
-try fileManager.createDirectory(atPath: iconset, withIntermediateDirectories: true)
-let macPad = CGRect(x: 100, y: 100, width: 824, height: 824)
-for points in [16, 32, 128, 256, 512] {
-    for scale in [1, 2] {
-        let pixels = CGFloat(points * scale)
-        let name = scale == 1 ? "icon_\(points)x\(points).png" : "icon_\(points)x\(points)@2x.png"
-        try write(render(size: pixels, padRect: macPad, corner: 185), to: "\(iconset)/\(name)")
-    }
-}
-let iconutil = Process()
-iconutil.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
-iconutil.arguments = ["-c", "icns", iconset, "-o", "Resources/AppIcon.icns"]
-try iconutil.run()
-iconutil.waitUntilExit()
-try? fileManager.removeItem(atPath: iconset)
-print(iconutil.terminationStatus == 0 ? "Wrote Resources/AppIcon.icns and the iPad icon." : "iconutil failed.")

@@ -2,8 +2,9 @@ import Foundation
 import UniformTypeIdentifiers
 
 public extension UTType {
-    /// A `.turnkeeper` file: a JSON library package.
-    static let turnkeeperLibrary = UTType(exportedAs: "io.github.scooper4711.turnkeeper.library", conformingTo: .json)
+    /// A `.turnkeeper` file: a library package. It holds JSON but isn't declared as text, or Finder and Files
+    /// would draw the start of the JSON as the file's picture in place of its icon.
+    static let turnkeeperLibrary = UTType(exportedAs: "io.github.scooper4711.turnkeeper.library", conformingTo: .data)
 }
 
 /// The contents of a `.turnkeeper` file: some or all of a library.
@@ -23,6 +24,11 @@ public struct LibraryPackage: Codable, Sendable {
         self.exportedAt = exportedAt
         self.bestiaryRevision = bestiaryRevision
         self.library = library
+    }
+
+    /// A package of what the GM checked in the export dialog (R1.2a).
+    public init(picking selection: ExportSelection, from library: Library, bestiaryRevision: String) {
+        self.init(library: library.exporting(selection), bestiaryRevision: bestiaryRevision)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -47,6 +53,20 @@ public struct LibraryPackage: Codable, Sendable {
         return package
     }
 
+    /// Puts art in the package with its image, for art the library doesn't hold as a record (R1.2b).
+    public mutating func add(_ art: CustomArt, image: Data) {
+        library.customArt.append(art)
+        images[art.fileName] = image
+    }
+
+    /// The package with only the images that have these file names: those a library still points to once the
+    /// package is merged into it.
+    public func keepingImages(_ fileNames: Set<String>) -> LibraryPackage {
+        var package = self
+        package.images = images.filter { fileNames.contains($0.key) }
+        return package
+    }
+
     /// Writes the package's images that their store doesn't have yet; do this before merging the library.
     public func writeImages(to store: ArtStore, artStore: ArtStore? = nil) throws {
         let artFiles = Set(library.customArt.map(\.fileName))
@@ -54,24 +74,6 @@ public struct LibraryPackage: Codable, Sendable {
             let target = artFiles.contains(fileName) ? artStore ?? store : store
             if !target.contains(fileName) { try target.write(data, as: fileName) }
         }
-    }
-
-    /// A package of one campaign with its parties, scenarios, encounters and sessions.
-    public static func campaign(_ id: UUID, from library: Library, bestiaryRevision: String) -> LibraryPackage {
-        var subset = Library()
-        subset.campaigns = library.campaigns.filter { $0.id == id }
-        subset.parties = library.parties.filter { $0.campaignID == id }
-        subset.scenarios = library.scenarios.filter { $0.campaignID == id }
-        let scenarioIDs = Set(subset.scenarios.map(\.id))
-        subset.encounters = library.encounters.filter { scenarioIDs.contains($0.scenarioID) }
-        subset.sessions = library.sessions.filter { $0.campaignID == id }
-        let slotKeys = Set(subset.encounters.flatMap { $0.variants.flatMap { $0.slots.map(\.creatureKey) } })
-        subset.customCreatures = library.customCreatures.filter { $0.campaignID == id || slotKeys.contains($0.key) }
-        let subjects = slotKeys.union(subset.customCreatures.map(\.key))
-        subset.customArt = library.customArt.filter { subjects.contains($0.subject) }
-        subset.handouts = library.handouts.filter { scenarioIDs.contains($0.scenarioID) }
-        subset.creatureNotes = library.creatureNotes.filter { scenarioIDs.contains($0.scenarioID) }
-        return LibraryPackage(library: subset, bestiaryRevision: bestiaryRevision)
     }
 
     /// JSON with sorted keys. Dates use the default encoding, seconds as a double, which round-trips

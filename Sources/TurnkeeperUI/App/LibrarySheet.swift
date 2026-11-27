@@ -23,19 +23,6 @@ enum LibrarySheet: String, Identifiable {
     }
 }
 
-extension AppModel {
-    /// Prepares a campaign's file for the exporter in `RootView`, which asks where to save it.
-    func beginExport(of campaignID: UUID) {
-        do {
-            campaignExport = LibraryDocument(data: try exportCampaign(campaignID),
-                                             fileName: exportFileName(for: campaignID))
-        } catch {
-            let name = library.activeCampaigns.first { $0.id == campaignID }?.name ?? "the campaign"
-            errorMessage = "Exporting \(name) failed: \(error.localizedDescription)"
-        }
-    }
-}
-
 /// The campaign sidebar's buttons as File menu commands, so they're there however narrow or hidden the sidebar is.
 /// On the iPad they show in the menu bar a keyboard brings up.
 struct LibraryCommands: Commands {
@@ -47,8 +34,8 @@ struct LibraryCommands: Commands {
         CommandGroup(replacing: .newItem) { newCampaign }
         CommandGroup(after: .importExport) {
             Button("Import Library…") { model.isImportingLibrary = true }
-            Button("Export Campaign…") {
-                if let id = model.selectedCampaignID { model.beginExport(of: id) }
+            Button("Export…") {
+                if let id = model.selectedCampaignID { model.beginExport(of: model.selection, in: id) }
             }
             .disabled(model.selectedCampaignID == nil)
             Divider()

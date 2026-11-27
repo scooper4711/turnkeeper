@@ -54,12 +54,7 @@ struct RootView: View {
                       allowedContentTypes: [.turnkeeperLibrary, .json]) { result in
             if case let .success(url) = result { model.importLibraryFile(url) }
         }
-        .fileExporter(isPresented: exportBinding, document: model.campaignExport, contentType: .turnkeeperLibrary,
-                      defaultFilename: model.campaignExport?.fileName) { _ in model.campaignExport = nil }
-    }
-
-    private var exportBinding: Binding<Bool> {
-        Binding(get: { model.campaignExport != nil }, set: { if !$0 { model.campaignExport = nil } })
+        .sheet(item: $model.exportSelection) { ExportSheet(selection: $0) }
     }
 
     private static var demoCardBackKey: String? {

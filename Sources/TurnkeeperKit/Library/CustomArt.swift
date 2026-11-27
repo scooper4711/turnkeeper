@@ -39,7 +39,59 @@ public struct CustomArt: LibraryRecord, Hashable {
     }
 }
 
+public extension CustomArt {
+    /// When art carried in a file last changed: always the same time, and long ago. So sending the same art again
+    /// changes nothing where it has arrived, and art removed there stays removed.
+    static let carriedDate = Date(timeIntervalSinceReferenceDate: 0)
+
+    /// The record for art this device draws from the GM's PDFs, sent in a file as the creature's pasted art
+    /// (R1.2b). `source` is the art's ID in the art library: the same art for the same creature makes the same
+    /// record every time, so importing it twice adds it once.
+    static func carried(_ source: UUID, for subject: String, image: PreparedImage) -> CustomArt {
+        let id = UUID(seed: "carried art \(source.uuidString) \(subject)")
+        var art = CustomArt(subject: subject, fileName: "\(id.uuidString).\(image.fileExtension)",
+                            byteCount: image.data.count)
+        art.id = id
+        art.modifiedAt = carriedDate
+        return art
+    }
+
+    /// The art with the name and size of the creature it shows (R3.5c1).
+    func labeled(_ label: ArtSubjectLabel) -> CustomArt {
+        var art = self
+        art.subjectName = label.subjectName
+        art.subjectSize = label.subjectSize
+        return art
+    }
+}
+
 public extension Library {
+    /// The creatures in the encounters that have no pasted art, in order of their keys: those whose art, if they
+    /// have any, this device draws from the GM's PDFs.
+    var creatureKeysWithoutPastedArt: [String] {
+        let pasted = Set(customArt.filter { !$0.isDeleted }.map(\.subject))
+        let keys = Set(encounters.flatMap { $0.variants.flatMap { $0.slots.map(\.creatureKey) } })
+        return keys.subtracting(pasted).sorted()
+    }
+
+    /// Makes the art a file brought the only pasted art of its creatures, as pasting it would (R1.2b): any other
+    /// art those creatures had is removed, so an organizer who changes a creature's art and sends the file again
+    /// leaves no unused picture behind. Call it after merging `imported`. Where this device's GM removed the
+    /// file's art, the creature keeps what it has: the GM chose otherwise.
+    mutating func replaceArt(withThatOf imported: Library) {
+        let arrived = Dictionary(grouping: imported.customArt.filter { !$0.isDeleted }, by: \.subject)
+        let now = ChangeClock.now()
+        for (subject, art) in arrived {
+            let ids = Set(art.map(\.id))
+            guard customArt.contains(where: { ids.contains($0.id) && !$0.isDeleted }) else { continue }
+            for index in customArt.indices where customArt[index].subject == subject
+                && !ids.contains(customArt[index].id) && !customArt[index].isDeleted {
+                customArt[index].deletedAt = now
+                customArt[index].modifiedAt = now
+            }
+        }
+    }
+
     /// Saves with each pasted picture the name and size of the creature it shows (R3.5c1), which `label` gives
     /// from the creature's key, or nil for a creature this app doesn't know. Art is stamped as changed only when
     /// its name or size differs. A custom creature's and a character's art are left alone.

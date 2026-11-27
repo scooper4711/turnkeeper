@@ -57,7 +57,7 @@ struct CampaignSidebar: View {
     @ViewBuilder
     private func menu(for campaign: Campaign) -> some View {
         Button("Edit…", systemImage: "pencil") { renaming = campaign }
-        Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: campaign.id) }
+        Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: nil, in: campaign.id) }
         Button("Delete", systemImage: "trash", role: .destructive) { model.deleteCampaign(campaign.id) }
     }
 
