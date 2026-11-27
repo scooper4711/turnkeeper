@@ -198,6 +198,9 @@ Ported from the pf2e system, with tests.
   the creature's key, and its `modifiedAt` is a fixed time long ago (`carriedDate`), so the merger's ordinary
   rules give R1.2b's three promises with no rule of their own. Drawing is asynchronous, so the dialog shows a
   spinner in place of Export… until the file is ready.
+  On import, `Library.replaceArt(withThatOf:)` runs after the merge and marks deleted every other live art record
+  of each creature the file brought art for, which is what `Library.save(_:)` does for a paste; the shared library
+  deletes the picture with its record. It skips a creature whose art from the file is deleted on this device.
   `LibraryPackage.compressingImages()` then stores every PNG in the package as HEIC (ImageIO writes HEIC with
   alpha, and can't write WebP) and renames it in the package's art and handout records; the library's own records
   keep their PNG. It runs off the main actor. In one real export 11 MB of PNG became 1.7 MB.

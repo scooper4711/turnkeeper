@@ -90,6 +90,7 @@ extension AppModel {
         }
         var merged = library
         let summary = LibraryMerger.merge(package.library, into: &merged)
+        merged.replaceArt(withThatOf: package.library)
         library = merged
         campaignSync?.libraryMerged()
         if selectedCampaignID == nil { selectedCampaignID = library.activeCampaign(preferring: nil)?.id }

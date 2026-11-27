@@ -42,8 +42,11 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   none of the organizer's PDFs. So the file carries the art the exporting device shows for each creature in the
   checked encounters, a bestiary creature's or a custom creature's alike: its pasted art, or else the portrait
   drawn from the GM's PDFs (R2.3), and a checked handout's image.
-  - A portrait from the PDFs arrives as the creature's pasted art. Importing the same file again adds nothing, art
-    removed on the receiving device stays removed, and art pasted there is shown instead.
+  - A portrait from the PDFs arrives as the creature's pasted art.
+  - Importing acts like pasting: the file's art for a creature becomes its only pasted art, and what the creature
+    had is removed with its picture. So an organizer who changes a creature's art and sends the file again leaves
+    no unused pictures on the other GMs' devices. Importing the same file again changes nothing. Art the receiving
+    GM removed stays removed, and art they pasted after an import stays until the file brings different art.
   - A creature whose PDF has gone missing (R2.3a) is sent without art.
   - Pictures with transparency (PNG) travel as HEIC, which keeps the transparency at about a sixth of the size,
     so a scenario's file stays small enough to send by chat or mail. The pictures on the exporting device don't

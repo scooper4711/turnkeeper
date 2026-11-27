@@ -92,12 +92,58 @@ struct CarriedArtTests {
         #expect(phone.customArt(for: "goblin") == nil)
     }
 
-    @Test("Art pasted on the receiving device wins over carried art")
-    func pastedArtWins() throws {
-        let (package, _) = try arrivingPackage(for: "goblin")
+    @Test("Imported art replaces the pasted art a creature had, as pasting does, and leaves other creatures alone")
+    func replacesLikeAPaste() throws {
+        let (package, art) = try arrivingPackage(for: "goblin")
         var phone = Library()
         phone.save(CustomArt(subject: "goblin", fileName: "own.jpg", byteCount: 1))
+        phone.save(CustomArt(subject: "wolf", fileName: "wolf.jpg", byteCount: 1))
         _ = LibraryMerger.merge(package.library, into: &phone)
-        #expect(phone.customArt(for: "goblin")?.fileName == "own.jpg")
+        phone.replaceArt(withThatOf: package.library)
+        #expect(phone.customArt(for: "goblin")?.id == art.id)
+        #expect(phone.liveArtFileNames == [art.fileName, "wolf.jpg"])
+    }
+
+    @Test("When the organizer changes a creature's art and sends again, the old picture goes")
+    func changedArtLeavesNothingBehind() throws {
+        let (first, old) = try arrivingPackage(for: "goblin")
+        let (second, new) = try arrivingPackage(for: "goblin")
+        var phone = Library()
+        for package in [first, second, second] {
+            _ = LibraryMerger.merge(package.library, into: &phone)
+            phone.replaceArt(withThatOf: package.library)
+        }
+        #expect(phone.liveArtFileNames == [new.fileName] && old.id != new.id)
+        #expect(phone.customArt.filter { !$0.isDeleted }.count == 1)
+    }
+
+    /// A file's name is no part of what it holds, so "Convention.turnkeeper" and "Convention (2).turnkeeper" differ
+    /// only in when they were exported.
+    @Test("The same art exported twice, at different times, arrives as one picture")
+    func sameArtInTwoFiles() throws {
+        let image = try picture()
+        let source = UUID()
+        var phone = Library()
+        for exportedAt in [Date(timeIntervalSince1970: 1_000), Date(timeIntervalSince1970: 2_000)] {
+            var package = LibraryPackage(library: Library(), bestiaryRevision: "", exportedAt: exportedAt)
+            package.add(CustomArt.carried(source, for: "goblin", image: image), image: image.data)
+            let arrived = try LibraryPackage.decode(package.encoded())
+            _ = LibraryMerger.merge(arrived.library, into: &phone)
+            phone.replaceArt(withThatOf: arrived.library)
+            #expect(Set(arrived.images.keys) == phone.liveArtFileNames)
+        }
+        #expect(phone.customArt.count == 1)
+    }
+
+    @Test("Art pasted after an import survives importing the same file again")
+    func ownArtPastedLaterStays() throws {
+        let (package, _) = try arrivingPackage(for: "goblin")
+        var phone = Library()
+        _ = LibraryMerger.merge(package.library, into: &phone)
+        phone.replaceArt(withThatOf: package.library)
+        phone.save(CustomArt(subject: "goblin", fileName: "own.jpg", byteCount: 1))
+        _ = LibraryMerger.merge(package.library, into: &phone)
+        phone.replaceArt(withThatOf: package.library)
+        #expect(phone.liveArtFileNames == ["own.jpg"])
     }
 }
