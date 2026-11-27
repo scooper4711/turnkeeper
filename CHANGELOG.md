@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exported files are much smaller: pictures with transparency are sent as HEIC
 - Open an encounter's or a scenario's pawns in Pawn Shop, ready to print, from its context menu on the Mac
 - Art pasted onto a bestiary creature prints as a pawn in Pawn Shop
+- On the iPad and iPhone, Share Pawn Sheet in a scenario's or an encounter's context menu sends its pawns to Pawn
+  Shop, or to another device, as a sheet
 
 ### Fixed
 - Hit points stay on one line on narrow strips, such as on an iPhone

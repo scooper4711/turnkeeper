@@ -115,10 +115,8 @@ private struct ScenarioRows: View {
         .contextMenu {
             Button("Add Encounter", systemImage: "plus") { model.addEncounter(to: scenario.id) }
             Button("Add Handout", systemImage: "doc.richtext") { model.addHandout(to: scenario.id) }
-            #if os(macOS)
-            OpenInPawnShopMenu(scenario: scenario, encounters: model.library.encounters(in: scenario.id),
-                               title: scenario.name)
-            #endif
+            PawnSheetItem(scenario: scenario, encounters: model.library.encounters(in: scenario.id),
+                          title: scenario.name)
             ExportButton(item: .scenario(scenario.id), campaignID: scenario.campaignID)
             Button("Delete \(scenarioTitle)", systemImage: "trash", role: .destructive) {
                 model.library.deleteScenario(scenario.id)
@@ -134,10 +132,8 @@ private struct ScenarioRows: View {
                 .padding(.leading, 28)
                 .tag(PlannerSelection.encounter(encounter.id))
                 .contextMenu {
-                    #if os(macOS)
-                    OpenInPawnShopMenu(scenario: scenario, encounters: [encounter],
-                                       title: "\(scenario.name): \(encounter.name)")
-                    #endif
+                    PawnSheetItem(scenario: scenario, encounters: [encounter],
+                                  title: "\(scenario.name): \(encounter.name)")
                     ExportButton(item: .encounter(encounter.id), campaignID: scenario.campaignID)
                     Button("Delete Encounter", systemImage: "trash", role: .destructive) {
                         model.library.deleteEncounter(encounter.id)

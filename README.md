@@ -99,7 +99,7 @@ Starfinder games in person. Like any good toolkit, each one grants a +1 item bon
 - [Pluck](https://github.com/scooper4711/pluck) gets the art, text and stat blocks out of a PDF.
 - [Pawn Shop](https://github.com/scooper4711/pawn-shop) prints just the pawns you need, single-sided, from your
   pawn PDFs. On the Mac, right-click a scenario or an encounter and choose Open in Pawn Shop to get a sheet of the
-  pawns it needs.
+  pawns it needs; on the iPad and iPhone, touch and hold it and choose Share Pawn Sheet, then Pawn Shop.
 - [Mapsmith](https://github.com/scooper4711/mapsmith) prints battle maps at true scale on ordinary paper.
 - **Turnkeeper** builds encounters and runs initiative at the table, with the battle card of whoever's turn it is.
 - [Field Guide](https://github.com/scooper4711/field-guide) carries the Pathfinder and Starfinder compendium,

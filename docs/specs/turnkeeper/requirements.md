@@ -200,7 +200,13 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
     name, and Pawn Shop shows a placeholder for it.
   - R3.9.4 The sheet is named after the scenario, or the scenario and the encounter, with the difficulty when one
     of several was chosen. Pawns are listed in the order the encounters plan them.
-  - R3.9.5 Not on the iPad or iPhone yet.
+  - R3.9.5 The iPad and iPhone can't open a document in another app, so there the item is Share Pawn Sheet, with
+    the same submenu, counts, pawns and name (R3.9.1 to R3.9.4). It is always shown, since a shared sheet has
+    other uses than Pawn Shop on the same device.
+  - R3.9.6 Share Pawn Sheet hands the system's share sheet one of Pawn Shop's sheet files (Tabletop Kit Tableside
+    Shared R6.5), named after the sheet. Choosing Pawn Shop opens it there as a sheet (Pawn Shop R13.7); it can
+    also be sent to a Mac or to someone else, whose Pawn Shop shows the pawns their own library has. The file is
+    written when it is shared, not when the menu opens.
 
 ## R4 Combat
 - R4.1 Starting combat asks for the party and the variant. The scenario's last-used variant is the
