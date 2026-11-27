@@ -1,6 +1,8 @@
 #!/bin/sh
 # Runs the iPad UI tests in a simulator, or with DEVICE_KIND=iPhone the same tests on an iPhone. They drive the demo fight (--demo board), so they need no
-# saved library, only an imported bestiary in Generated/.
+# saved library, only an imported bestiary in Generated/. The run's result bundle, ios/build/UITests.xcresult, keeps
+# each test's screen recording. When the run fails, xcodebuild's own reasons are printed: a test that never reports,
+# because the app or the runner died, is named only there.
 #
 # Each run drives a simulator of its own: a copy of the one chosen, erased first and deleted afterward. A simulator
 # that is used again keeps what earlier runs saved, and the CI Macs run several jobs at once, which would otherwise
@@ -46,9 +48,16 @@ trap 'exit 1' INT TERM
 set -- -project ios/Turnkeeper.xcodeproj -scheme Turnkeeper-iPad \
     -destination "platform=iOS Simulator,id=$DEVICE" -derivedDataPath ios/build -skipPackageUpdates \
     TABLESIDE_SYNC_CONTAINER=
+RESULT=ios/build/UITests.xcresult
+rm -rf "$RESULT"
+set -- "$@" -resultBundlePath "$RESULT"
 for test in ${ONLY:-}; do set -- "$@" -only-testing:"TurnkeeperUITests/$test"; done
 
 STATUS=0
 xcodebuild test "$@" > "$LOG" 2>&1 || STATUS=$?
 grep -E " error: |Test Case .*(passed|failed)|\*\* TEST" "$LOG" || tail -n 20 "$LOG"
+if [ "$STATUS" -ne 0 ]; then
+    echo "Why the run failed, as xcodebuild tells it:"
+    sed -n '/^Failing tests:/,/^\*\* TEST/p; /^Testing failed:/,/^\*\* TEST/p' "$LOG" | head -n 60
+fi
 exit "$STATUS"
