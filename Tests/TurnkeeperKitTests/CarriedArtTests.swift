@@ -90,6 +90,7 @@ struct CarriedArtTests {
         phone.deleteCustomArt(for: "goblin")
         #expect(!LibraryMerger.merge(package.library, into: &phone).changedAnything)
         #expect(phone.customArt(for: "goblin") == nil)
+        #expect(package.keepingImages(phone.liveImageFileNames).images.isEmpty, "its picture isn't written again")
     }
 
     @Test("Imported art replaces the pasted art a creature had, as pasting does, and leaves other creatures alone")

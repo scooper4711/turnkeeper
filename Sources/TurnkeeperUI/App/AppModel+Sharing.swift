@@ -83,14 +83,17 @@ extension AppModel {
     }
 
     func importPackage(_ package: LibraryPackage) {
-        do {
-            if let artStore { try package.writeImages(to: artStore, artStore: pastedArtStore) }
-        } catch {
-            errorMessage = error.localizedDescription
-        }
         var merged = library
         let summary = LibraryMerger.merge(package.library, into: &merged)
         merged.replaceArt(withThatOf: package.library)
+        do {
+            // Only the pictures the merged library points to, written before it is shown: a picture whose record
+            // lost the merge would lie in the folder with nothing pointing at it.
+            let kept = package.keepingImages(merged.liveImageFileNames)
+            if let artStore { try kept.writeImages(to: artStore, artStore: pastedArtStore) }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
         library = merged
         campaignSync?.libraryMerged()
         if selectedCampaignID == nil { selectedCampaignID = library.activeCampaign(preferring: nil)?.id }

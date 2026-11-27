@@ -59,6 +59,14 @@ public struct LibraryPackage: Codable, Sendable {
         images[art.fileName] = image
     }
 
+    /// The package with only the images that have these file names: those a library still points to once the
+    /// package is merged into it.
+    public func keepingImages(_ fileNames: Set<String>) -> LibraryPackage {
+        var package = self
+        package.images = images.filter { fileNames.contains($0.key) }
+        return package
+    }
+
     /// Writes the package's images that their store doesn't have yet; do this before merging the library.
     public func writeImages(to store: ArtStore, artStore: ArtStore? = nil) throws {
         let artFiles = Set(library.customArt.map(\.fileName))
