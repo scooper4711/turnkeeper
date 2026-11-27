@@ -123,7 +123,8 @@ struct CustomArtTests {
         library.save(try store.add(try image(width: 8, height: 8), for: "goblin"))
         library.save(try store.add(try image(width: 8, height: 8), for: "dragon"))
 
-        let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
+        let package = LibraryPackage(picking: .everything(in: campaign.id, of: library), from: library,
+                                     bestiaryRevision: "")
             .addingImages(from: store)
         #expect(package.library.customArt.map(\.subject) == ["goblin"])
         let decoded = try LibraryPackage.decode(package.encoded())
@@ -149,7 +150,8 @@ struct HandoutTests {
         library.save(Handout(scenarioID: scenario.id, name: "A Letter"))
         #expect(library.handouts(in: scenario.id).map(\.name) == ["A Letter", "Map of the Docks"])
         #expect(library.liveImageFileNames == ["map.jpg"] && map.imagePath == "Pasted/map.jpg")
-        let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
+        let package = LibraryPackage(picking: .everything(in: campaign.id, of: library), from: library,
+                                     bestiaryRevision: "")
         #expect(package.library.handouts.count == 2)
         library.deleteScenario(scenario.id)
         #expect(library.handouts(in: scenario.id).isEmpty && library.liveImageFileNames.isEmpty)

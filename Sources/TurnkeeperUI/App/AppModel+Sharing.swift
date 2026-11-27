@@ -6,8 +6,9 @@ extension AppModel {
     /// The campaign as a `.turnkeeper` package.
     func exportCampaign(_ id: UUID) throws -> Data {
         markSent()
-        return try withImages(LibraryPackage.campaign(id, from: library,
-                                                      bestiaryRevision: bestiary.index.sourceRevision)).encoded()
+        let package = LibraryPackage(picking: .everything(in: id, of: library), from: library,
+                                     bestiaryRevision: bestiary.index.sourceRevision)
+        return try withImages(package).encoded()
     }
 
     /// Records that every record's current version has left this device, so when the other device sends it

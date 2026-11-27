@@ -130,15 +130,6 @@ struct LibraryTests {
         #expect(library.encounters.allSatisfy { $0.isDeleted })
     }
 
-    @Test("A campaign package holds only that campaign")
-    func campaignPackage() {
-        var (library, _) = plannedLibrary()
-        library.save(Campaign(name: "Home game", game: .starfinder))
-        let package = LibraryPackage.campaign(library.campaigns[0].id, from: library, bestiaryRevision: "")
-        #expect(package.library.campaigns.map(\.name) == ["PFS Season 7"])
-        #expect(package.library.encounters.count == 1)
-    }
-
     @Test("A package from a newer format is refused")
     func newerFormat() throws {
         var package = LibraryPackage(library: Library(), bestiaryRevision: "")
@@ -147,7 +138,7 @@ struct LibraryTests {
         #expect(throws: LibraryError.newerFormat(99)) { try LibraryPackage.decode(data) }
     }
 
-    @Test("Custom creatures travel with their campaign, are found by key, and outlive it")
+    @Test("Custom creatures are found by key and outlive the campaign they were made in")
     func customCreatures() throws {
         var (library, _) = plannedLibrary()
         let campaign = library.campaigns[0]
@@ -155,8 +146,6 @@ struct LibraryTests {
         library.save(custom)
         #expect(library.customCreature(key: custom.key)?.creature.name == "Gwibble")
         #expect(CustomCreature.isCustomKey(custom.key))
-        let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
-        #expect(package.library.customCreatures.map(\.id) == [custom.id])
         library.deleteCampaign(campaign.id)
         #expect(library.customCreature(key: custom.key) != nil, "it outlives the campaign it was made in")
     }

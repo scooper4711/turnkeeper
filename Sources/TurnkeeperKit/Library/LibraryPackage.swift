@@ -25,6 +25,11 @@ public struct LibraryPackage: Codable, Sendable {
         self.library = library
     }
 
+    /// A package of what the GM checked in the export dialog (R1.2a).
+    public init(picking selection: ExportSelection, from library: Library, bestiaryRevision: String) {
+        self.init(library: library.exporting(selection), bestiaryRevision: bestiaryRevision)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case format, exportedAt, bestiaryRevision, library, images
     }
@@ -54,24 +59,6 @@ public struct LibraryPackage: Codable, Sendable {
             let target = artFiles.contains(fileName) ? artStore ?? store : store
             if !target.contains(fileName) { try target.write(data, as: fileName) }
         }
-    }
-
-    /// A package of one campaign with its parties, scenarios, encounters and sessions.
-    public static func campaign(_ id: UUID, from library: Library, bestiaryRevision: String) -> LibraryPackage {
-        var subset = Library()
-        subset.campaigns = library.campaigns.filter { $0.id == id }
-        subset.parties = library.parties.filter { $0.campaignID == id }
-        subset.scenarios = library.scenarios.filter { $0.campaignID == id }
-        let scenarioIDs = Set(subset.scenarios.map(\.id))
-        subset.encounters = library.encounters.filter { scenarioIDs.contains($0.scenarioID) }
-        subset.sessions = library.sessions.filter { $0.campaignID == id }
-        let slotKeys = Set(subset.encounters.flatMap { $0.variants.flatMap { $0.slots.map(\.creatureKey) } })
-        subset.customCreatures = library.customCreatures.filter { $0.campaignID == id || slotKeys.contains($0.key) }
-        let subjects = slotKeys.union(subset.customCreatures.map(\.key))
-        subset.customArt = library.customArt.filter { subjects.contains($0.subject) }
-        subset.handouts = library.handouts.filter { scenarioIDs.contains($0.scenarioID) }
-        subset.creatureNotes = library.creatureNotes.filter { scenarioIDs.contains($0.scenarioID) }
-        return LibraryPackage(library: subset, bestiaryRevision: bestiaryRevision)
     }
 
     /// JSON with sorted keys. Dates use the default encoding, seconds as a double, which round-trips

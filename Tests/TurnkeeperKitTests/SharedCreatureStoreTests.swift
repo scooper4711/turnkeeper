@@ -208,7 +208,8 @@ struct SharedCreatureStoreTests {
         library.save(scenario)
         library.save(custom)
         library.save(fight)
-        let package = LibraryPackage.campaign(campaign.id, from: library, bestiaryRevision: "")
+        let package = LibraryPackage(picking: .everything(in: campaign.id, of: library), from: library,
+                                     bestiaryRevision: "")
         #expect(package.library.customCreatures.map(\.id) == [custom.id])
     }
 
