@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Typing the fourth digit of a table's code follows it; on an iPad without a keyboard, Follow took two taps
+- A followed table's card backs show the card frame and background, as on the GM's device
 - Hit points stay on one line on narrow strips, such as on an iPhone
 
 ## [2.3.0] - 2026-11-24
