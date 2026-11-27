@@ -18,7 +18,7 @@ jobs:
     # The Mac mini runs our own builds; pull requests from forks stay on GitHub's machines, since this is a public
     # repository and a self-hosted runner would run a stranger's code on the mini.
     runs-on: ${{ github.event.pull_request.head.repo.fork && 'macos-26' || 'mac-mini' }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -39,6 +39,47 @@ jobs:
         with:
           name: coverage
           path: coverage/sonar-coverage.xml
+
+      # The UI tests drive the app on the imported bestiary in Generated/, which git ignores. Importing reads the pf2e
+      # release and the private Artwork submodule and takes minutes, so the CI Mac keeps each import, by what decides
+      # it, in the runner user's home: not in GitHub's cache, which pull requests from forks could read. Forks'
+      # pull requests (on GitHub's machines, without the Artwork key) skip the UI tests.
+      - name: Restore the import
+        id: generated
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        env:
+          KEY: ${{ hashFiles('pf2e.release', 'import.sha256', 'scripts/import*.sh') }}
+        run: |
+          dir="$HOME/.ci-cache/${{ github.event.repository.name }}/generated-$KEY-$(git ls-tree HEAD Artwork | awk '{print $3}')"
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+          if [ -d "$dir" ]; then
+            rm -rf Generated && cp -Rc "$dir" Generated && echo "hit=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch artwork
+        if: ${{ !github.event.pull_request.head.repo.fork && steps.generated.outputs.hit != 'true' }}
+        env:
+          ARTWORK_SSH_KEY: ${{ secrets.ARTWORK_SSH_KEY }}
+        run: |
+          printf '%s\n' "$ARTWORK_SSH_KEY" > "$RUNNER_TEMP/artwork_key"
+          chmod 600 "$RUNNER_TEMP/artwork_key"
+          GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/artwork_key -o IdentitiesOnly=yes" \
+            git submodule update --init --depth 1 Artwork
+          rm -f "$RUNNER_TEMP/artwork_key"
+
+      # Keeps this import, and drops older ones.
+      - name: Import the bestiary
+        if: ${{ !github.event.pull_request.head.repo.fork && steps.generated.outputs.hit != 'true' }}
+        env:
+          DIR: ${{ steps.generated.outputs.dir }}
+        run: |
+          REXARD_PACKS=Artwork/rexard scripts/import-bestiary.sh
+          rm -rf "$(dirname "$DIR")" && mkdir -p "$(dirname "$DIR")" && cp -Rc Generated "$DIR"
+
+      # Builds the iPad app and runs its UI tests, in a Simulator the CI Mac keeps booted (see the script).
+      - name: Run the iPad UI tests
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: scripts/run-ipad-uitests.sh
 
   sonar:
     name: SonarCloud Analysis
