@@ -44,10 +44,13 @@ extension AppModel {
     /// Pawn Shop prints the art as a pawn under them.
     func labelArtSubjects() {
         var labeled = library
-        labeled.labelArtSubjects { key in
-            bestiary.entry(key).map { ArtSubjectLabel(name: $0.name, size: CreatureSize(trait: $0.traits.size)) }
-        }
+        labeled.labelArtSubjects(artSubjectLabel(for:))
         if labeled != library { library = labeled }
+    }
+
+    /// The name and size of a bestiary creature, to save with its art; nil for a creature the bestiary lacks.
+    func artSubjectLabel(for key: String) -> ArtSubjectLabel? {
+        bestiary.entry(key).map { ArtSubjectLabel(name: $0.name, size: CreatureSize(trait: $0.traits.size)) }
     }
 }
 

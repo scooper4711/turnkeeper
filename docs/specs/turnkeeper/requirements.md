@@ -32,10 +32,19 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   - Checking a scenario checks what's in it, and clearing it clears that. Checking an encounter or a handout
     checks its scenario, which travels with it so an import has somewhere to put it.
   - The file holds the campaign's name and settings and what's checked, plus what that uses: the checked
-    encounters' custom creatures, their pasted art and the notes on their creatures, and the portraits of the
-    checked parties' characters. An import merges it into the same campaign and scenario, or adds them.
+    encounters' custom creatures, their creatures' art (R1.2b) and the notes on their creatures, and the portraits
+    of the checked parties' characters. An import merges it into the same campaign and scenario, or adds them.
   - Saved fights and deleted records stay out of the file.
   - The file is named for the one scenario, encounter or party it holds, else for the campaign.
+- R1.2b A file is enough to run its encounters on a device that has nothing else: an assisting GM's phone, with
+  none of the organizer's PDFs. So the file carries the art the exporting device shows for each creature in the
+  checked encounters, a bestiary creature's or a custom creature's alike: its pasted art, or else the portrait
+  drawn from the GM's PDFs (R2.3), and a checked handout's image.
+  - A portrait from the PDFs arrives as the creature's pasted art. Importing the same file again adds nothing, art
+    removed on the receiving device stays removed, and art pasted there is shown instead.
+  - A creature whose PDF has gone missing (R2.3a) is sent without art.
+  - This is the one way art read from PDFs leaves the device, for a GM handing prepared encounters to the GMs of
+    their event. The PDFs themselves never travel.
 - R1.3 A GM's own devices stay in step through their private iCloud, in the background, with nothing to press:
   campaigns, parties, scenarios, encounters, fights, handouts and creature notes, and through the shared library
   custom creatures, pasted art and the art read from PDFs (the PDFs themselves don't sync). The first sync merges the

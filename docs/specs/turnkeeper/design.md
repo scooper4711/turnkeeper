@@ -187,6 +187,13 @@ Ported from the pf2e system, with tests.
   of the library it names, live records only, with the custom creatures, art and notes they use, and no fights.
   `ExportSheet` shows the lines, and presents the file exporter itself, over the sheet: the sheet closes when the
   file is saved and stays when the save is canceled.
+- **Art carried in a file** (R1.2b). `AppModel.exportDocument(for:)` asks the art library for the portrait of each
+  creature in the package that has no pasted art (`Library.creatureKeysWithoutPastedArt`), encodes it
+  (`PreparedImage(picture:)`) and adds it with `LibraryPackage.add(_:image:)` as a `CustomArt` record made by
+  `CustomArt.carried`. The record exists only in the file. Its ID comes from the art's ID in the art library and
+  the creature's key, and its `modifiedAt` is a fixed time long ago (`carriedDate`), so the merger's ordinary
+  rules give R1.2b's three promises with no rule of their own. Drawing is asynchronous, so the dialog shows a
+  spinner in place of Export… until the file is ready.
 - **iCloud sync** (R1.3). `CampaignSync` is a `SyncZoneHandler` on tabletop-kit's `CKSyncEngine`, beside `LibrarySync`,
   which syncs the shared library, in the suite's container `iCloud.io.github.scooper4711.tableside`, private database.
   - *Records.* One zone, `Turnkeeper`, with one CloudKit record per library record, named `<kind>-<UUID>`, of the

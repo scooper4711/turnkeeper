@@ -52,6 +52,12 @@ public struct LibraryPackage: Codable, Sendable {
         return package
     }
 
+    /// Puts art in the package with its image, for art the library doesn't hold as a record (R1.2b).
+    public mutating func add(_ art: CustomArt, image: Data) {
+        library.customArt.append(art)
+        images[art.fileName] = image
+    }
+
     /// Writes the package's images that their store doesn't have yet; do this before merging the library.
     public func writeImages(to store: ArtStore, artStore: ArtStore? = nil) throws {
         let artFiles = Set(library.customArt.map(\.fileName))

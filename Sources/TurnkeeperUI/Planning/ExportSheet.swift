@@ -10,6 +10,8 @@ struct ExportSheet: View {
     @Environment(\.dismiss) private var dismiss
     /// The file waiting for the user to choose where to save it.
     @State private var document: LibraryDocument?
+    /// True while the file is being put together: drawing the creatures' art takes a moment.
+    @State private var isPreparing = false
 
     var body: some View {
         NavigationStack {
@@ -35,7 +37,11 @@ struct ExportSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Export…", action: export).disabled(selection.isEmpty)
+                    if isPreparing {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Button("Export…", action: export).disabled(selection.isEmpty)
+                    }
                 }
             }
         }
@@ -62,7 +68,7 @@ struct ExportSheet: View {
     /// A row, not the section's footer: the Mac shows a footer on one line and cuts the rest off.
     private var whatGoesAlong: some View {
         Text("""
-            Custom creatures, pasted art and creature notes go with the encounters that use them. \
+            Custom creatures, creature art and creature notes go with the encounters that use them. \
             Saved fights stay on this device.
             """)
             .font(.footnote)
@@ -75,10 +81,14 @@ struct ExportSheet: View {
     }
 
     private func export() {
-        do {
-            document = try model.exportDocument(for: selection)
-        } catch {
-            close(reporting: "Exporting failed: \(error.localizedDescription)")
+        isPreparing = true
+        Task {
+            defer { isPreparing = false }
+            do {
+                document = try await model.exportDocument(for: selection)
+            } catch {
+                close(reporting: "Exporting failed: \(error.localizedDescription)")
+            }
         }
     }
 

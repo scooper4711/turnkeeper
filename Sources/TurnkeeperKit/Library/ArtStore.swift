@@ -87,6 +87,11 @@ public struct PreparedImage: Sendable {
                                 : Self.image(from: original) else {
             throw ArtStoreError.unreadableImage
         }
+        try self.init(picture: image)
+    }
+
+    /// A picture that is already drawn, such as art from the art library, at the size it has.
+    public init(picture image: CGImage) throws {
         let hasAlpha = ![.none, .noneSkipFirst, .noneSkipLast].contains(image.alphaInfo)
         let type = hasAlpha ? UTType.png : .jpeg
         let output = NSMutableData()

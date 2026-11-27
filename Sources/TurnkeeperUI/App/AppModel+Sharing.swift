@@ -1,3 +1,4 @@
+import Bestiary
 import TurnkeeperKit
 import Foundation
 
@@ -25,12 +26,35 @@ extension AppModel {
         }
     }
 
-    /// What's checked in the export dialog, as a `.turnkeeper` file for the exporter.
-    func exportDocument(for selection: ExportSelection) throws -> LibraryDocument {
+    /// What's checked in the export dialog, as a `.turnkeeper` file for the exporter. The file carries the art
+    /// this device shows for the encounters' creatures, so a device with none of the GM's PDFs shows it too (R1.2b).
+    func exportDocument(for selection: ExportSelection) async throws -> LibraryDocument {
         markSent()
-        let package = LibraryPackage(picking: selection, from: library,
-                                     bestiaryRevision: bestiary.index.sourceRevision)
-        return LibraryDocument(data: try withImages(package).encoded(), fileName: selection.fileName(in: library))
+        var package = withImages(LibraryPackage(picking: selection, from: library,
+                                                bestiaryRevision: bestiary.index.sourceRevision))
+        for key in package.library.creatureKeysWithoutPastedArt {
+            guard let image = await libraryArtImage(for: key) else { continue }
+            package.add(carriedArt(image, for: key), image: image.picture.data)
+        }
+        return LibraryDocument(data: try package.encoded(), fileName: selection.fileName(in: library))
+    }
+
+    /// The portrait the art library draws for a creature from the GM's PDFs, ready to send. Nil for a creature
+    /// with no art there, or whose PDF has gone missing.
+    private func libraryArtImage(for key: String) async -> LibraryArtImage? {
+        let prefix = LibraryArtMatcher.pathPrefix
+        guard let portrait = entry(key)?.art.portrait, portrait.hasPrefix(prefix),
+              let source = UUID(uuidString: String(portrait.dropFirst(prefix.count))),
+              let drawn = await artPicture(for: portrait, maxPixels: 0),
+              let picture = try? PreparedImage(picture: drawn) else { return nil }
+        return LibraryArtImage(source: source, picture: picture)
+    }
+
+    /// The record that makes a drawn portrait the creature's pasted art where the file is imported, with the
+    /// name and size a bestiary creature's art carries (R3.5c1).
+    private func carriedArt(_ image: LibraryArtImage, for key: String) -> CustomArt {
+        let art = CustomArt.carried(image.source, for: key, image: image.picture)
+        return artSubjectLabel(for: key).map(art.labeled) ?? art
     }
 
     /// Records that every record's current version has left this device, so when the other device sends it
@@ -81,4 +105,10 @@ extension AppModel {
         }
         return message
     }
+}
+
+/// A portrait drawn from the art library, with the ID of the art it shows.
+private struct LibraryArtImage {
+    var source: UUID
+    var picture: PreparedImage
 }
