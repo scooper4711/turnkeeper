@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Shop, or to another device, as a sheet
 
 ### Fixed
+- Typing the fourth digit of a table's code follows it; on an iPad without a keyboard, Follow took two taps
 - Hit points stay on one line on narrow strips, such as on an iPhone
 
 ## [2.3.0] - 2026-11-24
