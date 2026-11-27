@@ -23,6 +23,19 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   Weak, Normal and Elite sit above the card instead of in the toolbar. The planner shows one column at a time.
 - R1.2 Planning data moves between devices in both directions as `.turnkeeper` files, through AirDrop,
   Files or Finder.
+- R1.2a Export… opens a dialog that lists a campaign's scenarios, each with its encounters and handouts, and its
+  parties. Every line has a check mark, and the GM picks what goes in the file.
+  - Export… is in the menu of a campaign, a scenario, an encounter and a party, and in the File menu. From a
+    campaign everything starts checked; from a scenario, that scenario with what's in it; from an encounter or a
+    party, that one alone. The File menu's starts from what the planner has selected, or with everything when
+    nothing is. Select All and Select None check and clear every line.
+  - Checking a scenario checks what's in it, and clearing it clears that. Checking an encounter or a handout
+    checks its scenario, which travels with it so an import has somewhere to put it.
+  - The file holds the campaign's name and settings and what's checked, plus what that uses: the checked
+    encounters' custom creatures, their pasted art and the notes on their creatures, and the portraits of the
+    checked parties' characters. An import merges it into the same campaign and scenario, or adds them.
+  - Saved fights and deleted records stay out of the file.
+  - The file is named for the one scenario, encounter or party it holds, else for the campaign.
 - R1.3 A GM's own devices stay in step through their private iCloud, in the background, with nothing to press:
   campaigns, parties, scenarios, encounters, fights, handouts and creature notes, and through the shared library
   custom creatures, pasted art and the art read from PDFs (the PDFs themselves don't sync). The first sync merges the
@@ -33,7 +46,7 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   Creature Art…, Share with Players… and Follow a Table… (R9) and, on the iPad and the iPhone, About, so none of them is lost when the sidebar is too narrow for a row of
   buttons. When art PDFs are missing, the menu's button and its Creature Art item say how many.
 - R1.3b The File menu has the same, whether or not the sidebar is showing: New Campaign… (⌘N, in place of New
-  Window on the Mac, as every window shows the same library), Import Library…, Export Campaign… (the selected
+  Window on the Mac, as every window shows the same library), Import Library…, Export… (R1.2a, for the selected
   campaign), the iCloud line, Creature Art…, Share with Players… and Follow a Table…. On the iPad they are in the menu bar a keyboard
   brings up.
 - R1.4 Merging never loses edits silently. When both sides changed the same record, the newer one wins
