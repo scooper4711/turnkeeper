@@ -213,6 +213,28 @@ struct SharedCreatureStoreTests {
         #expect(package.library.customCreatures.map(\.id) == [custom.id])
     }
 
+    @Test("Art that an import replaces leaves the shared library with its picture, however often it's imported")
+    func replacedArtLeavesNoPicture() throws {
+        let store = try makeStore()
+        var library = Library()
+        /// A file from an organizer holding one picture for the goblin, as it arrives.
+        func arriving(_ fileName: String) throws -> LibraryPackage {
+            var package = LibraryPackage(library: Library(), bestiaryRevision: "")
+            package.add(CustomArt(subject: "goblin", fileName: fileName, byteCount: Self.pngImage.count),
+                        image: Self.pngImage)
+            return try LibraryPackage.decode(package.encoded())
+        }
+        let (first, second) = (try arriving("first.png"), try arriving("second.png"))
+        for package in [first, first, second, second] {
+            _ = LibraryMerger.merge(package.library, into: &library)
+            library.replaceArt(withThatOf: package.library)
+            try package.keepingImages(library.liveImageFileNames).writeImages(to: store.artStore)
+            try store.push(library)
+        }
+        #expect(!store.artStore.contains("first.png") && store.artStore.contains("second.png"))
+        #expect(try store.shared.customArt().map(\.fileName) == ["second.png"])
+    }
+
     /// A 1×1 PNG.
     private static let pngImage = Data(base64Encoded:
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/AAAMBAQAY3Y2wAAAAAElFTkSuQmCC") ?? Data()
