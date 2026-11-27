@@ -181,6 +181,10 @@ Ported from the pf2e system, with tests.
   later-fetched Demiplane sheet wins when both versions are linked, so an unlink isn't undone.
   Members saved before stamping read as `.distantPast`.
 - **Files.** `LibraryPackage` is the `.turnkeeper` file (UTType `io.github.scooper4711.turnkeeper.library`).
+  The type conforms to `public.data` and `public.content`, not to JSON (R1.2c): a type that is text gets a thumbnail
+  of its first lines from Finder and Files in place of its icon. The Mac app declares
+  `Resources/DocumentIcon.icns` for it (`CFBundleTypeIconFile`, `UTTypeIconFile`), drawn by `make icon`
+  (`scripts/icon`), which also draws the app icons.
 - **Export picker** (R1.2a). `ExportSelection` is what's checked in one campaign: the IDs of scenarios,
   encounters, handouts and parties. `include` and `exclude` keep it whole (a scenario with its contents, an
   encounter or handout with its scenario), so the dialog only draws it. `Library.exporting(_:)` builds the part

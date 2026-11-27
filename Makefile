@@ -59,9 +59,12 @@ iphone-simulator:
 iphone-install:
 	DEVICE_KIND=iPhone scripts/install-ipad.sh
 
-# Redraws the Mac and iPad icons from scripts/make-icon.swift.
+# Redraws the Mac and iPad icons and the icon of a .turnkeeper file, from scripts/icon.
 icon:
-	swift scripts/make-icon.swift
+	mkdir -p tmp
+	swiftc -o tmp/make-icon scripts/icon/*.swift
+	tmp/make-icon
+	rm tmp/make-icon
 
 # Runs the iPad UI tests in a simulator, against the demo fight. ONLY="DelayUITests ..." runs just those.
 ipad-uitest:

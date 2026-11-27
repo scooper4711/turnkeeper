@@ -2,8 +2,9 @@ import Foundation
 import UniformTypeIdentifiers
 
 public extension UTType {
-    /// A `.turnkeeper` file: a JSON library package.
-    static let turnkeeperLibrary = UTType(exportedAs: "io.github.scooper4711.turnkeeper.library", conformingTo: .json)
+    /// A `.turnkeeper` file: a library package. It holds JSON but isn't declared as text, or Finder and Files
+    /// would draw the start of the JSON as the file's picture in place of its icon.
+    static let turnkeeperLibrary = UTType(exportedAs: "io.github.scooper4711.turnkeeper.library", conformingTo: .data)
 }
 
 /// The contents of a `.turnkeeper` file: some or all of a library.

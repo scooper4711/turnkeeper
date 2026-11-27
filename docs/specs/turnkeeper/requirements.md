@@ -23,6 +23,8 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   Weak, Normal and Elite sit above the card instead of in the toolbar. The planner shows one column at a time.
 - R1.2 Planning data moves between devices in both directions as `.turnkeeper` files, through AirDrop,
   Files or Finder.
+- R1.2c On the Mac a `.turnkeeper` file shows an icon of its own, a page with the app icon on it, and never a
+  picture of its contents.
 - R1.2a Export… opens a dialog that lists a campaign's scenarios, each with its encounters and handouts, and its
   parties. Every line has a check mark, and the GM picks what goes in the file.
   - Export… is in the menu of a campaign, a scenario, an encounter and a party, and in the File menu. From a
