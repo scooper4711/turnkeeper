@@ -289,7 +289,7 @@ Ported from the pf2e system, with tests.
   whose subject is neither a custom creature nor a character, from a lookup the app gives (the bestiary), and
   stamps the art as changed only when they differ. `AppModel.labelArtSubjects()` runs it after a paste and each
   time the shared library is read (`followSharedLibrary`), which covers launch and art from Field Guide.
-- **Open in Pawn Shop** (R3.9, Mac only). `PawnTally` (`TurnkeeperKit/Library`) builds Tabletop Kit's
+- **Open in Pawn Shop** (R3.9; the link is the Mac's). `PawnTally` (`TurnkeeperKit/Library`) builds Tabletop Kit's
   `PawnSheetRequest` from encounters, the difficulty labels and a resolver from a creature key to its name and pawn
   ID: it sums a fight's slots by pawn (the pawn ID, else the creature key), keeps the largest count across fights
   and the order of first appearance. `AppModel+PawnShop` gives the resolver (`matchedArt(for:).portrait` for a
@@ -301,44 +301,21 @@ Ported from the pf2e system, with tests.
   `ScenarioRows`' context menus: a submenu when `shownVariantLabels(of:)` has several labels.
 
 ## Character import
-- **Sheet.** A PC's sheet is a `Creature` of kind `character`, with `PlayerDetails` (ancestry, heritage,
-  background, class, class DC, feats and class features), stored on its `PartyMember` with a
-  `CharacterLink` (source, character ID, game, revision) and an optional GM-typed max HP. On the board it
-  has the key `pc.<member id>`; `AppModel` resolves those keys from the party. Tiles still treat it as a PC.
-- **Demiplane.** Nothing needs a Demiplane account: every request is one anyone with a shared character's link
-  can make, without cookies or a token (checked 2026-10-19). `DemiplaneClient` makes three:
-  - The sheet page (`app.demiplane.com/nexus/<pathfinder2e|starfinder2e>/character-sheet/<id>`) embeds the
-    character as `characterSheetContent.character` (`name`, `level`, `avatar_url`, `nexus_id`: 1 Pathfinder,
-    100 Starfinder) inside the page's string-escaped React data; `DemiplaneClient.sharedCharacter` reads it.
-    When the page doesn't have it, the import goes on with the link's game and the sheet's name and level.
-  - `POST app.demiplane.com/api/magic-missile` with `GENERATE_CHARACTER_PDF_LAMBDA_NAME` exports the sheet
-    PDF: 202 (or 200 with `cacheStatus: pending` and no URL) while it builds, then 200 with the PDF URL and a
-    revision hash of the character. 401, 403 or 404 mean the character isn't shared by link.
-  - The PDF itself, on `content.demiplane.com`, and the avatar on S3.
-
-  The sheet PDF is a fillable form read field by field with PDFKit (`DemiplaneSheetReader`), one sheet at a
-  time since PDFKit can deadlock reading form fields on several threads. Starfinder sheets add Computers,
-  Piloting, credits and a ranged weapon's range, magazine and expend, and have no damage types; a sheet's game
-  comes from the sheet page, else from those fields. Demiplane campaigns aren't imported: reading one
-  (`/api/getCampaign`) needs a signed-in session, which the app doesn't have.
-- **Refresh.** Every request to Demiplane skips the URL cache (`reloadIgnoringLocalCacheData`): the sheet's
-  address never changes, so a cached PDF would hide a rebuild. `Party.apply(_:link:to:)`
-  (TurnkeeperKit) puts an imported sheet on its member and returns a `SheetUpdate`: `added`, `unchanged` (the
-  same sheet as before) or `updated` with the changes a GM cares about (level, AC, saves, Perception, class DC,
-  then skills, Strikes, spells, feats and items). The status message reports it. The party row shows progress
-  while its refresh runs.
-- **Table Buddies.** `scripts/foundry/export-pregens.js` is a Foundry macro. Run in a pf2e and an sf2e world,
-  it exports each iconic at each level with the numbers Foundry works out (the compendium stores only how
-  they're built) to `Resources/Pregens/<system>-pregens.json`. `scripts/extract-pregen-art.sh` takes their
-  portraits from Paizo's Community Use pregen PDFs into `Resources/Pregens/Art`. `make bestiary` copies both
-  into `Generated/Pregens`. `PregenCatalog` (CharacterImport) reads them, leaving out companions (`minion`),
-  and `PregenSheetReader` turns a sheet into a character `Creature`. A Table Buddy is a member whose link
-  source is `.pregen`, with the pregen's key as the character ID. `PregenLevel` and
-  `Party.settlingTableBuddies` (TurnkeeperKit) apply the Guide's table. The challenge points line counts a
-  settled copy of the party, and `startNewCombat` saves the settled party so the cards match the fight.
-- **Glossary links.** `CharacterGlossaryLinker` fills the sheet's `LinkTable` by name through
-  `BestiaryStore.glossaryID`, falling back to Pathfinder names for Starfinder characters (Starfinder 2e
-  shares the Player Core ancestries and feats); action text is replaced by the linked entry's rules text when there is one.
+- **Share Pawn Sheet** (R3.9.5, R3.9.6; iPad and iPhone). `PawnSheetMenu` (`TurnkeeperUI/Planning`) is the menu
+  both platforms share: the item or the submenu of difficulties, generic over the control that hands a sheet over.
+  `OpenInPawnShopMenu` fills it with a button that opens the link, `SharePawnSheetMenu` with one that calls
+  `AppModel.sharePawnSheet`: it builds the request, has `PawnSheetShareFile` (`TurnkeeperKit/Library`) write the
+  kit's `sheetFile` into a folder of its own inside the temporary one, with the reader's version
+  (`PawnExtractor.version`), and shows the share sheet with `ShareSheet` (`UIActivityViewController`, in the middle
+  of the app's window, since the menu item is gone by then). So the pawns are counted and the file is written when
+  the item is chosen, not as menus draw.
+  - The share sheet gets the file's URL itself. A `ShareLink` of a `Transferable` that promised the file was tried
+    first: the sheet then offered Copy and Save to Files but no app, so Pawn Shop couldn't be chosen.
+  - `ios/Info.plist` imports Pawn Shop's type `io.github.scooper4711.pawnsheet` as Pawn Shop declares it.
+  - A share sheet was chosen over a second link because SwiftUI's document apps can't open a document from code on
+    iOS, while the system already hands a shared file to the app that owns its type.
+  - `PawnSheetUITests` opens the share sheet from an encounter's menu. Its second test goes on into Pawn Shop and
+    runs only with `TEST_RUNNER_PAWN_SHOP_HANDOFF=1`, on a simulator that has Pawn Shop too.
 
 ## Sharing the player screen (R9)
 - **Protocol** (TurnkeeperKit, tested over real loopback connections). Network.framework TCP, found by Bonjour
