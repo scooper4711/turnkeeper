@@ -11,7 +11,7 @@ let package = Package(
         .executable(name: "BestiaryImport", targets: ["BestiaryImport"])
     ],
     dependencies: [
-        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "1.24.0")
+        .package(url: "https://github.com/scooper4711/tabletop-kit.git", from: "1.26.0")
     ],
     targets: [
         .target(name: "TurnkeeperKit", dependencies: [
