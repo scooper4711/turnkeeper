@@ -43,8 +43,8 @@ final class AppModel {
     var librarySheet: LibrarySheet?
     /// True while the picker for a `.turnkeeper` file to import is open.
     var isImportingLibrary = false
-    /// A campaign's file waiting for the user to choose where to save it.
-    var campaignExport: LibraryDocument?
+    /// What the export dialog starts with checked, while it is open.
+    var exportSelection: ExportSelection?
     /// A planning edit that would reset a fight in progress, waiting for the GM to confirm.
     var pendingPlanChange: PendingPlanChange?
     /// What the last paste or drop of stat blocks added, shown until dismissed.

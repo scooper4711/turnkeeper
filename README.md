@@ -75,7 +75,8 @@ requirements and design.
   that was in another app catches up by itself when they come back. Everyone needs to be on the same network.
 - **Your devices:** signed in to the same iCloud, your iPad, iPhone and Mac stay in step by themselves. Edits made on
   two devices at once are kept as conflict copies.
-- **Share:** export a campaign as a `.turnkeeper` file (AirDrop, Files, Finder) and open it on the other device.
+- **Share:** export a campaign, or only the scenarios, encounters and parties you check, as a `.turnkeeper` file
+  (AirDrop, Files, Finder) and open it on the other device.
 - **Demo:** launch with `--demo planner`, `--demo setup`, `--demo board` or `--demo starfinder` for an
   in-memory sample that leaves the saved library alone. `--demo-art` adds drawn stand-in art.
 

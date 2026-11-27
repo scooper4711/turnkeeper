@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Choose what to export: Export… asks which scenarios, encounters, handouts and parties go in the file
 - Open an encounter's or a scenario's pawns in Pawn Shop, ready to print, from its context menu on the Mac
 - Art pasted onto a bestiary creature prints as a pawn in Pawn Shop
 

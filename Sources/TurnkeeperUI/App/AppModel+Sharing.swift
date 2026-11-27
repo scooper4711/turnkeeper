@@ -3,12 +3,34 @@ import Foundation
 
 /// `.turnkeeper` files in both directions.
 extension AppModel {
-    /// The campaign as a `.turnkeeper` package.
-    func exportCampaign(_ id: UUID) throws -> Data {
+    /// Opens the export dialog for a campaign (R1.2a) with one of the planner's items checked, or with
+    /// everything checked when there is none.
+    func beginExport(of item: PlannerSelection?, in campaignID: UUID) {
+        guard let item else {
+            exportSelection = .everything(in: campaignID, of: library)
+            return
+        }
+        var picked = ExportSelection(campaignID: campaignID)
+        if let line = exportItem(item) { picked.include(line, from: library) }
+        exportSelection = picked
+    }
+
+    /// The planner's item as a line of the export dialog, if it still exists.
+    private func exportItem(_ item: PlannerSelection) -> ExportItem? {
+        switch item {
+        case let .scenario(id): scenario(id).map(ExportItem.scenario)
+        case let .encounter(id): encounter(id).map(ExportItem.encounter)
+        case let .handout(id): handout(id).map(ExportItem.handout)
+        case let .party(id): party(id).map(ExportItem.party)
+        }
+    }
+
+    /// What's checked in the export dialog, as a `.turnkeeper` file for the exporter.
+    func exportDocument(for selection: ExportSelection) throws -> LibraryDocument {
         markSent()
-        let package = LibraryPackage(picking: .everything(in: id, of: library), from: library,
+        let package = LibraryPackage(picking: selection, from: library,
                                      bestiaryRevision: bestiary.index.sourceRevision)
-        return try withImages(package).encoded()
+        return LibraryDocument(data: try withImages(package).encoded(), fileName: selection.fileName(in: library))
     }
 
     /// Records that every record's current version has left this device, so when the other device sends it
@@ -20,12 +42,6 @@ extension AppModel {
 
     private func withImages(_ package: LibraryPackage) -> LibraryPackage {
         artStore.map { package.addingImages(from: $0, artStore: pastedArtStore) } ?? package
-    }
-
-    /// The file name an export should use, such as "PFS Season 7.turnkeeper".
-    func exportFileName(for id: UUID) -> String {
-        let name = library.campaigns.first { $0.id == id }?.name ?? "Turnkeeper"
-        return name.replacingOccurrences(of: "/", with: "-") + ".turnkeeper"
     }
 
     /// Merges a `.turnkeeper` file into the library and reports what changed.

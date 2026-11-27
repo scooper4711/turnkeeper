@@ -23,6 +23,7 @@ struct CampaignContentView: View {
                         .partyIconInset()
                         .tag(PlannerSelection.party(party.id))
                         .contextMenu {
+                            ExportButton(item: .party(party.id), campaignID: campaign.id)
                             Button("Delete", systemImage: "trash", role: .destructive) {
                                 model.library.deleteParty(party.id)
                             }
@@ -74,6 +75,17 @@ private extension View {
     }
 }
 
+/// Export…, in the menu of a scenario, an encounter or a party: opens the export dialog with that one checked.
+private struct ExportButton: View {
+    let item: PlannerSelection
+    let campaignID: UUID
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        Button("Export…", systemImage: "square.and.arrow.up") { model.beginExport(of: item, in: campaignID) }
+    }
+}
+
 /// A scenario and its encounters, indented under it.
 private struct ScenarioRows: View {
     let scenario: Scenario
@@ -107,6 +119,7 @@ private struct ScenarioRows: View {
             OpenInPawnShopMenu(scenario: scenario, encounters: model.library.encounters(in: scenario.id),
                                title: scenario.name)
             #endif
+            ExportButton(item: .scenario(scenario.id), campaignID: scenario.campaignID)
             Button("Delete \(scenarioTitle)", systemImage: "trash", role: .destructive) {
                 model.library.deleteScenario(scenario.id)
             }
@@ -125,6 +138,7 @@ private struct ScenarioRows: View {
                     OpenInPawnShopMenu(scenario: scenario, encounters: [encounter],
                                        title: "\(scenario.name): \(encounter.name)")
                     #endif
+                    ExportButton(item: .encounter(encounter.id), campaignID: scenario.campaignID)
                     Button("Delete Encounter", systemImage: "trash", role: .destructive) {
                         model.library.deleteEncounter(encounter.id)
                     }
