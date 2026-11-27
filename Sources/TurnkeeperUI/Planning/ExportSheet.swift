@@ -16,11 +16,7 @@ struct ExportSheet: View {
             List {
                 Section {
                     selectAllRow
-                } footer: {
-                    Text("""
-                        Custom creatures, pasted art and creature notes go with the encounters that use them. \
-                        Saved fights stay on this device.
-                        """)
+                    whatGoesAlong
                 }
                 Section("\(campaign?.scenarioTitle ?? "Scenario")s") {
                     ForEach(model.library.scenarios(in: selection.campaignID)) { scenario in
@@ -57,8 +53,21 @@ struct ExportSheet: View {
             Spacer()
             Button("Select None") { selection.excludeAll() }
         }
-        // Two plain buttons in one row would both fire on a tap anywhere in it.
+        // Two plain buttons in one row would both fire on a tap anywhere in it. The Mac draws borderless
+        // buttons gray, like text, without the tint.
         .buttonStyle(.borderless)
+        .foregroundStyle(.tint)
+    }
+
+    /// A row, not the section's footer: the Mac shows a footer on one line and cuts the rest off.
+    private var whatGoesAlong: some View {
+        Text("""
+            Custom creatures, pasted art and creature notes go with the encounters that use them. \
+            Saved fights stay on this device.
+            """)
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var documentBinding: Binding<Bool> {
