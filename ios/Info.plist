@@ -67,6 +67,25 @@
                 <string>public.json</string>
             </array>
         </dict>
+        <!-- Pawn Shop's sheet, which Turnkeeper shares (R3.9.6). The same as Pawn Shop declares it. -->
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>io.github.scooper4711.pawnsheet</string>
+            <key>UTTypeDescription</key>
+            <string>Pawn Sheet</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.data</string>
+                <string>public.content</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>pawnsheet</string>
+                </array>
+            </dict>
+        </dict>
     </array>
 </dict>
 </plist>
