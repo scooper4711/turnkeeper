@@ -36,7 +36,10 @@ extension AppModel {
             guard let image = await libraryArtImage(for: key) else { continue }
             package.add(carriedArt(image, for: key), image: image.picture.data)
         }
-        return LibraryDocument(data: try package.encoded(), fileName: selection.fileName(in: library))
+        let fileName = selection.fileName(in: library)
+        // Off the main actor: it re-encodes every picture with transparency, which takes a moment.
+        let data = try await Task.detached { [package] in try package.compressingImages().encoded() }.value
+        return LibraryDocument(data: data, fileName: fileName)
     }
 
     /// The portrait the art library draws for a creature from the GM's PDFs, ready to send. Nil for a creature

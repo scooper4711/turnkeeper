@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Choose what to export: Export… asks which scenarios, encounters, handouts and parties go in the file
 - An exported file carries its creatures' art, so another GM can run it on a device without your PDFs
 - `.turnkeeper` files have an icon of their own on the Mac
+- Exported files are much smaller: pictures with transparency are sent as HEIC
 - Open an encounter's or a scenario's pawns in Pawn Shop, ready to print, from its context menu on the Mac
 - Art pasted onto a bestiary creature prints as a pawn in Pawn Shop
 

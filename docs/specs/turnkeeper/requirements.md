@@ -45,6 +45,9 @@ iPhone the ladder fills the screen and the notes side opens in a sheet (R1.1a).
   - A portrait from the PDFs arrives as the creature's pasted art. Importing the same file again adds nothing, art
     removed on the receiving device stays removed, and art pasted there is shown instead.
   - A creature whose PDF has gone missing (R2.3a) is sent without art.
+  - Pictures with transparency (PNG) travel as HEIC, which keeps the transparency at about a sixth of the size,
+    so a scenario's file stays small enough to send by chat or mail. The pictures on the exporting device don't
+    change. A device that can't write HEIC sends them as they are.
   - This is the one way art read from PDFs leaves the device, for a GM handing prepared encounters to the GMs of
     their event. The PDFs themselves never travel.
 - R1.3 A GM's own devices stay in step through their private iCloud, in the background, with nothing to press:

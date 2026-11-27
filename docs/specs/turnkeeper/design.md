@@ -198,6 +198,9 @@ Ported from the pf2e system, with tests.
   the creature's key, and its `modifiedAt` is a fixed time long ago (`carriedDate`), so the merger's ordinary
   rules give R1.2b's three promises with no rule of their own. Drawing is asynchronous, so the dialog shows a
   spinner in place of Export… until the file is ready.
+  `LibraryPackage.compressingImages()` then stores every PNG in the package as HEIC (ImageIO writes HEIC with
+  alpha, and can't write WebP) and renames it in the package's art and handout records; the library's own records
+  keep their PNG. It runs off the main actor. In one real export 11 MB of PNG became 1.7 MB.
 - **iCloud sync** (R1.3). `CampaignSync` is a `SyncZoneHandler` on tabletop-kit's `CKSyncEngine`, beside `LibrarySync`,
   which syncs the shared library, in the suite's container `iCloud.io.github.scooper4711.tableside`, private database.
   - *Records.* One zone, `Turnkeeper`, with one CloudKit record per library record, named `<kind>-<UUID>`, of the
