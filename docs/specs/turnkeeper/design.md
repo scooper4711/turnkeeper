@@ -289,7 +289,7 @@ Ported from the pf2e system, with tests.
   whose subject is neither a custom creature nor a character, from a lookup the app gives (the bestiary), and
   stamps the art as changed only when they differ. `AppModel.labelArtSubjects()` runs it after a paste and each
   time the shared library is read (`followSharedLibrary`), which covers launch and art from Field Guide.
-- **Open in Pawn Shop** (R3.9, Mac only). `PawnTally` (`TurnkeeperKit/Library`) builds Tabletop Kit's
+- **Open in Pawn Shop** (R3.9; the link is the Mac's). `PawnTally` (`TurnkeeperKit/Library`) builds Tabletop Kit's
   `PawnSheetRequest` from encounters, the difficulty labels and a resolver from a creature key to its name and pawn
   ID: it sums a fight's slots by pawn (the pawn ID, else the creature key), keeps the largest count across fights
   and the order of first appearance. `AppModel+PawnShop` gives the resolver (`matchedArt(for:).portrait` for a
@@ -301,6 +301,15 @@ Ported from the pf2e system, with tests.
   `ScenarioRows`' context menus: a submenu when `shownVariantLabels(of:)` has several labels.
 
 ## Character import
+- **Share Pawn Sheet** (R3.9.5, R3.9.6; iPad and iPhone). `PawnSheetMenu` (`TurnkeeperUI/Planning`) is the menu
+  both platforms share: the item or the submenu of difficulties, generic over the control that hands a sheet over.
+  `OpenInPawnShopMenu` fills it with a button that opens the link; `SharePawnSheetMenu` with a `ShareLink` of a
+  `SharedPawnSheet`, a `Transferable` that holds the model, the tally and the title and writes the file only in
+  its `FileRepresentation`, so opening a menu counts no pawns. `PawnSheetShareFile` (`TurnkeeperKit/Library`)
+  writes the kit's `sheetFile` into a folder of its own inside the temporary one, with the reader's version
+  (`PawnExtractor.version`). `ios/Info.plist` imports Pawn Shop's type `io.github.scooper4711.pawnsheet` as Pawn
+  Shop declares it. A share sheet was chosen over a second link because SwiftUI's document apps can't open a
+  document from code on iOS, while the system already hands a shared file to the app that owns its type.
 - **Sheet.** A PC's sheet is a `Creature` of kind `character`, with `PlayerDetails` (ancestry, heritage,
   background, class, class DC, feats and class features), stored on its `PartyMember` with a
   `CharacterLink` (source, character ID, game, revision) and an optional GM-typed max HP. On the board it
